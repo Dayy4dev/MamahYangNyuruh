@@ -12,10 +12,6 @@ public class PlayerMovement : MonoBehaviour
     [Tooltip("Movement speed")]
     public float moveSpeed = 2f;
 
-
-
-
-
     void Start()
     {
         controller = GetComponent<CharacterController>();    
@@ -36,5 +32,25 @@ public class PlayerMovement : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation,targetRotation,10f * Time.deltaTime);
         }
     }
+
+    // untuk si dinding yang bisa tembus pandang, jadi pas player masuk ke belakang dinding, dindingnya jadi transparan, pas keluar balik lagi ke semula
+
+    private void OnTriggerEnter(Collider other)
+{
+    // Jika menabrak trigger milik dinding yang menghalangi
+    if (other.TryGetComponent<WallFader>(out WallFader wall))
+    {
+        wall.FadeToTransparent();
+    }
+}
+
+private void OnTriggerExit(Collider other)
+{
+    // Jika keluar dari area belakang dinding
+    if (other.TryGetComponent<WallFader>(out WallFader wall))
+    {
+        wall.FadeToOpaque();
+    }
+}
 
 }

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.AI;
 
 
@@ -32,6 +33,8 @@ public class HostileAI : MonoBehaviour
     private bool isOnAttackCooldown;
     [SerializeField] private float forwardShotForce = 10f;
     [SerializeField] private float verticalShotForce = 5f;
+    [SerializeField] private int projectilePoolSize = 10;
+    [SerializeField] private float projectileLifetime = 3f;
 
     [Header("Detection Ranges")]
     [SerializeField] private float visionRange = 20f;
@@ -39,6 +42,8 @@ public class HostileAI : MonoBehaviour
 
     private bool isPlayerVisible;
     private bool isPlayerInRange;
+    private readonly Queue<GameObject> projectilePool = new Queue<GameObject>();
+    private Transform projectilePoolRoot;
 
     private void Awake()
     {
@@ -55,6 +60,8 @@ public class HostileAI : MonoBehaviour
         {
             navAgent = GetComponent<NavMeshAgent>();
         }
+
+        InitializeProjectilePool();
     }
 
     private void Update()
@@ -78,15 +85,65 @@ public class HostileAI : MonoBehaviour
         isPlayerInRange = Physics.CheckSphere(transform.position, engagementRange, playerLayerMask);
     }
 
+    private void InitializeProjectilePool()
+    {
+        if (projectilePrefab == null) return;
+
+        if (projectilePoolRoot == null)
+        {
+            projectilePoolRoot = new GameObject("ProjectilePool - " + gameObject.name).transform;
+            projectilePoolRoot.SetParent(transform, false);
+        }
+
+        for (int i = 0; i < projectilePoolSize; i++)
+        {
+            GameObject projectile = Instantiate(projectilePrefab, projectilePoolRoot);
+            projectile.SetActive(false);
+            projectilePool.Enqueue(projectile);
+        }
+    }
+
+    private GameObject GetProjectileFromPool()
+    {
+        if (projectilePool.Count == 0)
+        {
+            GameObject projectile = Instantiate(projectilePrefab, projectilePoolRoot);
+            projectile.SetActive(false);
+            projectilePool.Enqueue(projectile);
+        }
+
+        return projectilePool.Dequeue();
+    }
+
     private void FireProjectile()
     {
         if (projectilePrefab == null || firePoint == null) return;
 
-        Rigidbody projectileRb = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity).GetComponent<Rigidbody>();
-        projectileRb.AddForce(transform.forward * forwardShotForce, ForceMode.Impulse);
-        projectileRb.AddForce(transform.up * verticalShotForce, ForceMode.Impulse);
+        GameObject projectileObject = GetProjectileFromPool();
+        projectileObject.transform.SetPositionAndRotation(firePoint.position, Quaternion.identity);
+        projectileObject.SetActive(true);
 
-        Destroy(projectileRb.gameObject, 3f);
+        Rigidbody projectileRb = projectileObject.GetComponent<Rigidbody>();
+        if (projectileRb != null)
+        {
+            projectileRb.linearVelocity = Vector3.zero;
+            projectileRb.angularVelocity = Vector3.zero;
+            projectileRb.AddForce(transform.forward * forwardShotForce, ForceMode.Impulse);
+            projectileRb.AddForce(transform.up * verticalShotForce, ForceMode.Impulse);
+        }
+
+        StartCoroutine(ReturnProjectileToPool(projectileObject, projectileLifetime));
+    }
+
+    private IEnumerator ReturnProjectileToPool(GameObject projectile, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (projectile != null)
+        {
+            projectile.SetActive(false);
+            projectilePool.Enqueue(projectile);
+        }
     }
 
     private void FindPatrolPoint()
