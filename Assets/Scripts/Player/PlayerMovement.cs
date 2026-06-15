@@ -35,6 +35,34 @@ public class PlayerMovement : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(move);
             transform.rotation = Quaternion.Slerp(transform.rotation,targetRotation,10f * Time.deltaTime);
         }
-    }
+        if (Input.GetMouseButton(1))
+        {
+            PlayerDirection();
 
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                Debug.Log("Attack");
+            }
+        }
+    }
+    
+    public void PlayerDirection()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        
+        Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+        
+        if (groundPlane.Raycast(ray, out float distance))
+        {
+            Vector3 mouseWorldPos = ray.GetPoint(distance);
+            
+            Vector3 direction = new Vector3(mouseWorldPos.x - transform.position.x,0f,mouseWorldPos.z - transform.position.z);
+            
+            if (direction != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
+            }
+        }
+    }
 }
