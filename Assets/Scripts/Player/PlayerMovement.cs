@@ -1,17 +1,27 @@
 using UnityEngine;
 
-public class PlayerMov : MonoBehaviour
+[AddComponentMenu("Player Movement and Camera Controller")]
+public class PlayerMovement : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    public float moveSpeed = 5f;
+
+    [Space]
+    [Header("Movement Settings")]
+
     private CharacterController controller;
+
+    [Tooltip("Movement speed")]
+    public float moveSpeed = 2f;
+
+
+
+
+
     void Start()
     {
-        controller = GetComponent<CharacterController>();
+        controller = GetComponent<CharacterController>();    
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
@@ -23,11 +33,8 @@ public class PlayerMov : MonoBehaviour
         if (move != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(move);
-    transform.rotation = Quaternion.Slerp(
-        transform.rotation,
-        targetRotation,
-        10f * Time.deltaTime
-    );
+            transform.rotation = Quaternion.Slerp(transform.rotation,targetRotation,10f * Time.deltaTime);
         }
     }
+
 }
