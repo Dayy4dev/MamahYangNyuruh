@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using UnityEngine.Pool;
 
 public class HandCannon : MonoBehaviour
@@ -11,6 +12,13 @@ public class HandCannon : MonoBehaviour
     [Header("Pool Configuration")]
     [SerializeField] private int defaultCapacity = 20;
     [SerializeField] private int maxPoolSize = 50;
+
+    [Header("Shooting & Reload")]
+    [SerializeField] private int magazineSize = 10;
+    [SerializeField] private float reloadTime = 5f;
+
+    private int currentBullet;
+    private bool isReloading;
 
     private IObjectPool<Bullet> bulletPool;
 
@@ -25,6 +33,11 @@ public class HandCannon : MonoBehaviour
             defaultCapacity,
             maxPoolSize
         );
+    }
+
+    private void Start()
+    {
+        currentBullet = magazineSize;
     }
 
     // private void Update()
@@ -50,10 +63,33 @@ public class HandCannon : MonoBehaviour
 
     public void Shoot()
     {
-        Bullet bullet = bulletPool.Get();
 
+        if (isReloading)
+        {
+            Debug.Log("Reloading...");
+            return;
+        }
+
+        Bullet bullet = bulletPool.Get();
         bullet.transform.position = firePoint.position;
         bullet.transform.rotation = firePoint.rotation;
+
+        currentBullet--;
+
+        if(currentBullet <= 0)
+        {
+            StartCoroutine(ReloadCoroutine());
+        }
+    }
+
+    private IEnumerator ReloadCoroutine()
+    {
+        isReloading = true;
+        Debug.Log("Reloading... " + reloadTime + "s");
+        yield return new WaitForSeconds(reloadTime);
+        currentBullet = magazineSize;
+        isReloading = false;
+        Debug.Log("Reloaded!");
     }
 
     // IMPLEMENTASI CALLBACK OBJECT POOL
