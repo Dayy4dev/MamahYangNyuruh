@@ -630,7 +630,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HandCannon
   bulletPrefab: {fileID: -6331776384978527437, guid: 97cb5df11765bc9479a469f465f00091, type: 3}
   firePoint: {fileID: 1461234906}
-  playerAim: {fileID: 1510361214}
   defaultCapacity: 20
   maxPoolSize: 50
 --- !u!1 &1085360356
