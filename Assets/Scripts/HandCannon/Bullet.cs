@@ -5,9 +5,11 @@ public class Bullet : MonoBehaviour
 {
     [SerializeField] private float speed = 25f;
     [SerializeField] private float lifetime = 2f;
+    [SerializeField] private int damageAmount = 10;
     
     private float currentLifetime;
     private IObjectPool<Bullet> originPool;
+    private bool hasHit = false;
 
     public void SetPool(IObjectPool<Bullet> pool)
     {
@@ -17,6 +19,7 @@ public class Bullet : MonoBehaviour
     private void OnEnable()
     {
         currentLifetime = lifetime;
+        hasHit = false;
     }
 
     private void Update()
@@ -32,6 +35,15 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        // Cek apakah objek yang tertabrak memiliki IDamageable interface
+        IDamageable damageable = other.GetComponent<IDamageable>();
+        if (damageable != null && !hasHit)
+        {
+            damageable.TakeDamage(damageAmount);
+            hasHit = true;
+            Debug.Log($"Bullet hit {other.gameObject.name} and dealt {damageAmount} damage!");
+        }
+
         ReleaseToPool();
     }
 
