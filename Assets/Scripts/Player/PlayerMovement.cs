@@ -3,14 +3,17 @@ using UnityEngine;
 [AddComponentMenu("Player Movement and Camera Controller")]
 public class PlayerMovement : MonoBehaviour
 {
-
     [Space]
     [Header("Movement Settings")]
-
     private CharacterController controller;
 
     [Tooltip("Movement speed")]
     public float moveSpeed = 2f;
+
+    [Header("Gravity Settings")]
+    [SerializeField] private float gravity = -9.81f; // Kekuatan gravitasi jatuh
+    private Vector3 velocity; // Menyimpan kecepatan jatuh player
+    private bool isGrounded; // Status apakah menyentuh tanah
 
     void Start()
     {
@@ -19,6 +22,14 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        // 1. Cek apakah player menyentuh tanah menggunakan fitur Character Controller
+        isGrounded = controller.isGrounded;
+        if (isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f; // Kunci nilai sedikit di bawah 0 agar deteksi ground stabil
+        }
+
+        // 2. Input pergerakan horizontal
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
 
@@ -29,28 +40,15 @@ public class PlayerMovement : MonoBehaviour
         if (move != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(move);
-            transform.rotation = Quaternion.Slerp(transform.rotation,targetRotation,10f * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
         }
+
+        // 3. Hitung gravitasi secara vertikal (Sumbu Y)
+        velocity.y += gravity * Time.deltaTime;
+
+        // 4. Jalankan pergerakan jatuh akibat gravitasi
+        controller.Move(velocity * Time.deltaTime);
     }
 
-    // untuk si dinding yang bisa tembus pandang, jadi pas player masuk ke belakang dinding, dindingnya jadi transparan, pas keluar balik lagi ke semula
-
-    private void OnTriggerEnter(Collider other)
-{
-    // Jika menabrak trigger milik dinding yang menghalangi
-    if (other.TryGetComponent<WallFader>(out WallFader wall))
-    {
-        wall.FadeToTransparent();
-    }
-}
-
-private void OnTriggerExit(Collider other)
-{
-    // Jika keluar dari area belakang dinding
-    if (other.TryGetComponent<WallFader>(out WallFader wall))
-    {
-        wall.FadeToOpaque();
-    }
-}
-
+   
 }

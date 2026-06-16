@@ -86,22 +86,22 @@ public class HostileAI : MonoBehaviour
     }
 
     private void InitializeProjectilePool()
+{
+    if (projectilePrefab == null) return;
+
+    if (projectilePoolRoot == null)
     {
-        if (projectilePrefab == null) return;
-
-        if (projectilePoolRoot == null)
-        {
-            projectilePoolRoot = new GameObject("ProjectilePool - " + gameObject.name).transform;
-            projectilePoolRoot.SetParent(transform, false);
-        }
-
-        for (int i = 0; i < projectilePoolSize; i++)
-        {
-            GameObject projectile = Instantiate(projectilePrefab, projectilePoolRoot);
-            projectile.SetActive(false);
-            projectilePool.Enqueue(projectile);
-        }
+        // HAPUS atau KOMENTARI baris SetParent di bawah ini:
+        projectilePoolRoot = new GameObject("ProjectilePool - " + gameObject.name).transform;
     }
+
+    for (int i = 0; i < projectilePoolSize; i++)
+    {
+        GameObject projectile = Instantiate(projectilePrefab, projectilePoolRoot);
+        projectile.SetActive(false);
+        projectilePool.Enqueue(projectile);
+    }
+}
 
     private GameObject GetProjectileFromPool()
     {
@@ -115,36 +115,44 @@ public class HostileAI : MonoBehaviour
         return projectilePool.Dequeue();
     }
 
-    private void FireProjectile()
+   private void FireProjectile()
+{
+    if (projectilePrefab == null || firePoint == null) return;
+
+    GameObject projectileObject = GetProjectileFromPool();
+    
+    // Lepaskan dari parent sementara waktu agar bergerak bebas di World Space
+    projectileObject.transform.SetParent(null); 
+    
+    projectileObject.transform.SetPositionAndRotation(firePoint.position, Quaternion.identity);
+    projectileObject.SetActive(true);
+
+    Rigidbody projectileRb = projectileObject.GetComponent<Rigidbody>();
+    if (projectileRb != null)
     {
-        if (projectilePrefab == null || firePoint == null) return;
-
-        GameObject projectileObject = GetProjectileFromPool();
-        projectileObject.transform.SetPositionAndRotation(firePoint.position, Quaternion.identity);
-        projectileObject.SetActive(true);
-
-        Rigidbody projectileRb = projectileObject.GetComponent<Rigidbody>();
-        if (projectileRb != null)
-        {
-            projectileRb.linearVelocity = Vector3.zero;
-            projectileRb.angularVelocity = Vector3.zero;
-            projectileRb.AddForce(transform.forward * forwardShotForce, ForceMode.Impulse);
-            projectileRb.AddForce(transform.up * verticalShotForce, ForceMode.Impulse);
-        }
-
-        StartCoroutine(ReturnProjectileToPool(projectileObject, projectileLifetime));
+        projectileRb.linearVelocity = Vector3.zero;
+        projectileRb.angularVelocity = Vector3.zero;
+        projectileRb.AddForce(transform.forward * forwardShotForce, ForceMode.Impulse);
+        projectileRb.AddForce(transform.up * verticalShotForce, ForceMode.Impulse);
     }
 
-    private IEnumerator ReturnProjectileToPool(GameObject projectile, float delay)
-    {
-        yield return new WaitForSeconds(delay);
+    StartCoroutine(ReturnProjectileToPool(projectileObject, projectileLifetime));
+}
 
-        if (projectile != null)
-        {
-            projectile.SetActive(false);
-            projectilePool.Enqueue(projectile);
-        }
+   private IEnumerator ReturnProjectileToPool(GameObject projectile, float delay)
+{
+    yield return new WaitForSeconds(delay);
+
+    if (projectile != null)
+    {
+        projectile.SetActive(false);
+        
+        // Kembalikan ke folder pool agar Hierarchy tetap rapi
+        projectile.transform.SetParent(projectilePoolRoot); 
+        
+        projectilePool.Enqueue(projectile);
     }
+}
 
     private void FindPatrolPoint()
     {
