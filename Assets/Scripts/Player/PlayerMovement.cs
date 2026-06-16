@@ -65,4 +65,22 @@ public class PlayerMovement : MonoBehaviour
             }
         }
     }
+
+    private void OnTriggerEnter(Collider other)
+{
+    // Jika menabrak trigger milik dinding yang menghalangi
+    if (other.TryGetComponent<WallFader>(out WallFader wall))
+    {
+        wall.FadeToTransparent();
+    }
+}
+
+private void OnTriggerExit(Collider other)
+{
+    // Jika keluar dari area belakang dinding
+    if (other.TryGetComponent<WallFader>(out WallFader wall))
+    {
+        wall.FadeToOpaque();
+    }
+}
 }
