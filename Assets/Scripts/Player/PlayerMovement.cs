@@ -38,11 +38,6 @@ public class PlayerMovement : MonoBehaviour
         if (Input.GetMouseButton(1))
         {
             PlayerDirection();
-
-            if (Input.GetKeyDown(KeyCode.Mouse0))
-            {
-                Debug.Log("Attack");
-            }
         }
     }
     
