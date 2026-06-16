@@ -12,6 +12,10 @@ public class PlayerMovement : MonoBehaviour
     [Tooltip("Movement speed")]
     public float moveSpeed = 2f;
 
+
+
+
+
     void Start()
     {
         controller = GetComponent<CharacterController>();    
