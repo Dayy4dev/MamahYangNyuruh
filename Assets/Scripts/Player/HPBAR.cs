@@ -16,6 +16,12 @@ public class HPBar : MonoBehaviour
 
     void Update()
     {
+        // Tekan Space → panggil TakeDamage dari PlayerHP
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Debug.Log("SPACE DITEKAN!");
+            playerHP.TakeDamage(10);
+        }
 
         // Update tampilan fill bar
         float percent = (float)playerHP.currentHP / playerHP.maxHP;
