@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using UnityEngine.Pool;
 
-public class HandCannon : MonoBehaviour
+public class HandCannon : Weapon
 {
     [Header("Weapon Settings")]
     [SerializeField] private Bullet bulletPrefab;
@@ -61,7 +61,7 @@ public class HandCannon : MonoBehaviour
     //     }
     // }
 
-    public void Shoot()
+    public override void Attack()
     {
 
         if (isReloading)
@@ -81,6 +81,26 @@ public class HandCannon : MonoBehaviour
             StartCoroutine(ReloadCoroutine());
         }
     }
+    // public void Shoot()
+    // {
+
+    //     if (isReloading)
+    //     {
+    //         Debug.Log("Reloading...");
+    //         return;
+    //     }
+
+    //     Bullet bullet = bulletPool.Get();
+    //     bullet.transform.position = firePoint.position;
+    //     bullet.transform.rotation = firePoint.rotation;
+
+    //     currentBullet--;
+
+    //     if(currentBullet <= 0)
+    //     {
+    //         StartCoroutine(ReloadCoroutine());
+    //     }
+    // }
 
     private IEnumerator ReloadCoroutine()
     {

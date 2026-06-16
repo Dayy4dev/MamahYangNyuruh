@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WeaponHitbox : MonoBehaviour
+public class WeaponHitbox : Weapon
 {
-    private Collider hitCollider;
+    [SerializeField]private Collider hitCollider;
     private int damage;
     private bool isActive = false;
     private HashSet<Collider> hitThisSwing = new HashSet<Collider>();
@@ -13,6 +13,11 @@ public class WeaponHitbox : MonoBehaviour
         hitCollider = GetComponent<Collider>();
         hitCollider.isTrigger = true;
         hitCollider.enabled = false;
+    }
+
+    public override void Attack()
+    {
+        Activate(damage);
     }
 
     public void Activate(int dmg)

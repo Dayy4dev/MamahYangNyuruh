@@ -14,13 +14,17 @@ public class PlayerMovement : MonoBehaviour
     public float moveSpeed = 2f;
 
     [Space]
-    [Header("Weapon Settings")]
-    [Tooltip("Masukkan script HandCannon yang ada di senjata karakter")]
-    public HandCannon equippedWeapon;
+    [Header("Weapon Inventory")]
+    [Tooltip("Masukkan semua objek senjata")]
+    public Weapon[] weapons; 
+    
+    private int currentWeaponIndex = 0;
+    private Weapon equippedWeapon;
 
 
     void Start()
     {
+        EquipWeapon(0);
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
     }
@@ -56,7 +60,7 @@ public class PlayerMovement : MonoBehaviour
                 if (equippedWeapon != null)
                 {
                     // Debug.Log("Shoot!");
-                    equippedWeapon.Shoot();
+                    equippedWeapon.Attack();
                 }
             }
         }
@@ -66,7 +70,54 @@ public class PlayerMovement : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(move);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
         }
+
+        for (int i = 0; i < weapons.Length && i < 9; i++)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+            {
+                EquipWeapon(i);
+            }
+        }
+
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if(scroll > 0f)
+        {
+            int nextIndex = currentWeaponIndex + 1;
+            if(nextIndex >= weapons.Length) nextIndex = 0;
+            EquipWeapon(nextIndex);
+        } else if(scroll < 0f)
+        {
+            int prevIndex = currentWeaponIndex - 1;
+            if(prevIndex < 0) prevIndex = weapons.Length - 1;
+            EquipWeapon(prevIndex);
+        }
         
+    }
+
+    private void EquipWeapon(int index)
+    {
+        if (index < 0 || index >= weapons.Length) return;
+
+        //mematikaan semua senjata di tangan
+        for(int i = 0; i < weapons.Length; i++)
+        {
+            weapons[i].gameObject.SetActive(false);
+
+            if (weapons[i].weaponRig != null)
+            {
+                weapons[i].weaponRig.weight = 0f;
+            }
+        }
+
+        //nyalakan senjata
+        currentWeaponIndex = index;
+        weapons[currentWeaponIndex].gameObject.SetActive(true);
+        equippedWeapon = weapons[currentWeaponIndex];
+
+        if (equippedWeapon.weaponRig != null)
+        {
+            equippedWeapon.weaponRig.weight = 1f;
+        }
     }
 
     public void PlayerDirection()

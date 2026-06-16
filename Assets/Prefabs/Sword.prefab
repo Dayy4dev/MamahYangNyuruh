@@ -78,6 +78,7 @@ GameObject:
   - component: {fileID: 5819898871635924461}
   - component: {fileID: 5937064390260624814}
   - component: {fileID: 1537226874727325128}
+  - component: {fileID: 8432677150322745846}
   m_Layer: 0
   m_Name: Sword
   m_TagString: Untagged
@@ -179,3 +180,15 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &8432677150322745846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7525053094447761975}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4372b96f71d3a94458c5609380e774d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponHitbox
