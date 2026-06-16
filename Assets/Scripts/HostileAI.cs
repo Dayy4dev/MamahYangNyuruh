@@ -3,13 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.AI;
 
-
-
 // HA HAYO JELASKAN KODENYA
-
-// GTW PAK NYOLONG YUTUB
-
-
+// GTW PAK NYOLONG YUTUB (Sudah dijinakkan biar gak ndongak lagi, Pak!)
 
 public class HostileAI : MonoBehaviour
 {
@@ -86,22 +81,21 @@ public class HostileAI : MonoBehaviour
     }
 
     private void InitializeProjectilePool()
-{
-    if (projectilePrefab == null) return;
-
-    if (projectilePoolRoot == null)
     {
-        // HAPUS atau KOMENTARI baris SetParent di bawah ini:
-        projectilePoolRoot = new GameObject("ProjectilePool - " + gameObject.name).transform;
-    }
+        if (projectilePrefab == null) return;
 
-    for (int i = 0; i < projectilePoolSize; i++)
-    {
-        GameObject projectile = Instantiate(projectilePrefab, projectilePoolRoot);
-        projectile.SetActive(false);
-        projectilePool.Enqueue(projectile);
+        if (projectilePoolRoot == null)
+        {
+            projectilePoolRoot = new GameObject("ProjectilePool - " + gameObject.name).transform;
+        }
+
+        for (int i = 0; i < projectilePoolSize; i++)
+        {
+            GameObject projectile = Instantiate(projectilePrefab, projectilePoolRoot);
+            projectile.SetActive(false);
+            projectilePool.Enqueue(projectile);
+        }
     }
-}
 
     private GameObject GetProjectileFromPool()
     {
@@ -117,42 +111,37 @@ public class HostileAI : MonoBehaviour
 
    private void FireProjectile()
 {
-    if (projectilePrefab == null || firePoint == null) return;
+    if (projectilePrefab == null || firePoint == null || playerTransform == null)
+        return;
 
-    GameObject projectileObject = GetProjectileFromPool();
-    
-    // Lepaskan dari parent sementara waktu agar bergerak bebas di World Space
-    projectileObject.transform.SetParent(null); 
-    
-    projectileObject.transform.SetPositionAndRotation(firePoint.position, Quaternion.identity);
-    projectileObject.SetActive(true);
+    GameObject bullet = Instantiate(
+        projectilePrefab,
+        firePoint.position,
+        Quaternion.identity);
 
-    Rigidbody projectileRb = projectileObject.GetComponent<Rigidbody>();
-    if (projectileRb != null)
-    {
-        projectileRb.linearVelocity = Vector3.zero;
-        projectileRb.angularVelocity = Vector3.zero;
-        projectileRb.AddForce(transform.forward * forwardShotForce, ForceMode.Impulse);
-        projectileRb.AddForce(transform.up * verticalShotForce, ForceMode.Impulse);
-    }
+    Rigidbody rb = bullet.GetComponent<Rigidbody>();
 
-    StartCoroutine(ReturnProjectileToPool(projectileObject, projectileLifetime));
+    Vector3 targetPos = playerTransform.position + Vector3.up * 1f;
+    Vector3 direction = (targetPos - firePoint.position).normalized;
+
+    rb.linearVelocity = direction * 20f;
+
+    bullet.transform.forward = direction;
+
+    Destroy(bullet, 3f);
 }
 
-   private IEnumerator ReturnProjectileToPool(GameObject projectile, float delay)
-{
-    yield return new WaitForSeconds(delay);
-
-    if (projectile != null)
+    private IEnumerator ReturnProjectileToPool(GameObject projectile, float delay)
     {
-        projectile.SetActive(false);
-        
-        // Kembalikan ke folder pool agar Hierarchy tetap rapi
-        projectile.transform.SetParent(projectilePoolRoot); 
-        
-        projectilePool.Enqueue(projectile);
+        yield return new WaitForSeconds(delay);
+
+        if (projectile != null)
+        {
+            projectile.SetActive(false);
+            projectile.transform.SetParent(projectilePoolRoot); 
+            projectilePool.Enqueue(projectile);
+        }
     }
-}
 
     private void FindPatrolPoint()
     {
@@ -174,7 +163,6 @@ public class HostileAI : MonoBehaviour
         yield return new WaitForSeconds(attackCooldown);
         isOnAttackCooldown = false;
     }
-
 
     private void PerformPatrol()
     {
@@ -198,11 +186,15 @@ public class HostileAI : MonoBehaviour
 
     private void PerformAttack()
     {
+        // Berhenti bergerak saat menyerang
         navAgent.SetDestination(transform.position);
 
         if (playerTransform != null)
         {
-            transform.LookAt(playerTransform);
+            
+            Vector3 targetPosition = new Vector3(playerTransform.position.x, transform.position.y, playerTransform.position.z);
+
+            transform.LookAt(targetPosition);
         }
 
         if (!isOnAttackCooldown)
