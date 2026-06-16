@@ -12,8 +12,10 @@ public class PlayerMovement : MonoBehaviour
     [Tooltip("Movement speed")]
     public float moveSpeed = 2f;
 
-
-
+    [Space]
+    [Header("Weapon Settings")]
+    [Tooltip("Masukkan script HandCannon yang ada di senjata karakter")]
+    public HandCannon equippedWeapon;
 
 
     void Start()
@@ -30,7 +32,7 @@ public class PlayerMovement : MonoBehaviour
 
         controller.Move(move * moveSpeed * Time.deltaTime);
 
-        if (move != Vector3.zero)
+        if (move != Vector3.zero && !Input.GetMouseButton(1))
         {
             Quaternion targetRotation = Quaternion.LookRotation(move);
             transform.rotation = Quaternion.Slerp(transform.rotation,targetRotation,10f * Time.deltaTime);
@@ -41,7 +43,11 @@ public class PlayerMovement : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {
-                Debug.Log("Attack");
+                if (equippedWeapon != null)
+                {
+                    Debug.Log("Shoot!");
+                    equippedWeapon.Shoot();
+                }
             }
         }
     }

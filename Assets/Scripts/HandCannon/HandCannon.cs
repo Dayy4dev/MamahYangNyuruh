@@ -6,7 +6,7 @@ public class HandCannon : MonoBehaviour
     [Header("Weapon Settings")]
     [SerializeField] private Bullet bulletPrefab;
     [SerializeField] private Transform firePoint;
-    [SerializeField] private PlayerAim playerAim;
+    // [SerializeField] private PlayerAim playerAim;
 
     [Header("Pool Configuration")]
     [SerializeField] private int defaultCapacity = 20;
@@ -34,21 +34,21 @@ public class HandCannon : MonoBehaviour
     //         Shoot();
     //     }
     // }
-    private void Update()
-    {
-        if (Input.GetButtonDown("Fire1"))
-        {
-            // Memaksa karakter berputar membidik kursor dlu
-            if (playerAim != null)
-            {
-                playerAim.AimTowardsMouse();
-            }
+    // private void Update()
+    // {
+    //     if (Input.GetButtonDown("Fire1"))
+    //     {
+    //         // Memaksa karakter berputar membidik kursor dlu
+    //         if (playerAim != null)
+    //         {
+    //             playerAim.AimTowardsMouse();
+    //         }
 
-            Shoot();
-        }
-    }
+    //         Shoot();
+    //     }
+    // }
 
-    private void Shoot()
+    public void Shoot()
     {
         Bullet bullet = bulletPool.Get();
 
