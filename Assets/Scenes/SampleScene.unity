@@ -1508,6 +1508,10 @@ PrefabInstance:
       propertyPath: playerAim
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 6297456286735163218, guid: 8983ba3588276754d85e920557c66b78, type: 3}
+      propertyPath: reloadTime
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 6617797645500171185, guid: 8983ba3588276754d85e920557c66b78, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
