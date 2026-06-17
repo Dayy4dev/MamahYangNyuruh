@@ -1837,5 +1837,5 @@ MonoBehaviour:
   firePoint: {fileID: 4855289852310857345}
   defaultCapacity: 20
   maxPoolSize: 50
-  magazineSize: 10
-  reloadTime: 5
+  magazineSize: 5
+  reloadTime: 10

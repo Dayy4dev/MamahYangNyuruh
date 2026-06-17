@@ -19,6 +19,8 @@ public class HandCannon : Weapon
 
     private int currentBullet;
     private bool isReloading;
+    private Coroutine reloadCoroutine;
+    private float remainingReloadTime; // Menyimpan sisa waktu reload
 
     private IObjectPool<Bullet> bulletPool;
 
@@ -78,7 +80,40 @@ public class HandCannon : Weapon
 
         if(currentBullet <= 0)
         {
-            StartCoroutine(ReloadCoroutine());
+            reloadCoroutine = StartCoroutine(ReloadCoroutine());
+        }
+    }
+
+    public void ResetReloadState()
+    {
+        if (reloadCoroutine != null)
+        {
+            StopCoroutine(reloadCoroutine);
+            reloadCoroutine = null;
+        }
+        isReloading = false;
+        currentBullet = magazineSize;
+        remainingReloadTime = 0f;
+    }
+
+    public override void OnWeaponDeactivate()
+    {
+        // Pause reload: hentikan coroutine tapi simpan progress
+        if (isReloading && reloadCoroutine != null)
+        {
+            StopCoroutine(reloadCoroutine);
+            reloadCoroutine = null;
+            Debug.Log($"Reload paused. Sisa waktu: {remainingReloadTime:F1}s");
+        }
+    }
+
+    public override void OnWeaponActivate()
+    {
+        // Resume reload dari sisa waktu
+        if (isReloading && reloadCoroutine == null && remainingReloadTime > 0)
+        {
+            reloadCoroutine = StartCoroutine(ReloadCoroutineWithRemainingTime(remainingReloadTime));
+            Debug.Log($"Reload resumed. Sisa waktu: {remainingReloadTime:F1}s");
         }
     }
     // public void Shoot()
@@ -105,10 +140,27 @@ public class HandCannon : Weapon
     private IEnumerator ReloadCoroutine()
     {
         isReloading = true;
+        remainingReloadTime = reloadTime;
         Debug.Log("Reloading... " + reloadTime + "s");
-        yield return new WaitForSeconds(reloadTime);
+        yield return new WaitForSeconds(remainingReloadTime);
+        CompleteReload();
+    }
+
+    private IEnumerator ReloadCoroutineWithRemainingTime(float remainingTime)
+    {
+        isReloading = true;
+        remainingReloadTime = remainingTime;
+        Debug.Log($"Reloading resumed... {remainingTime:F1}s");
+        yield return new WaitForSeconds(remainingReloadTime);
+        CompleteReload();
+    }
+
+    private void CompleteReload()
+    {
         currentBullet = magazineSize;
         isReloading = false;
+        reloadCoroutine = null;
+        remainingReloadTime = 0f;
         Debug.Log("Reloaded!");
     }
 

@@ -101,6 +101,7 @@ public class PlayerMovement : MonoBehaviour
         //mematikaan semua senjata di tangan
         for(int i = 0; i < weapons.Length; i++)
         {
+            weapons[i].OnWeaponDeactivate(); // Reset state saat weapon dinonaktifkan
             weapons[i].gameObject.SetActive(false);
 
             if (weapons[i].weaponRig != null)
@@ -113,6 +114,7 @@ public class PlayerMovement : MonoBehaviour
         currentWeaponIndex = index;
         weapons[currentWeaponIndex].gameObject.SetActive(true);
         equippedWeapon = weapons[currentWeaponIndex];
+        equippedWeapon.OnWeaponActivate(); // Resume state saat weapon diaktifkan
 
         if (equippedWeapon.weaponRig != null)
         {

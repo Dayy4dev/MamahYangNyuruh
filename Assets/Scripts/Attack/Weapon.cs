@@ -7,4 +7,8 @@ public abstract class Weapon : MonoBehaviour
     public Rig weaponRig;
 
     public abstract void Attack();
+
+    public virtual void OnWeaponDeactivate() { }
+
+    public virtual void OnWeaponActivate() { }
 }
