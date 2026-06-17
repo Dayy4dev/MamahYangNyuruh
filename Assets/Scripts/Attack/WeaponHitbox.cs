@@ -3,16 +3,21 @@ using UnityEngine;
 
 public class WeaponHitbox : Weapon
 {
-    [SerializeField]private Collider hitCollider;
+    [SerializeField] private Collider hitCollider;
     private int damage;
     private bool isActive = false;
     private HashSet<Collider> hitThisSwing = new HashSet<Collider>();
+
+    private PlayerAttack playerAttack;
 
     void Awake()
     {
         hitCollider = GetComponent<Collider>();
         hitCollider.isTrigger = true;
         hitCollider.enabled = false;
+
+        // Ambil PlayerAttack dari parent untuk knockback
+        playerAttack = GetComponentInParent<PlayerAttack>();
     }
 
     public override void Attack()
@@ -24,7 +29,7 @@ public class WeaponHitbox : Weapon
     {
         damage = dmg;
         isActive = true;
-        hitThisSwing.Clear();        // reset daftar yang sudah kena
+        hitThisSwing.Clear();
         hitCollider.enabled = true;
     }
 
@@ -37,14 +42,19 @@ public class WeaponHitbox : Weapon
     void OnTriggerEnter(Collider other)
     {
         if (!isActive) return;
-        if (hitThisSwing.Contains(other)) return;   // sudah kena, skip
+        if (hitThisSwing.Contains(other)) return;
 
-        // Cek apakah target memiliki IDamageable
         IDamageable target = other.GetComponent<IDamageable>();
         if (target != null)
         {
             hitThisSwing.Add(other);
             target.TakeDamage(damage);
+
+            // Knockback
+            if (playerAttack != null)
+            {
+                playerAttack.ApplyKnockback(other.gameObject);
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1331663357420165586}
   - component: {fileID: 3332663341257071247}
   - component: {fileID: -6331776384978527437}
+  - component: {fileID: 7051195695462945552}
   m_Layer: 0
   m_Name: Bullet_Placeholder
   m_TagString: Untagged
@@ -125,5 +126,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e5a69a377e09ca438abe17ed8cd9188, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Bullet
-  speed: 25
-  lifetime: 2
+  weaponData: {fileID: 11400000, guid: 1c2e5f0c8eaf6f04a8174c3233d67d43, type: 2}
+--- !u!54 &7051195695462945552
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3752401840410810257}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 4
+  m_CollisionDetection: 0

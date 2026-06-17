@@ -1,0 +1,49 @@
+using System.Collections;
+using UnityEngine;
+
+public class EnemyKnockback : MonoBehaviour, IKnockbackable
+{
+    private CharacterController cc;
+    private Rigidbody rb;
+
+    private Vector3 knockbackVelocity;
+    private float knockbackTimer = 0f;
+
+    void Awake()
+    {
+        // Support dua jenis — pakai salah satu yang ada
+        cc = GetComponent<CharacterController>();
+        rb = GetComponent<Rigidbody>();
+
+        if (cc == null && rb == null)
+        {
+            Debug.LogWarning($"[EnemyKnockback] {gameObject.name} tidak punya CharacterController atau Rigidbody!");
+        }
+    }
+
+    void Update()
+    {
+        if (knockbackTimer > 0f && cc != null)
+        {
+            cc.Move(knockbackVelocity * Time.deltaTime);
+            knockbackTimer -= Time.deltaTime;
+            knockbackVelocity = Vector3.Lerp(knockbackVelocity, Vector3.zero, Time.deltaTime * 10f);
+        }
+    }
+
+    public void TakeKnockback(Vector3 direction, float force, float duration)
+    {
+        if (cc != null)
+        {
+            // Pakai CharacterController
+            knockbackVelocity = direction * force;
+            knockbackTimer = duration;
+        }
+        else if (rb != null)
+        {
+            // Pakai Rigidbody
+            rb.AddForce(direction * force, ForceMode.Impulse);
+        }
+            Debug.Log($"TakeKnockback dipanggil! dir={direction}, force={force}");
+    }
+}

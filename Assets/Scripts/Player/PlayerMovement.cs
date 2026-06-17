@@ -15,22 +15,41 @@ public class PlayerMovement : MonoBehaviour
 
     [Space]
     [Header("Weapon Inventory")]
-    [Tooltip("Masukkan semua objek senjata")]
-    public Weapon[] weapons; 
-    
+    private Weapon[] weapons;           // FIX: tipe Weapon bukan GameObject
+    public int startingWeaponIndex = 0; // FIX: default 0, index awal senjata
+    public GameObject weaponParent;     // parent yang berisi semua weapon sebagai children
+
     private int currentWeaponIndex = 0;
     private Weapon equippedWeapon;
 
 
     void Start()
     {
-        EquipWeapon(0);
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+
+        // FIX: isi weapons array dari children weaponParent — cukup sekali di Start, bukan di Update
+        if (weaponParent != null)
+        {
+            weapons = weaponParent.GetComponentsInChildren<Weapon>(true); // true = include inactive
+        }
+
+        if (weapons != null && weapons.Length > 0)
+        {
+            // Pastikan startingWeaponIndex tidak melebihi jumlah weapon
+            int safeIndex = Mathf.Clamp(startingWeaponIndex, 0, weapons.Length - 1);
+            EquipWeapon(safeIndex);
+        }
+        else
+        {
+            Debug.LogWarning("[PlayerMovement] Weapons array kosong! Pastikan weaponParent sudah di-assign dan punya children dengan component Weapon.");
+        }
     }
 
     private void Update()
     {
+        if (controller == null) return;
+
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
 
@@ -49,8 +68,8 @@ public class PlayerMovement : MonoBehaviour
             animator.SetFloat("Horizontal", Mathf.MoveTowards(currentInputX, localMove.x, Time.deltaTime * 5f));
             animator.SetFloat("Vertical", Mathf.MoveTowards(currentInputZ, localMove.z, Time.deltaTime * 5f));
         }
-        
-        // rotasi klik kanan prioritas mas
+
+        // rotasi klik kanan prioritas
         if (Input.GetMouseButton(1))
         {
             PlayerDirection();
@@ -59,7 +78,6 @@ public class PlayerMovement : MonoBehaviour
             {
                 if (equippedWeapon != null)
                 {
-                    // Debug.Log("Shoot!");
                     equippedWeapon.Attack();
                 }
             }
@@ -71,37 +89,54 @@ public class PlayerMovement : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
         }
 
-        for (int i = 0; i < weapons.Length && i < 9; i++)
+        if (weapons != null)
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+            // Ganti senjata dengan tombol angka
+            for (int i = 0; i < weapons.Length && i < 9; i++)
             {
-                EquipWeapon(i);
+                if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+                {
+                    EquipWeapon(i);
+                }
+            }
+
+            // Ganti senjata dengan scroll
+            float scroll = Input.GetAxis("Mouse ScrollWheel");
+            if (scroll > 0f)
+            {
+                int nextIndex = currentWeaponIndex + 1;
+                if (nextIndex >= weapons.Length) nextIndex = 0;
+                EquipWeapon(nextIndex);
+            }
+            else if (scroll < 0f)
+            {
+                int prevIndex = currentWeaponIndex - 1;
+                if (prevIndex < 0) prevIndex = weapons.Length - 1;
+                EquipWeapon(prevIndex);
             }
         }
-
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if(scroll > 0f)
-        {
-            int nextIndex = currentWeaponIndex + 1;
-            if(nextIndex >= weapons.Length) nextIndex = 0;
-            EquipWeapon(nextIndex);
-        } else if(scroll < 0f)
-        {
-            int prevIndex = currentWeaponIndex - 1;
-            if(prevIndex < 0) prevIndex = weapons.Length - 1;
-            EquipWeapon(prevIndex);
-        }
-        
     }
 
     private void EquipWeapon(int index)
     {
+        if (weapons == null || weapons.Length == 0)
+        {
+            Debug.LogWarning("[PlayerMovement] Weapons array kosong!");
+            return;
+        }
+
         if (index < 0 || index >= weapons.Length) return;
 
-        //mematikaan semua senjata di tangan
-        for(int i = 0; i < weapons.Length; i++)
+        // Matikan semua senjata
+        for (int i = 0; i < weapons.Length; i++)
         {
-            weapons[i].OnWeaponDeactivate(); // Reset state saat weapon dinonaktifkan
+            if (weapons[i] == null)
+            {
+                Debug.LogWarning($"[PlayerMovement] Weapon di index {i} null!");
+                continue;
+            }
+
+            weapons[i].OnWeaponDeactivate();
             weapons[i].gameObject.SetActive(false);
 
             if (weapons[i].weaponRig != null)
@@ -110,11 +145,18 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        //nyalakan senjata
+        // Nyalakan senjata yang dipilih
         currentWeaponIndex = index;
+
+        if (weapons[currentWeaponIndex] == null)
+        {
+            Debug.LogWarning($"[PlayerMovement] Weapon di index {currentWeaponIndex} null, tidak bisa equip!");
+            return;
+        }
+
         weapons[currentWeaponIndex].gameObject.SetActive(true);
         equippedWeapon = weapons[currentWeaponIndex];
-        equippedWeapon.OnWeaponActivate(); // Resume state saat weapon diaktifkan
+        equippedWeapon.OnWeaponActivate();
 
         if (equippedWeapon.weaponRig != null)
         {
@@ -144,7 +186,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Jika menabrak trigger milik dinding yang menghalangi
         if (other.TryGetComponent<WallFader>(out WallFader wall))
         {
             wall.FadeToTransparent();
@@ -153,7 +194,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        // Jika keluar dari area belakang dinding
         if (other.TryGetComponent<WallFader>(out WallFader wall))
         {
             wall.FadeToOpaque();

@@ -4,6 +4,7 @@ using UnityEngine.Pool;
 
 public class HandCannon : Weapon
 {
+
     [Header("Weapon Settings")]
     [SerializeField] private Bullet bulletPrefab;
     [SerializeField] private Transform firePoint;
@@ -13,10 +14,12 @@ public class HandCannon : Weapon
     [SerializeField] private int defaultCapacity = 20;
     [SerializeField] private int maxPoolSize = 50;
 
-    [Header("Shooting & Reload")]
-    [SerializeField] private int magazineSize = 10;
-    [SerializeField] private float reloadTime = 5f;
+    // Internal state
+    private int magazineSize;
+    private float reloadTime;
 
+    [Header("References")]
+    [SerializeField]private WeaponData weaponData;
     private int currentBullet;
     private bool isReloading;
     private Coroutine reloadCoroutine;
@@ -40,6 +43,11 @@ public class HandCannon : Weapon
     private void Start()
     {
         currentBullet = magazineSize;
+        if (weaponData != null)
+        {
+            reloadTime = weaponData.reloadTime;
+            magazineSize = weaponData.magazineSize;
+        }
     }
 
     // private void Update()
@@ -77,6 +85,7 @@ public class HandCannon : Weapon
         bullet.transform.rotation = firePoint.rotation;
 
         currentBullet--;
+        Debug.Log($"Sisa peluru: {currentBullet}");
 
         if(currentBullet <= 0)
         {

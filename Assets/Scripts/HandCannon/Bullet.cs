@@ -3,14 +3,25 @@ using UnityEngine.Pool;
 
 public class Bullet : MonoBehaviour
 {
-    [SerializeField] private float speed = 25f;
-    [SerializeField] private float lifetime = 2f;
-    [SerializeField] private int damageAmount = 10;
-    
+    private float speed;
+    private float lifetime = 2f;
+    private int damageAmount;
+
     private float currentLifetime;
     private IObjectPool<Bullet> originPool;
     private bool hasHit = false;
 
+    [Header("References")]
+    [SerializeField]private WeaponData weaponData;
+
+        private void Start()
+        {
+            if (weaponData != null)
+            {
+                speed = weaponData.speed;
+                damageAmount = weaponData.damage;            
+            }
+        }
     public void SetPool(IObjectPool<Bullet> pool)
     {
         originPool = pool;
@@ -42,9 +53,17 @@ public class Bullet : MonoBehaviour
             damageable.TakeDamage(damageAmount);
             hasHit = true;
             Debug.Log($"Bullet hit {other.gameObject.name} and dealt {damageAmount} damage!");
+            ReleaseToPool();
+
+        }
+        else if (!hasHit)
+        {
+            hasHit = true;
+            Debug.Log($"Bullet hit {other.gameObject.name} but it is not damageable.");
+            ReleaseToPool();
+  
         }
 
-        ReleaseToPool();
     }
 
     private void ReleaseToPool()
