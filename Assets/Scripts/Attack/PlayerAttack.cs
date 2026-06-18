@@ -53,12 +53,16 @@ public class PlayerAttack : MonoBehaviour
 
     void StartAttack()
     {
+        if (weaponHitbox == null)
+        {
+            Debug.LogWarning("WeaponHitbox belum di-assign!");
+            return;
+        }
+        
         isAttacking = true;
         attackTimer = attackDuration;
         cooldownTimer = attackCooldown;
-
         weaponHitbox.Activate(attackDamage);
-        Debug.Log("Attack");
     }
 
     void EndAttack()

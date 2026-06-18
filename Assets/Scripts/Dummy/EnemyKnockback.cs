@@ -35,15 +35,12 @@ public class EnemyKnockback : MonoBehaviour, IKnockbackable
     {
         if (cc != null)
         {
-            // Pakai CharacterController
             knockbackVelocity = direction * force;
             knockbackTimer = duration;
         }
         else if (rb != null)
         {
-            // Pakai Rigidbody
             rb.AddForce(direction * force, ForceMode.Impulse);
         }
-            Debug.Log($"TakeKnockback dipanggil! dir={direction}, force={force}");
     }
 }

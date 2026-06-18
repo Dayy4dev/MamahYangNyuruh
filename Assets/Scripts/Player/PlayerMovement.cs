@@ -3,118 +3,96 @@ using UnityEngine;
 [AddComponentMenu("Player Movement and Camera Controller")]
 public class PlayerMovement : MonoBehaviour
 {
-
     [Space]
     [Header("Movement Settings")]
-
-    private CharacterController controller;
-    private Animator animator;
-
     [Tooltip("Movement speed")]
     public float moveSpeed = 2f;
 
     [Space]
     [Header("Weapon Inventory")]
-    private Weapon[] weapons;           // FIX: tipe Weapon bukan GameObject
-    public int startingWeaponIndex = 0; // FIX: default 0, index awal senjata
-    public GameObject weaponParent;     // parent yang berisi semua weapon sebagai children
+    public int startingWeaponIndex = 0;
+    public GameObject weaponParent;
 
+    private CharacterController controller;
+    private Animator animator;
+    private Weapon[] weapons;
     private int currentWeaponIndex = 0;
     private Weapon equippedWeapon;
-
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
 
-        // FIX: isi weapons array dari children weaponParent — cukup sekali di Start, bukan di Update
         if (weaponParent != null)
-        {
-            weapons = weaponParent.GetComponentsInChildren<Weapon>(true); // true = include inactive
-        }
+            weapons = weaponParent.GetComponentsInChildren<Weapon>(true);
 
         if (weapons != null && weapons.Length > 0)
-        {
-            // Pastikan startingWeaponIndex tidak melebihi jumlah weapon
-            int safeIndex = Mathf.Clamp(startingWeaponIndex, 0, weapons.Length - 1);
-            EquipWeapon(safeIndex);
-        }
+            EquipWeapon(Mathf.Clamp(startingWeaponIndex, 0, weapons.Length - 1));
         else
-        {
             Debug.LogWarning("[PlayerMovement] Weapons array kosong! Pastikan weaponParent sudah di-assign dan punya children dengan component Weapon.");
-        }
     }
 
     private void Update()
     {
         if (controller == null) return;
 
+        HandleMovement();
+        HandleRotation();
+        HandleWeaponSwitch();
+    }
+
+    private void HandleMovement()
+    {
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
-
         Vector3 move = new Vector3(x, 0, z).normalized;
 
         controller.Move(move * moveSpeed * Time.deltaTime);
 
         if (animator != null)
         {
-            //biar relatif arahnya
             Vector3 localMove = transform.InverseTransformDirection(move);
-
-            float currentInputX = animator.GetFloat("Horizontal");
-            float currentInputZ = animator.GetFloat("Vertical");
-
-            animator.SetFloat("Horizontal", Mathf.MoveTowards(currentInputX, localMove.x, Time.deltaTime * 5f));
-            animator.SetFloat("Vertical", Mathf.MoveTowards(currentInputZ, localMove.z, Time.deltaTime * 5f));
+            animator.SetFloat("Horizontal", Mathf.MoveTowards(animator.GetFloat("Horizontal"), localMove.x, Time.deltaTime * 5f));
+            animator.SetFloat("Vertical",   Mathf.MoveTowards(animator.GetFloat("Vertical"),   localMove.z, Time.deltaTime * 5f));
         }
+    }
 
-        // rotasi klik kanan prioritas
+    private void HandleRotation()
+    {
+        float x = Input.GetAxisRaw("Horizontal");
+        float z = Input.GetAxisRaw("Vertical");
+        Vector3 move = new Vector3(x, 0, z).normalized;
+
         if (Input.GetMouseButton(1))
         {
-            PlayerDirection();
+            AimTowardsMouse();
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
-            {
-                if (equippedWeapon != null)
-                {
-                    equippedWeapon.Attack();
-                }
-            }
+                equippedWeapon?.Attack();
         }
-        // baru rotasi wasd
         else if (move != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(move);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
         }
+    }
 
-        if (weapons != null)
+    private void HandleWeaponSwitch()
+    {
+        if (weapons == null || weapons.Length == 0) return;
+
+        for (int i = 0; i < weapons.Length && i < 9; i++)
         {
-            // Ganti senjata dengan tombol angka
-            for (int i = 0; i < weapons.Length && i < 9; i++)
-            {
-                if (Input.GetKeyDown(KeyCode.Alpha1 + i))
-                {
-                    EquipWeapon(i);
-                }
-            }
-
-            // Ganti senjata dengan scroll
-            float scroll = Input.GetAxis("Mouse ScrollWheel");
-            if (scroll > 0f)
-            {
-                int nextIndex = currentWeaponIndex + 1;
-                if (nextIndex >= weapons.Length) nextIndex = 0;
-                EquipWeapon(nextIndex);
-            }
-            else if (scroll < 0f)
-            {
-                int prevIndex = currentWeaponIndex - 1;
-                if (prevIndex < 0) prevIndex = weapons.Length - 1;
-                EquipWeapon(prevIndex);
-            }
+            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
+                EquipWeapon(i);
         }
+
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        if (scroll > 0f)
+            EquipWeapon((currentWeaponIndex + 1) % weapons.Length);
+        else if (scroll < 0f)
+            EquipWeapon((currentWeaponIndex - 1 + weapons.Length) % weapons.Length);
     }
 
     private void EquipWeapon(int index)
@@ -127,7 +105,6 @@ public class PlayerMovement : MonoBehaviour
 
         if (index < 0 || index >= weapons.Length) return;
 
-        // Matikan semua senjata
         for (int i = 0; i < weapons.Length; i++)
         {
             if (weapons[i] == null)
@@ -140,12 +117,9 @@ public class PlayerMovement : MonoBehaviour
             weapons[i].gameObject.SetActive(false);
 
             if (weapons[i].weaponRig != null)
-            {
                 weapons[i].weaponRig.weight = 0f;
-            }
         }
 
-        // Nyalakan senjata yang dipilih
         currentWeaponIndex = index;
 
         if (weapons[currentWeaponIndex] == null)
@@ -159,21 +133,18 @@ public class PlayerMovement : MonoBehaviour
         equippedWeapon.OnWeaponActivate();
 
         if (equippedWeapon.weaponRig != null)
-        {
             equippedWeapon.weaponRig.weight = 1f;
-        }
     }
 
-    public void PlayerDirection()
+    // Dipisah dari PlayerDirection() lama, sekarang publik supaya bisa dipanggil PlayerAim juga kalau perlu
+    public void AimTowardsMouse()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
         Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
 
         if (groundPlane.Raycast(ray, out float distance))
         {
             Vector3 mouseWorldPos = ray.GetPoint(distance);
-
             Vector3 direction = new Vector3(mouseWorldPos.x - transform.position.x, 0f, mouseWorldPos.z - transform.position.z);
 
             if (direction != Vector3.zero)
@@ -187,16 +158,12 @@ public class PlayerMovement : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (other.TryGetComponent<WallFader>(out WallFader wall))
-        {
             wall.FadeToTransparent();
-        }
     }
 
     private void OnTriggerExit(Collider other)
     {
         if (other.TryGetComponent<WallFader>(out WallFader wall))
-        {
             wall.FadeToOpaque();
-        }
     }
 }

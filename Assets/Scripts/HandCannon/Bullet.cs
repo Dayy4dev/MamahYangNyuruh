@@ -12,16 +12,8 @@ public class Bullet : MonoBehaviour
     private bool hasHit = false;
 
     [Header("References")]
-    [SerializeField]private WeaponData weaponData;
+    [SerializeField] private WeaponData weaponData;
 
-        private void Start()
-        {
-            if (weaponData != null)
-            {
-                speed = weaponData.speed;
-                damageAmount = weaponData.damage;            
-            }
-        }
     public void SetPool(IObjectPool<Bullet> pool)
     {
         originPool = pool;
@@ -31,6 +23,13 @@ public class Bullet : MonoBehaviour
     {
         currentLifetime = lifetime;
         hasHit = false;
+
+        // Diambil di OnEnable bukan Start, biar bener tiap kali bullet di-reuse dari pool
+        if (weaponData != null)
+        {
+            speed = weaponData.speed;
+            damageAmount = weaponData.damage;
+        }
     }
 
     private void Update()
@@ -46,24 +45,21 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Cek apakah objek yang tertabrak memiliki IDamageable interface
+        if (hasHit) return;
+
         IDamageable damageable = other.GetComponent<IDamageable>();
-        if (damageable != null && !hasHit)
+        if (damageable != null)
         {
             damageable.TakeDamage(damageAmount);
-            hasHit = true;
             Debug.Log($"Bullet hit {other.gameObject.name} and dealt {damageAmount} damage!");
-            ReleaseToPool();
-
         }
-        else if (!hasHit)
+        else
         {
-            hasHit = true;
             Debug.Log($"Bullet hit {other.gameObject.name} but it is not damageable.");
-            ReleaseToPool();
-  
         }
 
+        hasHit = true;
+        ReleaseToPool();
     }
 
     private void ReleaseToPool()

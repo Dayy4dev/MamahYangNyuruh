@@ -13,7 +13,7 @@ public class Enemy : MonoBehaviour, IDamageable
     private Color originalColor;
 
     [Header("UI")]
-    public HealthBar healthBar; // optional, assign di inspector
+    public EnemyHealthBar healthBar; // optional, assign di inspector
 
     void Start()
     {
@@ -56,5 +56,12 @@ public class Enemy : MonoBehaviour, IDamageable
         Debug.Log($"{gameObject.name} mati!");
         // Tambahkan efek mati di sini (partikel, sound, dll)
         Destroy(gameObject, 0.1f);
+    }
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            Physics.IgnoreCollision(collision.collider, GetComponent<Collider>());
+        }
     }
 }
