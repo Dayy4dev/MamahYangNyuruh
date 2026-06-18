@@ -47,6 +47,21 @@ public class Bullet : MonoBehaviour
         ReleaseToPool();
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        // Fallback untuk collider non-trigger
+        var other = collision.collider;
+        IDamageable damageable = other.GetComponent<IDamageable>();
+        if (damageable != null && !hasHit)
+        {
+            damageable.TakeDamage(damageAmount);
+            hasHit = true;
+            Debug.Log($"Bullet collided with {other.gameObject.name} and dealt {damageAmount} damage!");
+        }
+
+        ReleaseToPool();
+    }
+
     private void ReleaseToPool()
     {
         if (gameObject.activeSelf && originPool != null)

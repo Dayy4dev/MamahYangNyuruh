@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [AddComponentMenu("Player/Player Health")]
 public class PlayerHealth : MonoBehaviour, IDamageable
@@ -26,7 +28,36 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     private void Die()
     {
         Debug.Log("PlayerHealth: Player died");
-        // Simple death behaviour: disable the GameObject
-        gameObject.SetActive(false);
+
+        // Disable player control scripts if present
+        var movement = GetComponent<PlayerMovement>();
+        if (movement != null) movement.enabled = false;
+
+        // Disable CharacterController so player can't be moved by physics
+        var cc = GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
+
+        // Play death animation if animator exists
+        var animator = GetComponentInChildren<Animator>();
+        if (animator != null)
+        {
+            animator.SetTrigger("Die");
+        }
+
+        // Disable collider to avoid further hits
+        var col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
+
+        // Optionally disable the whole GameObject as a fallback
+        // gameObject.SetActive(false);
+
+        // Reload current scene after a short delay
+        StartCoroutine(HandleDeathRoutine());
+    }
+
+    private IEnumerator HandleDeathRoutine()
+    {
+        yield return new WaitForSeconds(2f);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

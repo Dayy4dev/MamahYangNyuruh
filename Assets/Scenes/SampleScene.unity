@@ -723,7 +723,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &178034472
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1882,8 +1882,9 @@ MonoBehaviour:
     m_Bits: 128
   patrolRadius: 10
   attackCooldown: 1
-  forwardShotForce: 18.73
-  verticalShotForce: 5
+  projectileSpeed: 20
+  accuracyError: 0.5
+  usePrediction: 1
   projectilePoolSize: 10
   projectileLifetime: 3
   visionRange: 20
@@ -6237,7 +6238,7 @@ Transform:
   m_GameObject: {fileID: 1636232433}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.06, z: 0}
+  m_LocalPosition: {x: 0, y: -0.111, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7018,7 +7019,7 @@ Transform:
   m_GameObject: {fileID: 1779071718}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.23399997, y: 1.403, z: 0.798}
+  m_LocalPosition: {x: 0.071, y: 1.403, z: 0.6}
   m_LocalScale: {x: 0.10336197, y: 0.1044814, z: -0.5676039}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9603,8 +9604,9 @@ MonoBehaviour:
     m_Bits: 128
   patrolRadius: 21.2
   attackCooldown: 1
-  forwardShotForce: 132.9
-  verticalShotForce: 5
+  projectileSpeed: 20
+  accuracyError: 0.5
+  usePrediction: 1
   projectilePoolSize: 10
   projectileLifetime: 3
   visionRange: 15.76
