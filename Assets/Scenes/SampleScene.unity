@@ -1876,10 +1876,10 @@ MonoBehaviour:
   projectilePrefab: {fileID: 3752401840410810257, guid: f438ccf1c66608e4590837711217bfaf, type: 3}
   terrainLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 8
   playerLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   patrolRadius: 10
   attackCooldown: 1
   projectileSpeed: 20
@@ -6376,7 +6376,7 @@ GameObject:
   - component: {fileID: 1667661202}
   - component: {fileID: 1667661201}
   - component: {fileID: 1667661205}
-  m_Layer: 6
+  m_Layer: 3
   m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
