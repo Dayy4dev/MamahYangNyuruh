@@ -4,7 +4,7 @@ using UnityEngine;
 public class Enemy : MonoBehaviour, IDamageable
 {
     [Header("Stats")]
-    public int maxHealth = 100;
+    public int maxHealth = 300; // Menggunakan nilai 300 dari script kedua
     private int currentHealth;
 
     [Header("Visual Feedback")]
@@ -13,7 +13,8 @@ public class Enemy : MonoBehaviour, IDamageable
     private Color originalColor;
 
     [Header("UI")]
-    public HealthBar healthBar; // optional, assign di inspector
+    // Gunakan EnemyHealthBar (atau ubah menjadi HealthBar jika itu tipe script UI Anda)
+    public EnemyHealthBar healthBar; // optional, assign di inspector
 
     void Start()
     {
@@ -46,9 +47,13 @@ public class Enemy : MonoBehaviour, IDamageable
 
     IEnumerator HitFlash()
     {
-        bodyRenderer.material.color = Color.red;
-        yield return new WaitForSeconds(hitFlashDuration);
-        bodyRenderer.material.color = originalColor;
+        // Pengecekan null agar tidak error jika renderer hilang saat dipanggil
+        if (bodyRenderer != null)
+        {
+            bodyRenderer.material.color = Color.red;
+            yield return new WaitForSeconds(hitFlashDuration);
+            bodyRenderer.material.color = originalColor;
+        }
     }
 
     void Die()
@@ -56,5 +61,14 @@ public class Enemy : MonoBehaviour, IDamageable
         Debug.Log($"{gameObject.name} mati!");
         // Tambahkan efek mati di sini (partikel, sound, dll)
         Destroy(gameObject, 0.1f);
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        // Fungsi dari script kedua untuk mengabaikan collision dengan Player
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            Physics.IgnoreCollision(collision.collider, GetComponent<Collider>());
+        }
     }
 }

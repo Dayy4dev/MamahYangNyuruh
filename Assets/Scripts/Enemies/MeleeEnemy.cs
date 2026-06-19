@@ -213,9 +213,3 @@ public class MeleeEnemy : MonoBehaviour
         }
     }
 }
-
-// Optional interface the enemy will try to use if present in project
-public interface IDamageable
-{
-    void TakeDamage(int amount);
-}

@@ -1354,7 +1354,7 @@ PrefabInstance:
     - target: {fileID: 1320397266668453121, guid: 9018edc178f79bd488296b9f5f61e63c, type: 3}
       propertyPath: hitCollider
       value: 
-      objectReference: {fileID: 1506628735}
+      objectReference: {fileID: 0}
     - target: {fileID: 1522135801072272624, guid: 9018edc178f79bd488296b9f5f61e63c, type: 3}
       propertyPath: m_IsTrigger
       value: 1
@@ -1601,7 +1601,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 2.3904784, y: 8.298289, z: -6.8362255}
+  m_LocalPosition: {x: 2.2836342, y: 8.298289, z: -6.8221593}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1867,19 +1867,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 397394857}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d722a93a04cbbc24cb8b1a889b8367df, type: 3}
+  m_Script: {fileID: 11500000, guid: 7805a9ec7035db64d820b5f8f0b77ec2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HostileAI
   navAgent: {fileID: 397394862}
-  playerTransform: {fileID: 1636232434}
+  playerTransform: {fileID: 397394860}
   firePoint: {fileID: 1779071722}
-  projectilePrefab: {fileID: 5700317222181577461, guid: 0c821f2987c474c48bf2b123e94259db, type: 3}
+  projectilePrefab: {fileID: 3752401840410810257, guid: f438ccf1c66608e4590837711217bfaf, type: 3}
   terrainLayer:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 0
   playerLayerMask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 0
   patrolRadius: 10
   attackCooldown: 1
   projectileSpeed: 20
@@ -3621,10 +3621,7 @@ MonoBehaviour:
   weaponRig: {fileID: 0}
   bulletPrefab: {fileID: 0}
   firePoint: {fileID: 0}
-  defaultCapacity: 20
-  maxPoolSize: 50
-  magazineSize: 10
-  reloadTime: 5
+  weaponData: {fileID: 0}
 --- !u!1 &983299012
 GameObject:
   m_ObjectHideFlags: 0
@@ -5556,7 +5553,7 @@ Transform:
   m_GameObject: {fileID: 1427149368}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 2.3904784, y: 8.298289, z: -6.8362255}
+  m_LocalPosition: {x: 2.2836342, y: 8.298289, z: -6.8221593}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5786,11 +5783,6 @@ Transform:
   - {fileID: 498025689}
   m_Father: {fileID: 250339225}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &1506628735 stripped
-BoxCollider:
-  m_CorrespondingSourceObject: {fileID: 1522135801072272624, guid: 9018edc178f79bd488296b9f5f61e63c, type: 3}
-  m_PrefabInstance: {fileID: 251232573}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1510361209
 GameObject:
   m_ObjectHideFlags: 0
@@ -5868,7 +5860,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 6
-  gravity: -9.81
+  startingWeaponIndex: 0
+  weaponParent: {fileID: 0}
 --- !u!114 &1510361214
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7439,7 +7432,7 @@ PrefabInstance:
     - target: {fileID: 5866666021909216657, guid: 13cec85251ecd4c44ab6c9c46b407874, type: 3}
       propertyPath: m_Controller
       value: 
-      objectReference: {fileID: 9100000, guid: 230658ce8655135429adf13fb10fa90b, type: 2}
+      objectReference: {fileID: 9100000, guid: e7fbde2d1540e594d925dbe31fc403a0, type: 2}
     - target: {fileID: 5866666021909216657, guid: 13cec85251ecd4c44ab6c9c46b407874, type: 3}
       propertyPath: m_ApplyRootMotion
       value: 0
@@ -9592,25 +9585,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d722a93a04cbbc24cb8b1a889b8367df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HostileAI
-  navAgent: {fileID: 5866666020578727325}
-  playerTransform: {fileID: 1636232434}
-  firePoint: {fileID: 1062298678}
-  projectilePrefab: {fileID: 5700317222181577461, guid: 0c821f2987c474c48bf2b123e94259db, type: 3}
-  terrainLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  playerLayerMask:
-    serializedVersion: 2
-    m_Bits: 128
-  patrolRadius: 21.2
-  attackCooldown: 1
-  projectileSpeed: 20
-  accuracyError: 0.5
-  usePrediction: 1
-  projectilePoolSize: 10
-  projectileLifetime: 3
-  visionRange: 15.76
-  engagementRange: 10.45
 --- !u!195 &5866666020578727325
 NavMeshAgent:
   m_ObjectHideFlags: 0
