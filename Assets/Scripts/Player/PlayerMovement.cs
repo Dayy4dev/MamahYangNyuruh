@@ -8,6 +8,11 @@ public class PlayerMovement : MonoBehaviour
     [Tooltip("Movement speed")]
     public float moveSpeed = 2f;
 
+    [Header("Gravity Settings")]
+    [SerializeField] private float gravity = -9.81f; // Kekuatan gravitasi jatuh
+    private Vector3 velocity; // Menyimpan kecepatan jatuh player
+    private bool isGrounded; // Status apakah menyentuh tanah
+
     [Space]
     [Header("Weapon Inventory")]
     public int startingWeaponIndex = 0;
@@ -37,9 +42,26 @@ public class PlayerMovement : MonoBehaviour
     {
         if (controller == null) return;
 
+        HandleGravity();
         HandleMovement();
         HandleRotation();
         HandleWeaponSwitch();
+    }
+
+    private void HandleGravity()
+    {
+        // Cek apakah player menyentuh tanah menggunakan fitur Character Controller
+        isGrounded = controller.isGrounded;
+        if (isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f; // Kunci nilai sedikit di bawah 0 agar deteksi ground stabil
+        }
+
+        // Hitung gravitasi secara vertikal (Sumbu Y)
+        velocity.y += gravity * Time.deltaTime;
+
+        // Jalankan pergerakan jatuh akibat gravitasi
+        controller.Move(velocity * Time.deltaTime);
     }
 
     private void HandleMovement()
@@ -48,8 +70,10 @@ public class PlayerMovement : MonoBehaviour
         float z = Input.GetAxisRaw("Vertical");
         Vector3 move = new Vector3(x, 0, z).normalized;
 
+        // Jalankan pergerakan horizontal
         controller.Move(move * moveSpeed * Time.deltaTime);
 
+        // Update Animasi
         if (animator != null)
         {
             Vector3 localMove = transform.InverseTransformDirection(move);
@@ -136,7 +160,6 @@ public class PlayerMovement : MonoBehaviour
             equippedWeapon.weaponRig.weight = 1f;
     }
 
-    // Dipisah dari PlayerDirection() lama, sekarang publik supaya bisa dipanggil PlayerAim juga kalau perlu
     public void AimTowardsMouse()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);

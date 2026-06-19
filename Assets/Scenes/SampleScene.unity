@@ -1922,7 +1922,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 2.2836342, y: 8.298289, z: -6.8221593}
+  m_LocalPosition: {x: 2.2054086, y: 8.298289, z: -6.8118606}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2224,15 +2224,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HostileAI
   navAgent: {fileID: 397394862}
-  playerTransform: {fileID: 397394860}
+  playerTransform: {fileID: 1636232434}
   firePoint: {fileID: 1779071722}
-  projectilePrefab: {fileID: 3752401840410810257, guid: f438ccf1c66608e4590837711217bfaf, type: 3}
+  projectilePrefab: {fileID: 3752401840410810257, guid: 97cb5df11765bc9479a469f465f00091, type: 3}
   terrainLayer:
     serializedVersion: 2
     m_Bits: 8
   playerLayerMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 128
   patrolRadius: 10
   attackCooldown: 1
   projectileSpeed: 20
@@ -3196,11 +3196,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1526687365}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &622849843 stripped
-BoxCollider:
-  m_CorrespondingSourceObject: {fileID: 1522135801072272624, guid: 9018edc178f79bd488296b9f5f61e63c, type: 3}
-  m_PrefabInstance: {fileID: 964081851}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &656923688
 GameObject:
   m_ObjectHideFlags: 0
@@ -4833,7 +4828,7 @@ PrefabInstance:
     - target: {fileID: 1320397266668453121, guid: 9018edc178f79bd488296b9f5f61e63c, type: 3}
       propertyPath: hitCollider
       value: 
-      objectReference: {fileID: 622849843}
+      objectReference: {fileID: 0}
     - target: {fileID: 1522135801072272624, guid: 9018edc178f79bd488296b9f5f61e63c, type: 3}
       propertyPath: m_IsTrigger
       value: 1
@@ -7441,7 +7436,7 @@ Transform:
   m_GameObject: {fileID: 1427149368}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 2.2836342, y: 8.298289, z: -6.8221593}
+  m_LocalPosition: {x: 2.2054086, y: 8.298289, z: -6.8118606}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7859,6 +7854,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 6
+  gravity: -9.81
   startingWeaponIndex: 0
   weaponParent: {fileID: 0}
 --- !u!114 &1510361214
@@ -12458,6 +12454,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d722a93a04cbbc24cb8b1a889b8367df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HostileAI
+  navAgent: {fileID: 0}
+  playerTransform: {fileID: 0}
+  firePoint: {fileID: 0}
+  projectilePrefab: {fileID: 0}
+  terrainLayer:
+    m_Bits: 0
+  playerLayerMask:
+    m_Bits: 0
+  patrolRadius: 10
+  attackCooldown: 1
+  projectileSpeed: 20
+  accuracyError: 0.5
+  usePrediction: 1
+  projectilePoolSize: 10
+  projectileLifetime: 3
+  visionRange: 20
+  engagementRange: 10
 --- !u!195 &5866666020578727325
 NavMeshAgent:
   m_ObjectHideFlags: 0
