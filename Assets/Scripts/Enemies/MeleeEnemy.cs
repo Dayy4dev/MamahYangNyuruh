@@ -7,7 +7,7 @@ public class MeleeEnemy : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private NavMeshAgent navAgent;
-    [SerializeField] private Animator animator; // DITAMBAHKAN: Sekarang muncul di Inspector Unity!
+    [SerializeField] private Animator animator;
     private Transform playerTransform;
 
     [Header("Layers")]
@@ -42,7 +42,6 @@ public class MeleeEnemy : MonoBehaviour
 
         if (navAgent == null) navAgent = GetComponent<NavMeshAgent>();
         
-        // Cadangan: Kalau kamu lupa masukin Animator di Inspector, script akan mencari sendiri
         if (animator == null) animator = GetComponentInChildren<Animator>();
     }
 
@@ -78,7 +77,6 @@ public class MeleeEnemy : MonoBehaviour
             return;
         }
 
-        // Menggunakan hitungan jarak murni matematika (Aman dari bug Layer/Pivot kaki)
         float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
 
         isPlayerVisible = distanceToPlayer <= visionRange;
@@ -153,7 +151,6 @@ public class MeleeEnemy : MonoBehaviour
 
         if (playerTransform != null)
         {
-            // Sama seperti musuh AI, fitur anti-ndongak juga dipakai di sini
             Vector3 targetPosition = new Vector3(playerTransform.position.x, transform.position.y, playerTransform.position.z);
             transform.LookAt(targetPosition);
         }
@@ -167,7 +164,7 @@ public class MeleeEnemy : MonoBehaviour
 
     private void ExecuteMeleeStrike()
     {
-        if (animator != null) animator.SetTrigger("Attack");
+        // if (animator != null) animator.SetTrigger("Attack");
 
         Vector3 spherePos = transform.position + transform.forward * (engagementRange * 0.5f);
         Collider[] hits = Physics.OverlapSphere(spherePos, engagementRange, playerLayerMask);
@@ -181,12 +178,10 @@ public class MeleeEnemy : MonoBehaviour
                 Debug.Log("MeleeEnemy: BERHASIL MEMUKUL PLAYER -> " + c.gameObject.name);
             }
 
-            // Pastikan script Player kamu punya fungsi TakeDamage
             if (c.TryGetComponent<PlayerHealth>(out var ph))
             {
                 ph.TakeDamage(damage);
             }
-            // Atau jika menggunakan interface
             else if (c.TryGetComponent<IDamageable>(out var d))
             {
                 d.TakeDamage(damage);

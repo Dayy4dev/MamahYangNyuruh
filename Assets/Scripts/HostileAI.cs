@@ -135,7 +135,6 @@ public class HostileAI : MonoBehaviour
         if (projectilePrefab == null || firePoint == null || playerTransform == null)
             return;
 
-        // --- Ambil dari pool (bukan Instantiate baru) ---
         GameObject bullet = GetProjectileFromPool();
         bullet.transform.position = firePoint.position;
         bullet.transform.rotation = Quaternion.identity;
@@ -144,8 +143,6 @@ public class HostileAI : MonoBehaviour
         Rigidbody rb = bullet.GetComponent<Rigidbody>();
         if (rb == null) return;
 
-        // --- Lead prediction ---
-        // Perkirakan posisi pemain saat peluru tiba
         Vector3 targetPos = playerTransform.position + Vector3.up * 1f;
 
         if (usePrediction)
@@ -153,7 +150,6 @@ public class HostileAI : MonoBehaviour
             float distToTarget = Vector3.Distance(firePoint.position, targetPos);
             float travelTime = distToTarget / projectileSpeed;
 
-            // Ambil kecepatan horizontal pemain (NavMeshAgent / Rigidbody)
             Vector3 playerVelocity = Vector3.zero;
             NavMeshAgent playerAgent = playerTransform.GetComponent<NavMeshAgent>();
             Rigidbody playerRb = playerTransform.GetComponent<Rigidbody>();
@@ -164,13 +160,11 @@ public class HostileAI : MonoBehaviour
             targetPos += playerVelocity * travelTime;
         }
 
-        // --- Ballistic compensation (melawan gravitasi) ---
         Vector3 direction = (targetPos - firePoint.position).normalized;
         float travelEst = Vector3.Distance(firePoint.position, targetPos) / projectileSpeed;
         float gravOffset = 0.5f * Mathf.Abs(Physics.gravity.y) * travelEst * travelEst;
         direction = (direction + Vector3.up * (gravOffset / Vector3.Distance(firePoint.position, targetPos))).normalized;
 
-        // --- Accuracy scatter ---
         if (accuracyError > 0f)
         {
             direction += new Vector3(
@@ -181,7 +175,6 @@ public class HostileAI : MonoBehaviour
             direction.Normalize();
         }
 
-        // --- Tembak ---
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         rb.linearVelocity = direction * projectileSpeed;
@@ -286,11 +279,9 @@ public class HostileAI : MonoBehaviour
     {
         if (animator == null) return;
 
-        // Get NavMeshAgent velocity in local space
         Vector3 velocity = navAgent.velocity;
         Vector3 localVelocity = transform.InverseTransformDirection(velocity);
 
-        // Set animator parameters for movement
         animator.SetFloat("Horizontal", localVelocity.x);
         animator.SetFloat("Vertical", localVelocity.z);
     }
