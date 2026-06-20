@@ -435,7 +435,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3073122873768857717}
   m_Layer: 0
-  m_Name: StartRoom 1
+  m_Name: Reward_room
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
