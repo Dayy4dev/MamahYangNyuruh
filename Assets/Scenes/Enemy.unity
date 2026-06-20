@@ -1020,6 +1020,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeleeEnemy
   navAgent: {fileID: 178034473}
+  animator: {fileID: 178034475}
   terrainLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -2137,7 +2138,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 2.2054086, y: 8.298289, z: -6.8118606}
+  m_LocalPosition: {x: 2.2161984, y: 8.298289, z: -6.813281}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2439,6 +2440,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HostileAI
   navAgent: {fileID: 397394862}
+  animator: {fileID: 397394859}
   playerTransform: {fileID: 1636232434}
   firePoint: {fileID: 1779071722}
   projectilePrefab: {fileID: 3752401840410810257, guid: 97cb5df11765bc9479a469f465f00091, type: 3}
@@ -2496,7 +2498,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &405438974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10154,6 +10156,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeleeEnemy
   navAgent: {fileID: 1383843970}
+  animator: {fileID: 1383843972}
   terrainLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -10484,7 +10487,7 @@ Transform:
   m_GameObject: {fileID: 1427149368}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 2.2054086, y: 8.298289, z: -6.8118606}
+  m_LocalPosition: {x: 2.2161984, y: 8.298289, z: -6.813281}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -11133,7 +11136,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!143 &1510361210
 CharacterController:
   m_ObjectHideFlags: 0
@@ -16852,6 +16855,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d722a93a04cbbc24cb8b1a889b8367df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HostileAI
+  navAgent: {fileID: 0}
+  animator: {fileID: 0}
+  playerTransform: {fileID: 0}
+  firePoint: {fileID: 0}
+  projectilePrefab: {fileID: 0}
+  terrainLayer:
+    m_Bits: 0
+  playerLayerMask:
+    m_Bits: 0
+  patrolRadius: 10
+  attackCooldown: 1
+  projectileSpeed: 20
+  accuracyError: 0.5
+  usePrediction: 1
+  projectilePoolSize: 10
+  projectileLifetime: 3
+  visionRange: 20
+  engagementRange: 10
 --- !u!195 &5866666020578727325
 NavMeshAgent:
   m_ObjectHideFlags: 0

@@ -10,6 +10,7 @@ public class HostileAI : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private NavMeshAgent navAgent;
+    [SerializeField] private Animator animator;
     [SerializeField] private Transform playerTransform;
     [SerializeField] private Transform firePoint;
     [SerializeField] private GameObject projectilePrefab;
@@ -23,14 +24,14 @@ public class HostileAI : MonoBehaviour
     private Vector3 currentPatrolPoint;
     private bool hasPatrolPoint;
 
-[Header("Combat Settings")]
-[SerializeField] private float attackCooldown = 1f;
-private bool isOnAttackCooldown;
-[SerializeField] private float projectileSpeed = 20f;       // pisahkan jadi variabel
-[SerializeField] private float accuracyError = 0.5f;        // 0 = tepat, makin tinggi makin meleset
-[SerializeField] private bool usePrediction = true;         // toggle lead prediction
-[SerializeField] private int projectilePoolSize = 10;
-[SerializeField] private float projectileLifetime = 3f;
+    [Header("Combat Settings")]
+    [SerializeField] private float attackCooldown = 1f;
+    private bool isOnAttackCooldown;
+    [SerializeField] private float projectileSpeed = 20f;       // pisahkan jadi variabel
+    [SerializeField] private float accuracyError = 0.5f;        // 0 = tepat, makin tinggi makin meleset
+    [SerializeField] private bool usePrediction = true;         // toggle lead prediction
+    [SerializeField] private int projectilePoolSize = 10;
+    [SerializeField] private float projectileLifetime = 3f;
 
     [Header("Detection Ranges")]
     [SerializeField] private float visionRange = 20f;
@@ -43,18 +44,20 @@ private bool isOnAttackCooldown;
 
     private void Awake()
     {
-        if (playerTransform == null)
+        GameObject playerObj = GameObject.FindWithTag("Player");
+        if (playerObj != null)
         {
-            GameObject playerObj = GameObject.Find("Player");
-            if (playerObj != null)
-            {
-                playerTransform = playerObj.transform;
-            }
+            playerTransform = playerObj.transform;
         }
 
         if (navAgent == null)
         {
             navAgent = GetComponent<NavMeshAgent>();
+        }
+
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
         }
 
         InitializeProjectilePool();
@@ -77,8 +80,25 @@ private bool isOnAttackCooldown;
 
     private void DetectPlayer()
     {
-        isPlayerVisible = Physics.CheckSphere(transform.position, visionRange, playerLayerMask);
-        isPlayerInRange = Physics.CheckSphere(transform.position, engagementRange, playerLayerMask);
+        if (playerTransform == null)
+        {
+            GameObject playerObj = GameObject.FindWithTag("Player");
+            if (playerObj != null)
+            {
+                playerTransform = playerObj.transform;
+            }
+        }
+
+        if (playerTransform == null)
+        {
+            isPlayerVisible = false;
+            isPlayerInRange = false;
+            return;
+        }
+
+        float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
+        isPlayerVisible = distanceToPlayer <= visionRange;
+        isPlayerInRange = distanceToPlayer <= engagementRange;
     }
 
     private void InitializeProjectilePool()
@@ -110,65 +130,65 @@ private bool isOnAttackCooldown;
         return projectilePool.Dequeue();
     }
 
- private void FireProjectile()
-{
-    if (projectilePrefab == null || firePoint == null || playerTransform == null)
-        return;
-
-    // --- Ambil dari pool (bukan Instantiate baru) ---
-    GameObject bullet = GetProjectileFromPool();
-    bullet.transform.position = firePoint.position;
-    bullet.transform.rotation = Quaternion.identity;
-    bullet.SetActive(true);
-
-    Rigidbody rb = bullet.GetComponent<Rigidbody>();
-    if (rb == null) return;
-
-    // --- Lead prediction ---
-    // Perkirakan posisi pemain saat peluru tiba
-    Vector3 targetPos = playerTransform.position + Vector3.up * 1f;
-
-    if (usePrediction)
+    private void FireProjectile()
     {
-        float distToTarget = Vector3.Distance(firePoint.position, targetPos);
-        float travelTime   = distToTarget / projectileSpeed;
+        if (projectilePrefab == null || firePoint == null || playerTransform == null)
+            return;
 
-        // Ambil kecepatan horizontal pemain (NavMeshAgent / Rigidbody)
-        Vector3 playerVelocity = Vector3.zero;
-        NavMeshAgent playerAgent = playerTransform.GetComponent<NavMeshAgent>();
-        Rigidbody   playerRb    = playerTransform.GetComponent<Rigidbody>();
+        // --- Ambil dari pool (bukan Instantiate baru) ---
+        GameObject bullet = GetProjectileFromPool();
+        bullet.transform.position = firePoint.position;
+        bullet.transform.rotation = Quaternion.identity;
+        bullet.SetActive(true);
 
-        if (playerAgent != null) playerVelocity = playerAgent.velocity;
-        else if (playerRb != null) playerVelocity = playerRb.linearVelocity;
+        Rigidbody rb = bullet.GetComponent<Rigidbody>();
+        if (rb == null) return;
 
-        targetPos += playerVelocity * travelTime;
+        // --- Lead prediction ---
+        // Perkirakan posisi pemain saat peluru tiba
+        Vector3 targetPos = playerTransform.position + Vector3.up * 1f;
+
+        if (usePrediction)
+        {
+            float distToTarget = Vector3.Distance(firePoint.position, targetPos);
+            float travelTime = distToTarget / projectileSpeed;
+
+            // Ambil kecepatan horizontal pemain (NavMeshAgent / Rigidbody)
+            Vector3 playerVelocity = Vector3.zero;
+            NavMeshAgent playerAgent = playerTransform.GetComponent<NavMeshAgent>();
+            Rigidbody playerRb = playerTransform.GetComponent<Rigidbody>();
+
+            if (playerAgent != null) playerVelocity = playerAgent.velocity;
+            else if (playerRb != null) playerVelocity = playerRb.linearVelocity;
+
+            targetPos += playerVelocity * travelTime;
+        }
+
+        // --- Ballistic compensation (melawan gravitasi) ---
+        Vector3 direction = (targetPos - firePoint.position).normalized;
+        float travelEst = Vector3.Distance(firePoint.position, targetPos) / projectileSpeed;
+        float gravOffset = 0.5f * Mathf.Abs(Physics.gravity.y) * travelEst * travelEst;
+        direction = (direction + Vector3.up * (gravOffset / Vector3.Distance(firePoint.position, targetPos))).normalized;
+
+        // --- Accuracy scatter ---
+        if (accuracyError > 0f)
+        {
+            direction += new Vector3(
+                Random.Range(-accuracyError, accuracyError),
+                Random.Range(-accuracyError, accuracyError),
+                Random.Range(-accuracyError, accuracyError)
+            ) * 0.05f;
+            direction.Normalize();
+        }
+
+        // --- Tembak ---
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.linearVelocity = direction * projectileSpeed;
+        bullet.transform.forward = direction;
+
+        StartCoroutine(ReturnProjectileToPool(bullet, projectileLifetime));
     }
-
-    // --- Ballistic compensation (melawan gravitasi) ---
-    Vector3 direction  = (targetPos - firePoint.position).normalized;
-    float   travelEst  = Vector3.Distance(firePoint.position, targetPos) / projectileSpeed;
-    float   gravOffset = 0.5f * Mathf.Abs(Physics.gravity.y) * travelEst * travelEst;
-    direction = (direction + Vector3.up * (gravOffset / Vector3.Distance(firePoint.position, targetPos))).normalized;
-
-    // --- Accuracy scatter ---
-    if (accuracyError > 0f)
-    {
-        direction += new Vector3(
-            Random.Range(-accuracyError, accuracyError),
-            Random.Range(-accuracyError, accuracyError),
-            Random.Range(-accuracyError, accuracyError)
-        ) * 0.05f;
-        direction.Normalize();
-    }
-
-    // --- Tembak ---
-    rb.linearVelocity      = Vector3.zero;
-    rb.angularVelocity     = Vector3.zero;
-    rb.linearVelocity      = direction * projectileSpeed;
-    bullet.transform.forward = direction;
-
-    StartCoroutine(ReturnProjectileToPool(bullet, projectileLifetime));
-}
 
     private IEnumerator ReturnProjectileToPool(GameObject projectile, float delay)
     {
@@ -177,7 +197,7 @@ private bool isOnAttackCooldown;
         if (projectile != null)
         {
             projectile.SetActive(false);
-            projectile.transform.SetParent(projectilePoolRoot); 
+            projectile.transform.SetParent(projectilePoolRoot);
             projectilePool.Enqueue(projectile);
         }
     }
@@ -230,7 +250,7 @@ private bool isOnAttackCooldown;
 
         if (playerTransform != null)
         {
-            
+
             Vector3 targetPosition = new Vector3(playerTransform.position.x, transform.position.y, playerTransform.position.z);
 
             transform.LookAt(targetPosition);
@@ -257,5 +277,21 @@ private bool isOnAttackCooldown;
         {
             PerformAttack();
         }
+
+        // Update animator with movement parameters
+        UpdateAnimatorParameters();
+    }
+
+    private void UpdateAnimatorParameters()
+    {
+        if (animator == null) return;
+
+        // Get NavMeshAgent velocity in local space
+        Vector3 velocity = navAgent.velocity;
+        Vector3 localVelocity = transform.InverseTransformDirection(velocity);
+
+        // Set animator parameters for movement
+        animator.SetFloat("Horizontal", localVelocity.x);
+        animator.SetFloat("Vertical", localVelocity.z);
     }
 }

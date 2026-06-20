@@ -7,12 +7,12 @@ public class MeleeEnemy : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private NavMeshAgent navAgent;
+    [SerializeField] private Animator animator; // DITAMBAHKAN: Sekarang muncul di Inspector Unity!
     private Transform playerTransform;
-    private Animator animator;
 
     [Header("Layers")]
     [SerializeField] private LayerMask terrainLayer;     // Layer untuk lantai/ground panggung
-    [SerializeField] private LayerMask playerLayerMask; // Tetap dipertahankan untuk hit damage senjata
+    [SerializeField] private LayerMask playerLayerMask; // Layer untuk mendeteksi player saat memukul
 
     [Header("Patrol Settings")]
     [SerializeField] private float patrolRadius = 8f;
@@ -26,7 +26,7 @@ public class MeleeEnemy : MonoBehaviour
 
     [Header("Detection Ranges")]
     [SerializeField] private float visionRange = 10f;       // Jarak mulai mengejar
-    [SerializeField] private float engagementRange = 1.8f;  // Jarak mulai memukul (Dinaikkan sedikit agar pas)
+    [SerializeField] private float engagementRange = 1.8f;  // Jarak mulai memukul
 
     private bool isPlayerVisible;
     private bool isPlayerInRange;
@@ -41,7 +41,9 @@ public class MeleeEnemy : MonoBehaviour
         }
 
         if (navAgent == null) navAgent = GetComponent<NavMeshAgent>();
-        animator = GetComponentInChildren<Animator>();
+        
+        // Cadangan: Kalau kamu lupa masukin Animator di Inspector, script akan mencari sendiri
+        if (animator == null) animator = GetComponentInChildren<Animator>();
     }
 
     private void Update()
@@ -53,11 +55,9 @@ public class MeleeEnemy : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        // Lingkaran merah untuk jarak pukul
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, engagementRange);
 
-        // Lingkaran kuning untuk jarak pandang kejar
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, visionRange);
     }
@@ -78,7 +78,7 @@ public class MeleeEnemy : MonoBehaviour
             return;
         }
 
-        // PERBAIKAN UTAMA: Menggunakan hitungan jarak murni matematika (Aman dari bug Layer/Pivot kaki)
+        // Menggunakan hitungan jarak murni matematika (Aman dari bug Layer/Pivot kaki)
         float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
 
         isPlayerVisible = distanceToPlayer <= visionRange;
@@ -139,7 +139,6 @@ public class MeleeEnemy : MonoBehaviour
     {
         if (playerTransform != null && navAgent != null && navAgent.isOnNavMesh)
         {
-            // Reset stopping distance ke 0 saat mengejar agar dia mepet mendekati player
             navAgent.stoppingDistance = 0f;
             navAgent.SetDestination(playerTransform.position);
         }
@@ -149,13 +148,12 @@ public class MeleeEnemy : MonoBehaviour
     {
         if (navAgent != null && navAgent.isOnNavMesh)
         {
-            // Paksa berhenti berjalan saat masuk jarak pukul
             navAgent.SetDestination(transform.position);
         }
 
         if (playerTransform != null)
         {
-            // Hadapkan badan musuh ke arah posisi horizontal player
+            // Sama seperti musuh AI, fitur anti-ndongak juga dipakai di sini
             Vector3 targetPosition = new Vector3(playerTransform.position.x, transform.position.y, playerTransform.position.z);
             transform.LookAt(targetPosition);
         }
@@ -171,7 +169,6 @@ public class MeleeEnemy : MonoBehaviour
     {
         if (animator != null) animator.SetTrigger("Attack");
 
-        // Tetap gunakan OverlapSphere untuk mendeteksi apakah pedang mengenai objek di depannya saat mengayun
         Vector3 spherePos = transform.position + transform.forward * (engagementRange * 0.5f);
         Collider[] hits = Physics.OverlapSphere(spherePos, engagementRange, playerLayerMask);
         
@@ -181,14 +178,15 @@ public class MeleeEnemy : MonoBehaviour
 
             if (c.CompareTag("Player"))
             {
-                // SEKARANG INI DIJAMIN AKAN MUNCUL SAAT BERHASIL MEMUKUL PLAYER
                 Debug.Log("MeleeEnemy: BERHASIL MEMUKUL PLAYER -> " + c.gameObject.name);
             }
 
+            // Pastikan script Player kamu punya fungsi TakeDamage
             if (c.TryGetComponent<PlayerHealth>(out var ph))
             {
                 ph.TakeDamage(damage);
             }
+            // Atau jika menggunakan interface
             else if (c.TryGetComponent<IDamageable>(out var d))
             {
                 d.TakeDamage(damage);
@@ -207,9 +205,12 @@ public class MeleeEnemy : MonoBehaviour
     {
         if (animator != null && navAgent != null)
         {
-            // Deteksi isMoving berdasarkan kecepatan asli komponen NavMeshAgent
-            bool isMoving = navAgent.velocity.magnitude > 0.1f;
-            animator.SetBool("isMoving", isMoving);
+            Vector3 velocity = navAgent.velocity;
+            
+            Vector3 localVelocity = transform.InverseTransformDirection(velocity);
+
+            animator.SetFloat("Horizontal", localVelocity.x);
+            animator.SetFloat("Vertical", localVelocity.z);
         }
     }
 }
