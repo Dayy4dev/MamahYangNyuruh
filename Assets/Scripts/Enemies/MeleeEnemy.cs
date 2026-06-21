@@ -3,16 +3,21 @@ using System.Collections;
 using UnityEngine.AI;
 
 [AddComponentMenu("Enemies/Melee NavMesh Enemy")]
-public class MeleeEnemy : MonoBehaviour
+public class MeleeEnemy : MonoBehaviour, IDamageable
 {
     [Header("References")]
     [SerializeField] private NavMeshAgent navAgent;
     [SerializeField] private Animator animator;
     private Transform playerTransform;
+    private EnemyKnockback enemyKnockback;
+
+    [Header("Stats")]
+    [SerializeField] private int maxHealth = 100;
+    private int currentHealth;
 
     [Header("Layers")]
-    [SerializeField] private LayerMask terrainLayer;     // Layer untuk lantai/ground panggung
-    [SerializeField] private LayerMask playerLayerMask; // Layer untuk mendeteksi player saat memukul
+    [SerializeField] private LayerMask terrainLayer;
+    [SerializeField] private LayerMask playerLayerMask;
 
     [Header("Patrol Settings")]
     [SerializeField] private float patrolRadius = 8f;
@@ -25,40 +30,51 @@ public class MeleeEnemy : MonoBehaviour
     private bool isOnAttackCooldown;
 
     [Header("Detection Ranges")]
-    [SerializeField] private float visionRange = 10f;       // Jarak mulai mengejar
-    [SerializeField] private float engagementRange = 1.8f;  // Jarak mulai memukul
+    [SerializeField] private float visionRange = 10f;
+    [SerializeField] private float engagementRange = 1.8f;
 
     private bool isPlayerVisible;
     private bool isPlayerInRange;
 
     private void Awake()
     {
-        // Cari player otomatis menggunakan Tag "Player"
-        if (playerTransform == null)
-        {
-            GameObject playerObj = GameObject.FindWithTag("Player");
-            if (playerObj != null) playerTransform = playerObj.transform;
-        }
-
         if (navAgent == null) navAgent = GetComponent<NavMeshAgent>();
-        
         if (animator == null) animator = GetComponentInChildren<Animator>();
+        enemyKnockback = GetComponent<EnemyKnockback>();
+
+        GameObject playerObj = GameObject.FindWithTag("Player");
+        if (playerObj != null) playerTransform = playerObj.transform;
+    }
+
+    private void Start()
+    {
+        currentHealth = maxHealth;
     }
 
     private void Update()
     {
+        if (enemyKnockback != null && enemyKnockback.IsKnockback) return;
+
         DetectPlayer();
         UpdateBehaviourState();
         UpdateAnimation();
     }
 
-    private void OnDrawGizmosSelected()
+    public void TakeDamage(int amount)
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, engagementRange);
+        currentHealth -= amount;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, visionRange);
+        Debug.Log($"{gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
+
+        if (currentHealth <= 0)
+            Die();
+    }
+
+    private void Die()
+    {
+        Debug.Log($"{gameObject.name} mati!");
+        Destroy(gameObject, 0.1f);
     }
 
     private void DetectPlayer()
@@ -66,8 +82,7 @@ public class MeleeEnemy : MonoBehaviour
         if (playerTransform == null)
         {
             GameObject playerObj = GameObject.FindWithTag("Player");
-            if (playerObj != null)
-                playerTransform = playerObj.transform;
+            if (playerObj != null) playerTransform = playerObj.transform;
         }
 
         if (playerTransform == null)
@@ -77,10 +92,9 @@ public class MeleeEnemy : MonoBehaviour
             return;
         }
 
-        float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
-
-        isPlayerVisible = distanceToPlayer <= visionRange;
-        isPlayerInRange = distanceToPlayer <= engagementRange;
+        float dist = Vector3.Distance(transform.position, playerTransform.position);
+        isPlayerVisible = dist <= visionRange;
+        isPlayerInRange = dist <= engagementRange;
     }
 
     private void UpdateBehaviourState()
@@ -91,29 +105,27 @@ public class MeleeEnemy : MonoBehaviour
             return;
         }
 
-        // State Machine penentu aksi musuh
         if (!isPlayerVisible && !isPlayerInRange)
-        {
             PerformPatrol();
-        }
         else if (isPlayerVisible && !isPlayerInRange)
-        {
             PerformChase();
-        }
         else if (isPlayerVisible && isPlayerInRange)
-        {
             PerformAttack();
-        }
     }
+
+    private bool IsNavReady() => navAgent != null && navAgent.enabled && navAgent.isOnNavMesh;
 
     private void FindPatrolPoint()
     {
         float randomX = Random.Range(-patrolRadius, patrolRadius);
         float randomZ = Random.Range(-patrolRadius, patrolRadius);
 
-        Vector3 potentialPoint = new Vector3(transform.position.x + randomX, transform.position.y, transform.position.z + randomZ);
+        Vector3 potentialPoint = new Vector3(
+            transform.position.x + randomX,
+            transform.position.y,
+            transform.position.z + randomZ
+        );
 
-        // Menembakkan raycast ke bawah untuk mendeteksi tanah panggung
         if (Physics.Raycast(potentialPoint + Vector3.up * 2f, Vector3.down, out RaycastHit hit, 5f, terrainLayer))
         {
             currentPatrolPoint = hit.point;
@@ -123,10 +135,9 @@ public class MeleeEnemy : MonoBehaviour
 
     private void PerformPatrol()
     {
-        if (!hasPatrolPoint)
-            FindPatrolPoint();
+        if (!hasPatrolPoint) FindPatrolPoint();
 
-        if (hasPatrolPoint && navAgent != null && navAgent.isOnNavMesh)
+        if (hasPatrolPoint && IsNavReady())
             navAgent.SetDestination(currentPatrolPoint);
 
         if (Vector3.Distance(transform.position, currentPatrolPoint) < 1.5f)
@@ -135,7 +146,7 @@ public class MeleeEnemy : MonoBehaviour
 
     private void PerformChase()
     {
-        if (playerTransform != null && navAgent != null && navAgent.isOnNavMesh)
+        if (playerTransform != null && IsNavReady())
         {
             navAgent.stoppingDistance = 0f;
             navAgent.SetDestination(playerTransform.position);
@@ -144,15 +155,13 @@ public class MeleeEnemy : MonoBehaviour
 
     private void PerformAttack()
     {
-        if (navAgent != null && navAgent.isOnNavMesh)
-        {
+        if (IsNavReady())
             navAgent.SetDestination(transform.position);
-        }
 
         if (playerTransform != null)
         {
-            Vector3 targetPosition = new Vector3(playerTransform.position.x, transform.position.y, playerTransform.position.z);
-            transform.LookAt(targetPosition);
+            Vector3 targetPos = new Vector3(playerTransform.position.x, transform.position.y, playerTransform.position.z);
+            transform.LookAt(targetPos);
         }
 
         if (!isOnAttackCooldown)
@@ -164,28 +173,17 @@ public class MeleeEnemy : MonoBehaviour
 
     private void ExecuteMeleeStrike()
     {
-        // if (animator != null) animator.SetTrigger("Attack");
-
         Vector3 spherePos = transform.position + transform.forward * (engagementRange * 0.5f);
         Collider[] hits = Physics.OverlapSphere(spherePos, engagementRange, playerLayerMask);
-        
+
         foreach (var c in hits)
         {
             if (c == null) continue;
 
-            if (c.CompareTag("Player"))
-            {
-                Debug.Log("MeleeEnemy: BERHASIL MEMUKUL PLAYER -> " + c.gameObject.name);
-            }
-
             if (c.TryGetComponent<PlayerHealth>(out var ph))
-            {
                 ph.TakeDamage(damage);
-            }
             else if (c.TryGetComponent<IDamageable>(out var d))
-            {
                 d.TakeDamage(damage);
-            }
         }
     }
 
@@ -198,14 +196,18 @@ public class MeleeEnemy : MonoBehaviour
 
     private void UpdateAnimation()
     {
-        if (animator != null && navAgent != null)
-        {
-            Vector3 velocity = navAgent.velocity;
-            
-            Vector3 localVelocity = transform.InverseTransformDirection(velocity);
+        if (animator == null || navAgent == null) return;
 
-            animator.SetFloat("Horizontal", localVelocity.x);
-            animator.SetFloat("Vertical", localVelocity.z);
-        }
+        Vector3 localVelocity = transform.InverseTransformDirection(navAgent.velocity);
+        animator.SetFloat("Horizontal", localVelocity.x);
+        animator.SetFloat("Vertical", localVelocity.z);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, engagementRange);
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, visionRange);
     }
 }

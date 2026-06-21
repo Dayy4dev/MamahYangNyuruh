@@ -3,9 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.AI;
 
-// HA HAYO JELASKAN KODENYA
-// GTW PAK NYOLONG YUTUB (Sudah dijinakkan biar gak ndongak lagi, Pak!)
-
 public class HostileAI : MonoBehaviour
 {
     [Header("References")]
@@ -27,9 +24,9 @@ public class HostileAI : MonoBehaviour
     [Header("Combat Settings")]
     [SerializeField] private float attackCooldown = 1f;
     private bool isOnAttackCooldown;
-    [SerializeField] private float projectileSpeed = 20f;       // pisahkan jadi variabel
-    [SerializeField] private float accuracyError = 0.5f;        // 0 = tepat, makin tinggi makin meleset
-    [SerializeField] private bool usePrediction = true;         // toggle lead prediction
+    [SerializeField] private float projectileSpeed = 20f;
+    [SerializeField] private float accuracyError = 0.5f;
+    [SerializeField] private bool usePrediction = true;
     [SerializeField] private int projectilePoolSize = 10;
     [SerializeField] private float projectileLifetime = 3f;
 
@@ -42,51 +39,38 @@ public class HostileAI : MonoBehaviour
     private readonly Queue<GameObject> projectilePool = new Queue<GameObject>();
     private Transform projectilePoolRoot;
 
+    private EnemyKnockback enemyKnockback;
+
     private void Awake()
     {
         GameObject playerObj = GameObject.FindWithTag("Player");
-        if (playerObj != null)
-        {
-            playerTransform = playerObj.transform;
-        }
+        if (playerObj != null) playerTransform = playerObj.transform;
 
-        if (navAgent == null)
-        {
-            navAgent = GetComponent<NavMeshAgent>();
-        }
+        if (navAgent == null) navAgent = GetComponent<NavMeshAgent>();
+        if (animator == null) animator = GetComponent<Animator>();
 
-        if (animator == null)
-        {
-            animator = GetComponent<Animator>();
-        }
+        enemyKnockback = GetComponent<EnemyKnockback>();
 
         InitializeProjectilePool();
     }
 
     private void Update()
     {
+        // Skip AI saat kena knockback
+        if (enemyKnockback != null && enemyKnockback.IsKnockback) return;
+
         DetectPlayer();
         UpdateBehaviourState();
     }
 
-    private void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, engagementRange);
-
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, visionRange);
-    }
+    private bool IsNavReady() => navAgent != null && navAgent.enabled && navAgent.isOnNavMesh;
 
     private void DetectPlayer()
     {
         if (playerTransform == null)
         {
             GameObject playerObj = GameObject.FindWithTag("Player");
-            if (playerObj != null)
-            {
-                playerTransform = playerObj.transform;
-            }
+            if (playerObj != null) playerTransform = playerObj.transform;
         }
 
         if (playerTransform == null)
@@ -96,9 +80,9 @@ public class HostileAI : MonoBehaviour
             return;
         }
 
-        float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
-        isPlayerVisible = distanceToPlayer <= visionRange;
-        isPlayerInRange = distanceToPlayer <= engagementRange;
+        float dist = Vector3.Distance(transform.position, playerTransform.position);
+        isPlayerVisible = dist <= visionRange;
+        isPlayerInRange = dist <= engagementRange;
     }
 
     private void InitializeProjectilePool()
@@ -106,9 +90,7 @@ public class HostileAI : MonoBehaviour
         if (projectilePrefab == null) return;
 
         if (projectilePoolRoot == null)
-        {
             projectilePoolRoot = new GameObject("ProjectilePool - " + gameObject.name).transform;
-        }
 
         for (int i = 0; i < projectilePoolSize; i++)
         {
@@ -132,8 +114,7 @@ public class HostileAI : MonoBehaviour
 
     private void FireProjectile()
     {
-        if (projectilePrefab == null || firePoint == null || playerTransform == null)
-            return;
+        if (projectilePrefab == null || firePoint == null || playerTransform == null) return;
 
         GameObject bullet = GetProjectileFromPool();
         bullet.transform.position = firePoint.position;
@@ -200,12 +181,51 @@ public class HostileAI : MonoBehaviour
         float randomX = Random.Range(-patrolRadius, patrolRadius);
         float randomZ = Random.Range(-patrolRadius, patrolRadius);
 
-        Vector3 potentialPoint = new Vector3(transform.position.x + randomX, transform.position.y, transform.position.z + randomZ);
+        Vector3 potentialPoint = new Vector3(
+            transform.position.x + randomX,
+            transform.position.y,
+            transform.position.z + randomZ
+        );
 
         if (Physics.Raycast(potentialPoint, -transform.up, 2f, terrainLayer))
         {
             currentPatrolPoint = potentialPoint;
             hasPatrolPoint = true;
+        }
+    }
+
+    private void PerformPatrol()
+    {
+        if (!hasPatrolPoint) FindPatrolPoint();
+
+        if (hasPatrolPoint && IsNavReady())
+            navAgent.SetDestination(currentPatrolPoint);
+
+        if (Vector3.Distance(transform.position, currentPatrolPoint) < 1f)
+            hasPatrolPoint = false;
+    }
+
+    private void PerformChase()
+    {
+        if (playerTransform != null && IsNavReady())
+            navAgent.SetDestination(playerTransform.position);
+    }
+
+    private void PerformAttack()
+    {
+        if (IsNavReady())
+            navAgent.SetDestination(transform.position);
+
+        if (playerTransform != null)
+        {
+            Vector3 targetPos = new Vector3(playerTransform.position.x, transform.position.y, playerTransform.position.z);
+            transform.LookAt(targetPos);
+        }
+
+        if (!isOnAttackCooldown)
+        {
+            FireProjectile();
+            StartCoroutine(AttackCooldownRoutine());
         }
     }
 
@@ -216,73 +236,32 @@ public class HostileAI : MonoBehaviour
         isOnAttackCooldown = false;
     }
 
-    private void PerformPatrol()
-    {
-        if (!hasPatrolPoint)
-            FindPatrolPoint();
-
-        if (hasPatrolPoint)
-            navAgent.SetDestination(currentPatrolPoint);
-
-        if (Vector3.Distance(transform.position, currentPatrolPoint) < 1f)
-            hasPatrolPoint = false;
-    }
-
-    private void PerformChase()
-    {
-        if (playerTransform != null)
-        {
-            navAgent.SetDestination(playerTransform.position);
-        }
-    }
-
-    private void PerformAttack()
-    {
-        // Berhenti bergerak saat menyerang
-        navAgent.SetDestination(transform.position);
-
-        if (playerTransform != null)
-        {
-
-            Vector3 targetPosition = new Vector3(playerTransform.position.x, transform.position.y, playerTransform.position.z);
-
-            transform.LookAt(targetPosition);
-        }
-
-        if (!isOnAttackCooldown)
-        {
-            FireProjectile();
-            StartCoroutine(AttackCooldownRoutine());
-        }
-    }
-
     private void UpdateBehaviourState()
     {
         if (!isPlayerVisible && !isPlayerInRange)
-        {
             PerformPatrol();
-        }
         else if (isPlayerVisible && !isPlayerInRange)
-        {
             PerformChase();
-        }
         else if (isPlayerVisible && isPlayerInRange)
-        {
             PerformAttack();
-        }
 
-        // Update animator with movement parameters
         UpdateAnimatorParameters();
     }
 
     private void UpdateAnimatorParameters()
     {
-        if (animator == null) return;
+        if (animator == null || !IsNavReady()) return;
 
-        Vector3 velocity = navAgent.velocity;
-        Vector3 localVelocity = transform.InverseTransformDirection(velocity);
-
+        Vector3 localVelocity = transform.InverseTransformDirection(navAgent.velocity);
         animator.SetFloat("Horizontal", localVelocity.x);
         animator.SetFloat("Vertical", localVelocity.z);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, engagementRange);
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, visionRange);
     }
 }

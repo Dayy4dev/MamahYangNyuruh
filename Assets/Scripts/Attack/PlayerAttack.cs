@@ -74,16 +74,17 @@ public class PlayerAttack : MonoBehaviour
     // Dipanggil dari WeaponHitbox saat mengenai enemy
     public void ApplyKnockback(GameObject target)
     {
-        Vector3 knockbackDir = (target.transform.position - transform.position).normalized;
-        knockbackDir.y = 0f; // biar tidak terbang ke atas
+        // Cari di root object, bukan di child yang kena hit
+        GameObject root = target.transform.root.gameObject;
+        
+        Vector3 knockbackDir = (root.transform.position - transform.position).normalized;
+        knockbackDir.y = 0f;
 
-        // Coba pakai IKnockbackable interface dulu (lebih fleksibel)
-        if (target.TryGetComponent<IKnockbackable>(out IKnockbackable knockbackable))
+        if (root.TryGetComponent<IKnockbackable>(out IKnockbackable knockbackable))
         {
             knockbackable.TakeKnockback(knockbackDir, knockbackForce, knockbackDuration);
         }
-        // Fallback: langsung pakai Rigidbody kalau ada
-        else if (target.TryGetComponent<Rigidbody>(out Rigidbody rb))
+        else if (root.TryGetComponent<Rigidbody>(out Rigidbody rb))
         {
             rb.AddForce(knockbackDir * knockbackForce, ForceMode.Impulse);
         }
