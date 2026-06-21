@@ -93,7 +93,11 @@ public class PlayerMovement : MonoBehaviour
             AimTowardsMouse();
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
-                equippedWeapon?.Attack();
+            {
+                // Only allow attacking with weapons that have been picked up
+                if (equippedWeapon != null && equippedWeapon.IsPickedUp())
+                    equippedWeapon.Attack();
+            }
         }
         else if (move != Vector3.zero)
         {
@@ -109,14 +113,41 @@ public class PlayerMovement : MonoBehaviour
         for (int i = 0; i < weapons.Length && i < 9; i++)
         {
             if (Input.GetKeyDown(KeyCode.Alpha1 + i))
-                EquipWeapon(i);
+            {
+
+                if (weapons[i] != null && weapons[i].IsPickedUp())
+                    EquipWeapon(i);
+            }
         }
 
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         if (scroll > 0f)
-            EquipWeapon((currentWeaponIndex + 1) % weapons.Length);
+        {
+            int nextIndex = (currentWeaponIndex + 1) % weapons.Length;
+
+            int attempts = 0;
+            while (weapons[nextIndex] == null || !weapons[nextIndex].IsPickedUp())
+            {
+                nextIndex = (nextIndex + 1) % weapons.Length;
+                attempts++;
+                if (attempts >= weapons.Length) break;
+            }
+            if (weapons[nextIndex] != null && weapons[nextIndex].IsPickedUp())
+                EquipWeapon(nextIndex);
+        }
         else if (scroll < 0f)
-            EquipWeapon((currentWeaponIndex - 1 + weapons.Length) % weapons.Length);
+        {
+            int prevIndex = (currentWeaponIndex - 1 + weapons.Length) % weapons.Length;
+            int attempts = 0;
+            while (weapons[prevIndex] == null || !weapons[prevIndex].IsPickedUp())
+            {
+                prevIndex = (prevIndex - 1 + weapons.Length) % weapons.Length;
+                attempts++;
+                if (attempts >= weapons.Length) break;
+            }
+            if (weapons[prevIndex] != null && weapons[prevIndex].IsPickedUp())
+                EquipWeapon(prevIndex);
+        }
     }
 
     private void EquipWeapon(int index)
@@ -158,6 +189,54 @@ public class PlayerMovement : MonoBehaviour
 
         if (equippedWeapon.weaponRig != null)
             equippedWeapon.weaponRig.weight = 1f;
+    }
+
+    public void AddWeapon(GameObject weaponObject)
+    {
+        if (weaponParent == null)
+        {
+            Debug.LogError("[PlayerMovement] weaponParent is not assigned!");
+            return;
+        }
+
+        if (weaponObject == null)
+        {
+            Debug.LogError("[PlayerMovement] weaponObject is null!");
+            return;
+        }
+
+        Weapon newWeapon = weaponObject.GetComponent<Weapon>();
+        if (newWeapon == null)
+        {
+            Debug.LogError("[PlayerMovement] Weapon object doesn't have a Weapon component!");
+            return;
+        }
+
+        weaponObject.transform.SetParent(weaponParent.transform);
+
+        Weapon[] newWeapons = weaponParent.GetComponentsInChildren<Weapon>(true);
+        weapons = newWeapons;
+
+        int newWeaponIndex = -1;
+        for (int i = 0; i < weapons.Length; i++)
+        {
+            if (weapons[i] == newWeapon)
+            {
+                newWeaponIndex = i;
+                break;
+            }
+        }
+
+        if (newWeaponIndex >= 0)
+        {
+            // Equip the new weapon
+            EquipWeapon(newWeaponIndex);
+            Debug.Log($"[PlayerMovement] Equipped new weapon at index {newWeaponIndex}");
+        }
+        else
+        {
+            Debug.LogError("[PlayerMovement] Could not find newly added weapon in weapons array!");
+        }
     }
 
     public void AimTowardsMouse()
