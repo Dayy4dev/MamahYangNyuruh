@@ -50,7 +50,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HandCannon
   weaponRig: {fileID: 0}
-  bulletPrefab: {fileID: -6331776384978527437, guid: 97cb5df11765bc9479a469f465f00091, type: 3}
+  bulletPrefab: {fileID: 1341279259286703560, guid: 3b1ffcdb23098ee48a2062b0b11a6352, type: 3}
   firePoint: {fileID: 4947985785571846524}
   weaponData: {fileID: 11400000, guid: 1c2e5f0c8eaf6f04a8174c3233d67d43, type: 2}
 --- !u!1 &2422231415622077625
