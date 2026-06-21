@@ -18,14 +18,34 @@ public class PlayerAttack : MonoBehaviour
 
     void Start()
     {
-        if (weaponData != null)
+        // Tetap inisialisasi senjata awal jika di Inspector sudah diisi
+        if (weaponData != null && weaponHitbox != null)
         {
-            attackDuration = weaponData.attackDuration;
-            attackCooldown = weaponData.attackCooldown;
-            attackDamage = weaponData.damage;
-            knockbackForce = weaponData.knockbackForce;
-            knockbackDuration = weaponData.knockbackDuration;
+            EquipWeapon(weaponHitbox, weaponData);
         }
+    }
+
+    // --- FUNGSI BARU UNTUK GANTI SENJATAsecara DINAMIS ---
+    public void EquipWeapon(WeaponHitbox newHitbox, WeaponData newData)
+    {
+        // 1. Matikan hitbox senjata yang lama jika ada
+        if (weaponHitbox != null)
+        {
+            weaponHitbox.Deactivate();
+        }
+
+        // 2. Set referensi ke senjata yang baru
+        weaponHitbox = newHitbox;
+        weaponData = newData;
+
+        // 3. Update semua stats sesuai senjata baru yang dipakai
+        attackDuration = weaponData.attackDuration;
+        attackCooldown = weaponData.attackCooldown;
+        attackDamage = weaponData.damage;
+        knockbackForce = weaponData.knockbackForce;
+        knockbackDuration = weaponData.knockbackDuration;
+
+        Debug.Log($"Berhasil menggunakan senjata baru: {weaponData.name}");
     }
 
     void Update()
@@ -42,9 +62,9 @@ public class PlayerAttack : MonoBehaviour
         if (cooldownTimer > 0f)
             cooldownTimer -= Time.deltaTime;
 
-        if (Input.GetMouseButton(1))
+        if (Input.GetMouseButton(1)) // Klik kanan ditahan
         {
-            if (Input.GetMouseButtonDown(0) && cooldownTimer <= 0f && !isAttacking)
+            if (Input.GetMouseButtonDown(0) && cooldownTimer <= 0f && !isAttacking) // Klik kiri untuk hit
             {
                 StartAttack();
             }
@@ -68,23 +88,19 @@ public class PlayerAttack : MonoBehaviour
     void EndAttack()
     {
         isAttacking = false;
-        weaponHitbox.Deactivate();
+        if (weaponHitbox != null) weaponHitbox.Deactivate();
     }
 
-    // Dipanggil dari WeaponHitbox saat mengenai enemy
     public void ApplyKnockback(GameObject target)
     {
-        // Cari di root object, bukan di child yang kena hit
-        GameObject root = target.transform.root.gameObject;
-        
-        Vector3 knockbackDir = (root.transform.position - transform.position).normalized;
-        knockbackDir.y = 0f;
+        Vector3 knockbackDir = (target.transform.position - transform.position).normalized;
+        knockbackDir.y = 0f; 
 
-        if (root.TryGetComponent<IKnockbackable>(out IKnockbackable knockbackable))
+        if (target.TryGetComponent<IKnockbackable>(out IKnockbackable knockbackable))
         {
             knockbackable.TakeKnockback(knockbackDir, knockbackForce, knockbackDuration);
         }
-        else if (root.TryGetComponent<Rigidbody>(out Rigidbody rb))
+        else if (target.TryGetComponent<Rigidbody>(out Rigidbody rb))
         {
             rb.AddForce(knockbackDir * knockbackForce, ForceMode.Impulse);
         }

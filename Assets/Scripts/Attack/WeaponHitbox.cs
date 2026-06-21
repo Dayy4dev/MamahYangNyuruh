@@ -43,7 +43,6 @@ public class WeaponHitbox : Weapon
     {
         if (!isActive) return;
         if (hitThisSwing.Contains(other)) return;
-        if (other.CompareTag("Player")) return; // tambah ini — ignore player sendiri
 
         IDamageable target = other.GetComponent<IDamageable>();
         if (target != null)
@@ -51,8 +50,11 @@ public class WeaponHitbox : Weapon
             hitThisSwing.Add(other);
             target.TakeDamage(damage);
 
+            // Knockback
             if (playerAttack != null)
+            {
                 playerAttack.ApplyKnockback(other.gameObject);
+            }
         }
     }
 }

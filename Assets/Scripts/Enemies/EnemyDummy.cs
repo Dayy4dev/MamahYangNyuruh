@@ -11,30 +11,37 @@ public class EnemyDummy : MonoBehaviour, IDamageable
     public float hitFlashDuration = 0.1f;
     public Color hitFlashColor = Color.red;
 
+    private SkinnedMeshRenderer[] skinnedMeshRenderers;
+    private Color[][] originalColors;
+
+    private string colorPropertyName = "_BaseColor";
+
     [Header("UI")]
     public EnemyHealthBar healthBar;
-
-    private SkinnedMeshRenderer[] skinnedMeshRenderers;
-    private MaterialPropertyBlock propBlock;
 
     void Start()
     {
         currentHealth = maxHealth;
-        propBlock = new MaterialPropertyBlock();
 
         if (healthBar != null)
             healthBar.SetMaxHealth(maxHealth);
 
         skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
+        originalColors = new Color[skinnedMeshRenderers.Length][];
 
-            GameObject player = GameObject.FindWithTag("Player");
-    if (player != null)
-    {
-        Collider playerCol = player.GetComponent<Collider>();
-        Collider enemyCol = GetComponent<Collider>();
-        if (playerCol != null && enemyCol != null)
-            Physics.IgnoreCollision(playerCol, enemyCol);
-    }
+        for (int i = 0; i < skinnedMeshRenderers.Length; i++)
+        {
+            Material[] materials = skinnedMeshRenderers[i].materials;
+            originalColors[i] = new Color[materials.Length];
+            
+            for (int j = 0; j < materials.Length; j++)
+            {
+                if (materials[j].HasProperty(colorPropertyName))
+                {
+                    originalColors[i][j] = materials[j].GetColor(colorPropertyName);
+                }
+            }
+        }
     }
 
     public void TakeDamage(int amount)
@@ -46,7 +53,9 @@ public class EnemyDummy : MonoBehaviour, IDamageable
             healthBar.SetHealth(currentHealth);
 
         if (skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0)
+        {
             StartCoroutine(HitFlash());
+        }
 
         Debug.Log($"{gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
 
@@ -56,29 +65,44 @@ public class EnemyDummy : MonoBehaviour, IDamageable
 
     IEnumerator HitFlash()
     {
-        SetColor(hitFlashColor);
+        ChangeMeshColor(hitFlashColor);
+        
         yield return new WaitForSeconds(hitFlashDuration);
-        ClearColor();
+        
+        ResetMeshColor();
     }
 
-    private void SetColor(Color color)
+    private void ChangeMeshColor(Color color)
     {
-        propBlock.SetColor("_BaseColor", color);
-        foreach (var smr in skinnedMeshRenderers)
+        for (int i = 0; i < skinnedMeshRenderers.Length; i++)
         {
-            if (smr == null) continue;
-            smr.SetPropertyBlock(propBlock);
+            if (skinnedMeshRenderers[i] == null) continue;
+
+            Material[] materials = skinnedMeshRenderers[i].materials;
+            for (int j = 0; j < materials.Length; j++)
+            {
+                if (materials[j].HasProperty(colorPropertyName))
+                {
+                    materials[j].SetColor(colorPropertyName, color);
+                }
+            }
         }
     }
 
-    private void ClearColor()
+    private void ResetMeshColor()
     {
-        // Clear property block = kembali ke material asli
-        propBlock.Clear();
-        foreach (var smr in skinnedMeshRenderers)
+        for (int i = 0; i < skinnedMeshRenderers.Length; i++)
         {
-            if (smr == null) continue;
-            smr.SetPropertyBlock(propBlock);
+            if (skinnedMeshRenderers[i] == null) continue;
+
+            Material[] materials = skinnedMeshRenderers[i].materials;
+            for (int j = 0; j < materials.Length; j++)
+            {
+                if (materials[j].HasProperty(colorPropertyName))
+                {
+                    materials[j].SetColor(colorPropertyName, originalColors[i][j]);
+                }
+            }
         }
     }
 
@@ -86,5 +110,13 @@ public class EnemyDummy : MonoBehaviour, IDamageable
     {
         Debug.Log($"{gameObject.name} mati!");
         Destroy(gameObject, 0.1f);
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            Physics.IgnoreCollision(collision.collider, GetComponent<Collider>());
+        }
     }
 }

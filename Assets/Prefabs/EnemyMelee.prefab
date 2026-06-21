@@ -1019,7 +1019,7 @@ RectTransform:
   m_Father: {fileID: 501279230646281541}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1440,7 +1440,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MeleeEnemy
   navAgent: {fileID: 2255285491697273875}
   animator: {fileID: 2243213015419743282}
-  maxHealth: 100
   terrainLayer:
     serializedVersion: 2
     m_Bits: 8
@@ -1496,7 +1495,7 @@ Rigidbody:
   m_GameObject: {fileID: 3807745660598645816}
   serializedVersion: 5
   m_Mass: 1
-  m_LinearDamping: 0
+  m_LinearDamping: 2.05
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
@@ -2501,7 +2500,7 @@ RectTransform:
   m_Father: {fileID: 2586366586728613126}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -3388,7 +3387,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5798628348805505900, guid: 9018edc178f79bd488296b9f5f61e63c, type: 3}
       propertyPath: m_IsTrigger
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6402360355171979290, guid: 9018edc178f79bd488296b9f5f61e63c, type: 3}
       propertyPath: m_Layer
