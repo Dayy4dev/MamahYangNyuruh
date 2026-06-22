@@ -205,30 +205,71 @@ public class PlayerInventory : MonoBehaviour
         onActiveSlotChanged?.Invoke(currentSlot);
     }
 
-    private void EquipSlot(int index)
+private void EquipSlot(int index)
+{
+    WeaponData data = slots[index];
+    
+    // Kembalikan perintah kirim data ke PlayerAttack bawaan aslimu
+    if (playerAttack != null)
     {
-        WeaponData data = slots[index];
-        playerAttack?.EquipWeaponData(data); // null = unarmed
+        playerAttack.EquipWeaponData(data);
     }
 
+    // Ambil semua objek di bawah Player (termasuk yang non-aktif)
+    Transform[] allChildren = GetComponentsInChildren<Transform>(true);
+
+    foreach (Transform child in allChildren)
+    {
+        if (child == transform) continue;
+
+        // Daftar nama GameObject senjata yang ada di tangan kanan Player kamu
+        bool isWeaponObject = child.gameObject.name == "ToyHammer" || 
+                              child.gameObject.name == "HandCannon" || 
+                              child.gameObject.name == "BalloonSword" ||
+                              child.gameObject.name == "Unarmed";
+
+        if (!isWeaponObject) continue;
+
+        // Samakan format nama (hilangkan spasi / garis bawah dan buat jadi huruf kecil semua)
+        string cleanChildName = child.gameObject.name.Replace("_", "").Replace(" ", "").ToLower();
+
+        if (data != null)
+        {
+            string cleanDataName = data.weaponName.Replace("_", "").Replace(" ", "").ToLower();
+
+            if (cleanChildName == cleanDataName)
+            {
+                // NYALAKAN senjata yang sedang dipilih/di-pickup
+                child.gameObject.SetActive(true);
+                continue;
+            }
+        }
+
+        // MATIKAN senjata lain yang tidak dipilih (atau saat Unarmed)
+        child.gameObject.SetActive(false);
+    }
+}
     // -------------------------------------------------------------------------
     // Private — Input
     // -------------------------------------------------------------------------
 
-    private void HandleSlotSwitch()
-    {
-        // Tombol 1 2 3
-        if (Input.GetKeyDown(KeyCode.Alpha1)) SwitchToSlot(0);
-        if (Input.GetKeyDown(KeyCode.Alpha2)) SwitchToSlot(1);
-        if (Input.GetKeyDown(KeyCode.Alpha3)) SwitchToSlot(2);
+   private void HandleSlotSwitch()
+{
+    if (Input.GetKeyDown(KeyCode.Alpha1)) SwitchToSlot(0);
+    if (Input.GetKeyDown(KeyCode.Alpha2)) SwitchToSlot(1);
+    if (Input.GetKeyDown(KeyCode.Alpha3)) SwitchToSlot(2);
 
-        // Scroll wheel
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll > 0f)
-            SwitchToSlot((currentSlot + 1) % TOTAL_SLOTS);
-        else if (scroll < 0f)
-            SwitchToSlot((currentSlot - 1 + TOTAL_SLOTS) % TOTAL_SLOTS);
+    // FIX: Menggunakan GetAxisRaw dan ambang batas (threshold) agar tidak infinite loop
+    float scroll = Input.GetAxisRaw("Mouse ScrollWheel");
+    if (scroll > 0.1f)
+    {
+        SwitchToSlot((currentSlot + 1) % TOTAL_SLOTS);
     }
+    else if (scroll < -0.1f)
+    {
+        SwitchToSlot((currentSlot - 1 + TOTAL_SLOTS) % TOTAL_SLOTS);
+    }
+}
 
     private void HandleDropInput()
     {

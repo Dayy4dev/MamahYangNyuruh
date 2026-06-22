@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2c7051759f577d4e90bc60644040fe1, type: 3}
   m_Name: ToyHammer
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  weaponName: Toy_Hammer
+  weaponName: ToyHammer
   icon: {fileID: 0}
-  pickupPrefab: {fileID: 0}
+  pickupPrefab: {fileID: 919132149155446097, guid: 381daadbb19d54d43a7b32b7f4750e74, type: 3}
   damage: 35
   attackDuration: 0.8
   attackCooldown: 0.65

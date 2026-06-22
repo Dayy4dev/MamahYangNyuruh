@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2c7051759f577d4e90bc60644040fe1, type: 3}
   m_Name: BalloonSword
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  weaponName: Balloon_Sword
+  weaponName: BalloonSword
   icon: {fileID: 21300000, guid: 09dfda96436f4864a89985d28564edfc, type: 3}
   pickupPrefab: {fileID: 9004413375024476235, guid: 7dc22a81197cb064bbe8110e893cac9d, type: 3}
   damage: 20

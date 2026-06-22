@@ -18,19 +18,22 @@ public class WeaponHitbox : Weapon
     // Unity Lifecycle
     // -------------------------------------------------------------------------
 
-    void Awake()
+  // GANTI baris di dalam fungsi Awake() menjadi seperti ini:
+void Awake()
+{
+    if (hitCollider == null)
+        hitCollider = GetComponent<Collider>();
+
+    hitCollider.isTrigger = true;
+    hitCollider.enabled = false;
+
+    // FIX: Mencari ke struktur paling atas (root) dari Player kamu
+    playerAttack = GetComponentInParent<PlayerAttack>();
+    if (playerAttack == null)
     {
-        if (hitCollider == null)
-            hitCollider = GetComponent<Collider>();
-
-        hitCollider.isTrigger = true;
-        hitCollider.enabled = false;
-
-        playerAttack = GetComponentInParent<PlayerAttack>();
-
-        if (playerAttack == null)
-            Debug.LogWarning("[WeaponHitbox] PlayerAttack tidak ditemukan di parent!");
+        playerAttack = GameObject.FindWithTag("Player")?.GetComponent<PlayerAttack>();
     }
+}
 
     // -------------------------------------------------------------------------
     // Weapon Overrides
