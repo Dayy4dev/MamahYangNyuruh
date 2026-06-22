@@ -34,9 +34,14 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             Die();
     }
 
-    // -------------------------------------------------------------------------
-    // Private
-    // -------------------------------------------------------------------------
+    /// <summary>
+    /// Heal the player by the specified amount.
+    /// </summary>
+    public void Heal(int amount)
+    {
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        Debug.Log("PlayerHealth: Healed " + amount + " HP. Current: " + currentHealth);
+    }
 
     private void Die()
     {
