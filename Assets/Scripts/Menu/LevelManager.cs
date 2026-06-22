@@ -8,7 +8,7 @@ public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance;
 
-    public Slider progressBar;
+
     public GameObject transitionContainer;
     private SceneTransition[] transitions;
 
@@ -43,17 +43,8 @@ public class LevelManager : MonoBehaviour
         scene.allowSceneActivation = false;
 
         yield return transition.AnimateTransitionIn();
-
-        progressBar.gameObject.SetActive(true);
-
-        do
-        {
-            progressBar.value = scene.progress;
-            yield return null;
-        } while (scene.progress < 0.9f);
-
+ 
         scene.allowSceneActivation = true;
-        progressBar.gameObject.SetActive(false);
 
         yield return transition.AnimateTransitionOut();
     }
