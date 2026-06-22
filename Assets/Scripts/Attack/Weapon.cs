@@ -10,8 +10,6 @@ public abstract class Weapon : MonoBehaviour
 
     public abstract void Attack();
 
-    public virtual void OnWeaponActivate() { }
-
     public virtual void OnWeaponDeactivate() { }
 
     public virtual void OnWeaponActivate() { }

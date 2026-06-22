@@ -230,53 +230,53 @@ public class PlayerMovement : MonoBehaviour
             equippedWeapon.weaponRig.weight = 1f;
     }
 
-    public void AddWeapon(GameObject weaponObject)
-    {
-        if (weaponParent == null)
-        {
-            Debug.LogError("[PlayerMovement] weaponParent is not assigned!");
-            return;
-        }
+    // public void AddWeapon(GameObject weaponObject)
+    // {
+    //     if (weaponParent == null)
+    //     {
+    //         Debug.LogError("[PlayerMovement] weaponParent is not assigned!");
+    //         return;
+    //     }
 
-        if (weaponObject == null)
-        {
-            Debug.LogError("[PlayerMovement] weaponObject is null!");
-            return;
-        }
+    //     if (weaponObject == null)
+    //     {
+    //         Debug.LogError("[PlayerMovement] weaponObject is null!");
+    //         return;
+    //     }
 
-        Weapon newWeapon = weaponObject.GetComponent<Weapon>();
-        if (newWeapon == null)
-        {
-            Debug.LogError("[PlayerMovement] Weapon object doesn't have a Weapon component!");
-            return;
-        }
+    //     Weapon newWeapon = weaponObject.GetComponent<Weapon>();
+    //     if (newWeapon == null)
+    //     {
+    //         Debug.LogError("[PlayerMovement] Weapon object doesn't have a Weapon component!");
+    //         return;
+    //     }
 
-        weaponObject.transform.SetParent(weaponParent.transform);
+    //     weaponObject.transform.SetParent(weaponParent.transform);
 
-        Weapon[] newWeapons = weaponParent.GetComponentsInChildren<Weapon>(true);
-        weapons = newWeapons;
+    //     Weapon[] newWeapons = weaponParent.GetComponentsInChildren<Weapon>(true);
+    //     weapons = newWeapons;
 
-        int newWeaponIndex = -1;
-        for (int i = 0; i < weapons.Length; i++)
-        {
-            if (weapons[i] == newWeapon)
-            {
-                newWeaponIndex = i;
-                break;
-            }
-        }
+    //     int newWeaponIndex = -1;
+    //     for (int i = 0; i < weapons.Length; i++)
+    //     {
+    //         if (weapons[i] == newWeapon)
+    //         {
+    //             newWeaponIndex = i;
+    //             break;
+    //         }
+    //     }
 
-        if (newWeaponIndex >= 0)
-        {
-            // Equip the new weapon
-            EquipWeapon(newWeaponIndex);
-            Debug.Log($"[PlayerMovement] Equipped new weapon at index {newWeaponIndex}");
-        }
-        else
-        {
-            Debug.LogError("[PlayerMovement] Could not find newly added weapon in weapons array!");
-        }
-    }
+    //     if (newWeaponIndex >= 0)
+    //     {
+    //         // Equip the new weapon
+    //         EquipWeapon(newWeaponIndex);
+    //         Debug.Log($"[PlayerMovement] Equipped new weapon at index {newWeaponIndex}");
+    //     }
+    //     else
+    //     {
+    //         Debug.LogError("[PlayerMovement] Could not find newly added weapon in weapons array!");
+    //     }
+    // }
 
     public void AddWeapon(GameObject weaponObject)
     {

@@ -34,9 +34,6 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             Die();
     }
 
-    /// <summary>
-    /// Heal the player by the specified amount.
-    /// </summary>
     public void Heal(int amount)
     {
         currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
