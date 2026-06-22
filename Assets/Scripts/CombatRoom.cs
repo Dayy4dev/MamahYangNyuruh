@@ -1,16 +1,15 @@
 using UnityEngine;
 
-// Attach script ini ke prefab room yang punya enemy & door blocker.
-// RoomController akan otomatis memanggil StartCombat() dan EndCombat().
+// Attach ke prefab room yang punya enemy & door blocker.
+// StartCombat() dan EndCombat() dipanggil otomatis oleh RoomController.
+
 public class CombatRoom : MonoBehaviour
 {
     [Header("Combat Setup")]
-    // Enemy yang di-spawn/aktifkan saat combat mulai
     // Kosongkan jika pakai auto-detect dari RoomController (tag-based)
     public GameObject[] enemies;
 
     [Header("Door Blocker")]
-    // GameObject yang menghalangi pintu selama combat (misal: barrier/portal tertutup)
     public GameObject doorBlocker;
 
     public void StartCombat()

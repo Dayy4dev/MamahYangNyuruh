@@ -1,11 +1,12 @@
 using UnityEngine;
 
-// Attach ke GameObject portal/pintu di dalam prefab Left, Right, Top room.
-// Portal ini TIDAK aktif dari awal — baru aktif setelah room clear.
+// Attach ke GameObject portal di dalam prefab Left, Right, Top room.
+// Portal aktif otomatis setelah room clear, dipanggil oleh DungeonManager.
+
 public class NextMapPortal : MonoBehaviour
 {
     [Header("Visuals")]
-    public GameObject portalVisual;   // Efek visual portal (particle, glow, dll)
+    public GameObject portalVisual;
 
     [Header("Player Detection")]
     public string playerTag = "Player";
@@ -14,24 +15,21 @@ public class NextMapPortal : MonoBehaviour
 
     void Start()
     {
-        // Portal mati dari awal
-        SetActive(false);
+        SetPortalActive(false);
     }
 
-    // Dipanggil oleh DungeonManager setelah room clear
     public void Activate()
     {
         isActive = true;
-        SetActive(true);
+        SetPortalActive(true);
         Debug.Log("[Portal] Portal ke map berikutnya aktif!");
     }
 
-    void SetActive(bool active)
+    void SetPortalActive(bool active)
     {
         if (portalVisual != null)
             portalVisual.SetActive(active);
 
-        // Aktifkan/nonaktifkan collider trigger
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = active;
     }
@@ -41,8 +39,8 @@ public class NextMapPortal : MonoBehaviour
         if (!isActive) return;
         if (!other.CompareTag(playerTag)) return;
 
+        isActive = false; // cegah trigger ganda
         Debug.Log("[Portal] Player masuk portal, pindah map!");
-        isActive = false; // Cegah trigger ganda
         DungeonManager.Instance?.GoToNextMap();
     }
 }

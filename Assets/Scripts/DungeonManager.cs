@@ -41,7 +41,7 @@ public class DungeonManager : MonoBehaviour
     IEnumerator InitializeDungeon()
     {
         dungeonGenerator.GenerateDungeon();
-        yield return null;
+        yield return null; // tunggu 1 frame
         RegisterAllRooms();
         TeleportPlayerToRoom(RoomType.Bottom);
     }
@@ -82,7 +82,6 @@ public class DungeonManager : MonoBehaviour
             case RoomType.Left:
             case RoomType.Right:
             case RoomType.Top:
-                // Aktifkan portal di room ini
                 ActivatePortalInRoom(room);
                 break;
         }
@@ -128,16 +127,13 @@ public class DungeonManager : MonoBehaviour
 
     void ActivatePortalInRoom(RoomController room)
     {
-        // Cari NextMapPortal di dalam room
         NextMapPortal portal = room.GetComponentInChildren<NextMapPortal>(true);
         if (portal != null)
-        {
             portal.Activate();
-        }
         else
         {
             Debug.LogWarning($"[DungeonManager] Tidak ada NextMapPortal di {room.roomType}! Langsung load map.");
-            StartCoroutine(LoadNextMap()); // Fallback kalau portal lupa dipasang
+            StartCoroutine(LoadNextMap());
         }
     }
 

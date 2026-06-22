@@ -1,5 +1,7 @@
 using UnityEngine;
 
+// RoomType ada di RoomEnums.cs
+
 public class DoorController : MonoBehaviour
 {
     [Header("Door Settings")]
@@ -45,8 +47,7 @@ public class DoorController : MonoBehaviour
 
     void EnterDoor(GameObject player)
     {
-        // Kunci dulu agar tidak trigger berulang
-        isLocked = true;
+        isLocked = true; // cegah trigger ganda
         Debug.Log($"[Door] Player masuk pintu menuju {destinationRoomType}");
         DungeonManager.Instance?.OnPlayerEnterDoor(destinationRoomType, player);
     }
