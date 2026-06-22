@@ -3,27 +3,44 @@ using UnityEngine;
 
 public class WeaponHitbox : Weapon
 {
+    [Header("Hit Detection")]
     [SerializeField] private Collider hitCollider;
-    private int damage;
-    private bool isActive = false;
-    private HashSet<Collider> hitThisSwing = new HashSet<Collider>();
 
+    [Tooltip("Layer yang bisa kena damage (centang Enemy saja, jangan Player)")]
+    [SerializeField] private LayerMask targetLayers;
+
+    private int damage;
+    private bool isActive;
+    private HashSet<Collider> hitThisSwing = new HashSet<Collider>();
     private PlayerAttack playerAttack;
+
+    // -------------------------------------------------------------------------
+    // Unity Lifecycle
+    // -------------------------------------------------------------------------
 
     void Awake()
     {
-        hitCollider = GetComponent<Collider>();
+        if (hitCollider == null)
+            hitCollider = GetComponent<Collider>();
+
         hitCollider.isTrigger = true;
         hitCollider.enabled = false;
 
-        // Ambil PlayerAttack dari parent untuk knockback
         playerAttack = GetComponentInParent<PlayerAttack>();
+
+        if (playerAttack == null)
+            Debug.LogWarning("[WeaponHitbox] PlayerAttack tidak ditemukan di parent!");
     }
 
-    public override void Attack()
-    {
-        Activate(damage);
-    }
+    // -------------------------------------------------------------------------
+    // Weapon Overrides
+    // -------------------------------------------------------------------------
+
+    public override void Attack() => Activate(damage);
+
+    // -------------------------------------------------------------------------
+    // Public API
+    // -------------------------------------------------------------------------
 
     public void Activate(int dmg)
     {
@@ -37,24 +54,28 @@ public class WeaponHitbox : Weapon
     {
         isActive = false;
         hitCollider.enabled = false;
+        hitThisSwing.Clear();
     }
+
+    // -------------------------------------------------------------------------
+    // Trigger
+    // -------------------------------------------------------------------------
 
     void OnTriggerEnter(Collider other)
     {
         if (!isActive) return;
         if (hitThisSwing.Contains(other)) return;
 
-        IDamageable target = other.GetComponent<IDamageable>();
-        if (target != null)
-        {
-            hitThisSwing.Add(other);
-            target.TakeDamage(damage);
+        // FIX: hanya mengenai layer yang ada di targetLayers (misal: Enemy)
+        // Ini mencegah player kena damage dari senjatanya sendiri
+        if ((targetLayers.value & (1 << other.gameObject.layer)) == 0) return;
 
-            // Knockback
-            if (playerAttack != null)
-            {
-                playerAttack.ApplyKnockback(other.gameObject);
-            }
-        }
+        if (!other.TryGetComponent<IDamageable>(out IDamageable target)) return;
+
+        hitThisSwing.Add(other);
+        target.TakeDamage(damage);
+
+        if (playerAttack != null)
+            playerAttack.ApplyKnockback(other.gameObject);
     }
 }

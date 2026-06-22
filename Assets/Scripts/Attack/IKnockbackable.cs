@@ -1,7 +1,6 @@
-// IKnockbackable.cs
-// Implementasikan interface ini di script enemy/karakter yang bisa kena knockback
+using UnityEngine;
 
 public interface IKnockbackable
 {
-    void TakeKnockback(UnityEngine.Vector3 direction, float force, float duration);
+    void TakeKnockback(Vector3 direction, float force, float duration);
 }

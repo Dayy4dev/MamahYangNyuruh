@@ -243,6 +243,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponHitbox
   weaponRig: {fileID: 0}
   hitCollider: {fileID: 8968604123431798118}
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!114 &3479679309805539773
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -181,6 +181,10 @@ PrefabInstance:
       propertyPath: hitCollider
       value: 
       objectReference: {fileID: 686148463}
+    - target: {fileID: 2476869989935087230, guid: 7af46b5cd3264aa4a8090f2900b5ef8a, type: 3}
+      propertyPath: targetLayers.m_Bits
+      value: 128
+      objectReference: {fileID: 0}
     - target: {fileID: 7862802390946727130, guid: 7af46b5cd3264aa4a8090f2900b5ef8a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.157
@@ -732,7 +736,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 7.140477, y: 8.281289, z: -6.2452245}
+  m_LocalPosition: {x: 7.3452425, y: 8.281289, z: -6.2721825}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -911,6 +915,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 813
   currentHealth: 0
+  deathSceneReloadDelay: 2
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -1339,6 +1344,10 @@ PrefabInstance:
       propertyPath: weaponRig
       value: 
       objectReference: {fileID: 1007357203}
+    - target: {fileID: 3233620403773108385, guid: 54db6c29d2478314baee08f615788d1c, type: 3}
+      propertyPath: targetLayers.m_Bits
+      value: 128
+      objectReference: {fileID: 0}
     - target: {fileID: 3294726517836904466, guid: 54db6c29d2478314baee08f615788d1c, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.3
@@ -1378,6 +1387,14 @@ PrefabInstance:
     - target: {fileID: 3294726517836904466, guid: 54db6c29d2478314baee08f615788d1c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3557282537434777076, guid: 54db6c29d2478314baee08f615788d1c, type: 3}
+      propertyPath: m_Size.x
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3557282537434777076, guid: 54db6c29d2478314baee08f615788d1c, type: 3}
+      propertyPath: m_Size.y
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3323,6 +3340,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 813
   currentHealth: 0
+  deathSceneReloadDelay: 2
 --- !u!114 &1120201222
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4431,7 +4449,7 @@ Transform:
   m_GameObject: {fileID: 1427149368}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 7.140477, y: 8.281289, z: -6.2452245}
+  m_LocalPosition: {x: 7.3452425, y: 8.281289, z: -6.2721825}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4783,6 +4801,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 100
   currentHealth: 0
+  deathSceneReloadDelay: 2
 --- !u!1001 &1534633532
 PrefabInstance:
   m_ObjectHideFlags: 0

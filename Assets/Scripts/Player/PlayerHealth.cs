@@ -9,55 +9,62 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     public int maxHealth = 100;
     public int currentHealth;
 
+    [Header("Death Settings")]
+    [SerializeField] private float deathSceneReloadDelay = 2f;
+
+    // -------------------------------------------------------------------------
+    // Unity Lifecycle
+    // -------------------------------------------------------------------------
+
     void Awake()
     {
         currentHealth = maxHealth;
     }
 
+    // -------------------------------------------------------------------------
+    // IDamageable
+    // -------------------------------------------------------------------------
+
     public void TakeDamage(int amount)
     {
         currentHealth -= amount;
-        Debug.Log("PlayerHealth: Took " + amount + " damage. Remaining: " + currentHealth);
+        Debug.Log($"[PlayerHealth] Took {amount} damage. HP: {currentHealth}/{maxHealth}");
 
         if (currentHealth <= 0)
-        {
             Die();
-        }
     }
+
+    // -------------------------------------------------------------------------
+    // Private
+    // -------------------------------------------------------------------------
 
     private void Die()
     {
-        Debug.Log("PlayerHealth: Player died");
+        Debug.Log("[PlayerHealth] Player died.");
 
-        // Disable player control scripts if present
-        var movement = GetComponent<PlayerMovement>();
-        if (movement != null) movement.enabled = false;
+        // Matikan kontrol gerakan
+        if (TryGetComponent<PlayerMovement>(out PlayerMovement movement))
+            movement.enabled = false;
 
-        // Disable CharacterController so player can't be moved by physics
-        var cc = GetComponent<CharacterController>();
-        if (cc != null) cc.enabled = false;
+        // Matikan CharacterController agar tidak terpengaruh fisika
+        if (TryGetComponent<CharacterController>(out CharacterController cc))
+            cc.enabled = false;
 
-        // Play death animation if animator exists
-        var animator = GetComponentInChildren<Animator>();
+        // Matikan collider agar tidak kena hit lagi
+        if (TryGetComponent<Collider>(out Collider col))
+            col.enabled = false;
+
+        // Trigger animasi mati jika ada
+        Animator animator = GetComponentInChildren<Animator>();
         if (animator != null)
-        {
             animator.SetTrigger("Die");
-        }
 
-        // Disable collider to avoid further hits
-        var col = GetComponent<Collider>();
-        if (col != null) col.enabled = false;
-
-        // Optionally disable the whole GameObject as a fallback
-        // gameObject.SetActive(false);
-
-        // Reload current scene after a short delay
-        StartCoroutine(HandleDeathRoutine());
+        StartCoroutine(ReloadSceneAfterDelay());
     }
 
-    private IEnumerator HandleDeathRoutine()
+    private IEnumerator ReloadSceneAfterDelay()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(deathSceneReloadDelay);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

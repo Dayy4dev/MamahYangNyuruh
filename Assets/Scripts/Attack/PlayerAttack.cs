@@ -3,106 +3,112 @@ using UnityEngine;
 public class PlayerAttack : MonoBehaviour
 {
     [Header("References")]
-    public WeaponHitbox weaponHitbox;
+    [SerializeField] private WeaponHitbox weaponHitbox;
     [SerializeField] private WeaponData weaponData;
 
+    private int attackDamage;
+    private float attackDuration;
+    private float attackCooldown;
     private float knockbackForce;
     private float knockbackDuration;
 
-    private float attackDuration;
-    private float attackCooldown;
-    private int attackDamage;
-    private float attackTimer = 0f;
-    private float cooldownTimer = 0f;
-    private bool isAttacking = false;
+    private float attackTimer;
+    private float cooldownTimer;
+    private bool isAttacking;
+
+    // -------------------------------------------------------------------------
+    // Unity Lifecycle
+    // -------------------------------------------------------------------------
 
     void Start()
     {
-        // Tetap inisialisasi senjata awal jika di Inspector sudah diisi
         if (weaponData != null && weaponHitbox != null)
-        {
             EquipWeapon(weaponHitbox, weaponData);
-        }
-    }
-
-    // --- FUNGSI BARU UNTUK GANTI SENJATAsecara DINAMIS ---
-    public void EquipWeapon(WeaponHitbox newHitbox, WeaponData newData)
-    {
-        // 1. Matikan hitbox senjata yang lama jika ada
-        if (weaponHitbox != null)
-        {
-            weaponHitbox.Deactivate();
-        }
-
-        // 2. Set referensi ke senjata yang baru
-        weaponHitbox = newHitbox;
-        weaponData = newData;
-
-        // 3. Update semua stats sesuai senjata baru yang dipakai
-        attackDuration = weaponData.attackDuration;
-        attackCooldown = weaponData.attackCooldown;
-        attackDamage = weaponData.damage;
-        knockbackForce = weaponData.knockbackForce;
-        knockbackDuration = weaponData.knockbackDuration;
-
-        Debug.Log($"Berhasil menggunakan senjata baru: {weaponData.name}");
     }
 
     void Update()
     {
-        if (isAttacking)
-        {
-            attackTimer -= Time.deltaTime;
-            if (attackTimer <= 0f)
-            {
-                EndAttack();
-            }
-        }
-
-        if (cooldownTimer > 0f)
-            cooldownTimer -= Time.deltaTime;
-
-        if (Input.GetMouseButton(1)) // Klik kanan ditahan
-        {
-            if (Input.GetMouseButtonDown(0) && cooldownTimer <= 0f && !isAttacking) // Klik kiri untuk hit
-            {
-                StartAttack();
-            }
-        }
+        TickAttack();
+        TickCooldown();
+        HandleInput();
     }
 
-    void StartAttack()
-    {
-        if (weaponHitbox == null)
-        {
-            Debug.LogWarning("WeaponHitbox belum di-assign!");
-            return;
-        }
-        
-        isAttacking = true;
-        attackTimer = attackDuration;
-        cooldownTimer = attackCooldown;
-        weaponHitbox.Activate(attackDamage);
-    }
+    // -------------------------------------------------------------------------
+    // Public API
+    // -------------------------------------------------------------------------
 
-    void EndAttack()
+    public void EquipWeapon(WeaponHitbox newHitbox, WeaponData newData)
     {
-        isAttacking = false;
-        if (weaponHitbox != null) weaponHitbox.Deactivate();
+        weaponHitbox?.Deactivate();
+
+        weaponHitbox    = newHitbox;
+        weaponData      = newData;
+        attackDuration  = weaponData.attackDuration;
+        attackCooldown  = weaponData.attackCooldown;
+        attackDamage    = weaponData.damage;
+        knockbackForce  = weaponData.knockbackForce;
+        knockbackDuration = weaponData.knockbackDuration;
+
+        Debug.Log($"[PlayerAttack] Equipped: {weaponData.name}");
     }
 
     public void ApplyKnockback(GameObject target)
     {
-        Vector3 knockbackDir = (target.transform.position - transform.position).normalized;
-        knockbackDir.y = 0f; 
+        Vector3 dir = (target.transform.position - transform.position).normalized;
+        dir.y = 0f;
 
         if (target.TryGetComponent<IKnockbackable>(out IKnockbackable knockbackable))
-        {
-            knockbackable.TakeKnockback(knockbackDir, knockbackForce, knockbackDuration);
-        }
+            knockbackable.TakeKnockback(dir, knockbackForce, knockbackDuration);
         else if (target.TryGetComponent<Rigidbody>(out Rigidbody rb))
+            rb.AddForce(dir * knockbackForce, ForceMode.Impulse);
+    }
+
+    // -------------------------------------------------------------------------
+    // Private
+    // -------------------------------------------------------------------------
+
+    private void HandleInput()
+    {
+        // Tahan klik kanan untuk aiming, klik kiri untuk menyerang
+        if (Input.GetMouseButton(1) && Input.GetMouseButtonDown(0))
         {
-            rb.AddForce(knockbackDir * knockbackForce, ForceMode.Impulse);
+            if (!isAttacking && cooldownTimer <= 0f)
+                StartAttack();
         }
+    }
+
+    private void TickAttack()
+    {
+        if (!isAttacking) return;
+
+        attackTimer -= Time.deltaTime;
+        if (attackTimer <= 0f)
+            EndAttack();
+    }
+
+    private void TickCooldown()
+    {
+        if (cooldownTimer > 0f)
+            cooldownTimer -= Time.deltaTime;
+    }
+
+    private void StartAttack()
+    {
+        if (weaponHitbox == null)
+        {
+            Debug.LogWarning("[PlayerAttack] WeaponHitbox belum di-assign!");
+            return;
+        }
+
+        isAttacking  = true;
+        attackTimer  = attackDuration;
+        cooldownTimer = attackCooldown;
+        weaponHitbox.Activate(attackDamage);
+    }
+
+    private void EndAttack()
+    {
+        isAttacking = false;
+        weaponHitbox?.Deactivate();
     }
 }
