@@ -3,6 +3,10 @@ using UnityEngine;
 [AddComponentMenu("Player/Player Movement")]
 public class PlayerMovement : MonoBehaviour
 {
+    // -------------------------------------------------------------------------
+    // Inspector
+    // -------------------------------------------------------------------------
+
     [Header("Movement")]
     [Tooltip("Kecepatan gerak player")]
     public float moveSpeed = 2f;
@@ -10,16 +14,12 @@ public class PlayerMovement : MonoBehaviour
     [Header("Gravity")]
     [SerializeField] private float gravity = -9.81f;
 
-    [Header("Weapon Inventory")]
-    public int startingWeaponIndex = 0;
-    public GameObject weaponParent;
+    // -------------------------------------------------------------------------
+    // State
+    // -------------------------------------------------------------------------
 
     private CharacterController controller;
     private Animator animator;
-    private Weapon[] weapons;
-    private Weapon equippedWeapon;
-    private int currentWeaponIndex;
-
     private Vector3 velocity;
     private bool isGrounded;
 
@@ -35,14 +35,6 @@ public class PlayerMovement : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         animator   = GetComponentInChildren<Animator>();
-
-        if (weaponParent != null)
-            weapons = weaponParent.GetComponentsInChildren<Weapon>(true);
-
-        if (weapons != null && weapons.Length > 0)
-            EquipWeapon(Mathf.Clamp(startingWeaponIndex, 0, weapons.Length - 1));
-        else
-            Debug.LogWarning("[PlayerMovement] Weapons array kosong! Pastikan weaponParent sudah di-assign.");
     }
 
     void Update()
@@ -52,7 +44,6 @@ public class PlayerMovement : MonoBehaviour
         HandleGravity();
         HandleMovement();
         HandleRotation();
-        HandleWeaponSwitch();
     }
 
     // -------------------------------------------------------------------------
@@ -88,7 +79,7 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = controller.isGrounded;
 
         if (isGrounded && velocity.y < 0f)
-            velocity.y = -2f; // Nilai kecil negatif agar isGrounded tetap stabil
+            velocity.y = -2f;
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
@@ -114,14 +105,8 @@ public class PlayerMovement : MonoBehaviour
     {
         if (Input.GetMouseButton(1))
         {
+            // Klik kanan → aim ke mouse, attack dihandle PlayerAttack
             AimTowardsMouse();
-
-            if (Input.GetKeyDown(KeyCode.Mouse0))
-            {
-                // Only allow attacking with weapons that have been picked up
-                if (equippedWeapon != null && equippedWeapon.IsPickedUp())
-                    equippedWeapon.Attack();
-            }
         }
         else
         {
@@ -134,195 +119,6 @@ public class PlayerMovement : MonoBehaviour
                 Quaternion targetRotation = Quaternion.LookRotation(move);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
             }
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Private — Weapon Switch
-    // -------------------------------------------------------------------------
-
-    private void HandleWeaponSwitch()
-    {
-        if (weapons == null || weapons.Length == 0) return;
-
-        // Hotkey 1–9
-        for (int i = 0; i < weapons.Length && i < 9; i++)
-        {
-            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
-            {
-
-                if (weapons[i] != null && weapons[i].IsPickedUp())
-                    EquipWeapon(i);
-            }
-        }
-
-        // Scroll wheel
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll > 0f)
-        {
-            int nextIndex = (currentWeaponIndex + 1) % weapons.Length;
-
-            int attempts = 0;
-            while (weapons[nextIndex] == null || !weapons[nextIndex].IsPickedUp())
-            {
-                nextIndex = (nextIndex + 1) % weapons.Length;
-                attempts++;
-                if (attempts >= weapons.Length) break;
-            }
-            if (weapons[nextIndex] != null && weapons[nextIndex].IsPickedUp())
-                EquipWeapon(nextIndex);
-        }
-        else if (scroll < 0f)
-        {
-            int prevIndex = (currentWeaponIndex - 1 + weapons.Length) % weapons.Length;
-            int attempts = 0;
-            while (weapons[prevIndex] == null || !weapons[prevIndex].IsPickedUp())
-            {
-                prevIndex = (prevIndex - 1 + weapons.Length) % weapons.Length;
-                attempts++;
-                if (attempts >= weapons.Length) break;
-            }
-            if (weapons[prevIndex] != null && weapons[prevIndex].IsPickedUp())
-                EquipWeapon(prevIndex);
-        }
-    }
-
-    private void EquipWeapon(int index)
-    {
-        if (weapons == null || weapons.Length == 0)
-        {
-            Debug.LogWarning("[PlayerMovement] Weapons array kosong!");
-            return;
-        }
-
-        if (index < 0 || index >= weapons.Length) return;
-
-        // Nonaktifkan semua senjata
-        for (int i = 0; i < weapons.Length; i++)
-        {
-            if (weapons[i] == null)
-            {
-                Debug.LogWarning($"[PlayerMovement] Weapon index {i} null!");
-                continue;
-            }
-
-            weapons[i].OnWeaponDeactivate();
-            weapons[i].gameObject.SetActive(false);
-
-            if (weapons[i].weaponRig != null)
-                weapons[i].weaponRig.weight = 0f;
-        }
-
-        currentWeaponIndex = index;
-
-        Weapon selected = weapons[currentWeaponIndex];
-        if (selected == null)
-        {
-            Debug.LogWarning($"[PlayerMovement] Weapon index {currentWeaponIndex} null!");
-            return;
-        }
-
-        selected.gameObject.SetActive(true);
-        equippedWeapon = selected;
-        equippedWeapon.OnWeaponActivate();
-
-        if (equippedWeapon.weaponRig != null)
-            equippedWeapon.weaponRig.weight = 1f;
-    }
-
-    // public void AddWeapon(GameObject weaponObject)
-    // {
-    //     if (weaponParent == null)
-    //     {
-    //         Debug.LogError("[PlayerMovement] weaponParent is not assigned!");
-    //         return;
-    //     }
-
-    //     if (weaponObject == null)
-    //     {
-    //         Debug.LogError("[PlayerMovement] weaponObject is null!");
-    //         return;
-    //     }
-
-    //     Weapon newWeapon = weaponObject.GetComponent<Weapon>();
-    //     if (newWeapon == null)
-    //     {
-    //         Debug.LogError("[PlayerMovement] Weapon object doesn't have a Weapon component!");
-    //         return;
-    //     }
-
-    //     weaponObject.transform.SetParent(weaponParent.transform);
-
-    //     Weapon[] newWeapons = weaponParent.GetComponentsInChildren<Weapon>(true);
-    //     weapons = newWeapons;
-
-    //     int newWeaponIndex = -1;
-    //     for (int i = 0; i < weapons.Length; i++)
-    //     {
-    //         if (weapons[i] == newWeapon)
-    //         {
-    //             newWeaponIndex = i;
-    //             break;
-    //         }
-    //     }
-
-    //     if (newWeaponIndex >= 0)
-    //     {
-    //         // Equip the new weapon
-    //         EquipWeapon(newWeaponIndex);
-    //         Debug.Log($"[PlayerMovement] Equipped new weapon at index {newWeaponIndex}");
-    //     }
-    //     else
-    //     {
-    //         Debug.LogError("[PlayerMovement] Could not find newly added weapon in weapons array!");
-    //     }
-    // }
-
-    public void AddWeapon(GameObject weaponObject)
-    {
-        if (weaponParent == null)
-        {
-            Debug.LogError("[PlayerMovement] weaponParent is not assigned!");
-            return;
-        }
-
-        if (weaponObject == null)
-        {
-            Debug.LogError("[PlayerMovement] weaponObject is null!");
-            return;
-        }
-
-        Weapon newWeapon = weaponObject.GetComponent<Weapon>();
-        if (newWeapon == null)
-        {
-            Debug.LogError("[PlayerMovement] Weapon object doesn't have a Weapon component!");
-            return;
-        }
-
-        weaponObject.transform.SetParent(weaponParent.transform);
-
-        Weapon[] newWeapons = weaponParent.GetComponentsInChildren<Weapon>(true);
-        weapons = newWeapons;
-
-        int newWeaponIndex = -1;
-        for (int i = 0; i < weapons.Length; i++)
-        {
-            if (weapons[i] == newWeapon)
-            {
-                newWeaponIndex = i;
-                break;
-            }
-        }
-
-        if (newWeaponIndex >= 0)
-        {
-            // Equip the new weapon
-            EquipWeapon(newWeaponIndex);
-            Debug.Log($"[PlayerMovement] Equipped new weapon at index {newWeaponIndex}");
-        }
-        else
-        {
-            Debug.LogError("[PlayerMovement] Could not find newly added weapon in weapons array!");
         }
     }
 

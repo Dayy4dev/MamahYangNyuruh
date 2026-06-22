@@ -2,11 +2,20 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
+    // -------------------------------------------------------------------------
+    // Inspector
+    // -------------------------------------------------------------------------
+
     [Header("References")]
     [SerializeField] private WeaponHitbox weaponHitbox;
-    [SerializeField] private WeaponData weaponData;
 
-    private int attackDamage;
+    // -------------------------------------------------------------------------
+    // State
+    // -------------------------------------------------------------------------
+
+    private WeaponData currentWeaponData;
+
+    private int   attackDamage;
     private float attackDuration;
     private float attackCooldown;
     private float knockbackForce;
@@ -14,17 +23,12 @@ public class PlayerAttack : MonoBehaviour
 
     private float attackTimer;
     private float cooldownTimer;
-    private bool isAttacking;
+    private bool  isAttacking;
+    private bool  isArmed; // false = unarmed, input attack diabaikan
 
     // -------------------------------------------------------------------------
     // Unity Lifecycle
     // -------------------------------------------------------------------------
-
-    void Start()
-    {
-        if (weaponData != null && weaponHitbox != null)
-            EquipWeapon(weaponHitbox, weaponData);
-    }
 
     void Update()
     {
@@ -37,19 +41,31 @@ public class PlayerAttack : MonoBehaviour
     // Public API
     // -------------------------------------------------------------------------
 
-    public void EquipWeapon(WeaponHitbox newHitbox, WeaponData newData)
+    /// <summary>
+    /// Dipanggil PlayerInventory saat slot aktif berubah.
+    /// data == null  →  Unarmed (tidak bisa attack)
+    /// data != null  →  Equipped weapon
+    /// </summary>
+    public void EquipWeaponData(WeaponData data)
     {
-        weaponHitbox?.Deactivate();
+        EndAttack();
 
-        weaponHitbox    = newHitbox;
-        weaponData      = newData;
-        attackDuration  = weaponData.attackDuration;
-        attackCooldown  = weaponData.attackCooldown;
-        attackDamage    = weaponData.damage;
-        knockbackForce  = weaponData.knockbackForce;
-        knockbackDuration = weaponData.knockbackDuration;
+        currentWeaponData = data;
+        isArmed           = data != null;
 
-        Debug.Log($"[PlayerAttack] Equipped: {weaponData.name}");
+        if (isArmed)
+        {
+            attackDamage      = data.damage;
+            attackDuration    = data.attackDuration;
+            attackCooldown    = data.attackCooldown;
+            knockbackForce    = data.knockbackForce;
+            knockbackDuration = data.knockbackDuration;
+            Debug.Log($"[PlayerAttack] Equipped: {data.weaponName}");
+        }
+        else
+        {
+            Debug.Log("[PlayerAttack] Equipped: Unarmed");
+        }
     }
 
     public void ApplyKnockback(GameObject target)
@@ -57,8 +73,8 @@ public class PlayerAttack : MonoBehaviour
         Vector3 dir = (target.transform.position - transform.position).normalized;
         dir.y = 0f;
 
-        if (target.TryGetComponent<IKnockbackable>(out IKnockbackable knockbackable))
-            knockbackable.TakeKnockback(dir, knockbackForce, knockbackDuration);
+        if (target.TryGetComponent<IKnockbackable>(out IKnockbackable kb))
+            kb.TakeKnockback(dir, knockbackForce, knockbackDuration);
         else if (target.TryGetComponent<Rigidbody>(out Rigidbody rb))
             rb.AddForce(dir * knockbackForce, ForceMode.Impulse);
     }
@@ -69,7 +85,9 @@ public class PlayerAttack : MonoBehaviour
 
     private void HandleInput()
     {
-        // Tahan klik kanan untuk aiming, klik kiri untuk menyerang
+        if (!isArmed) return;
+
+        // Tahan klik kanan untuk aim, klik kiri untuk attack
         if (Input.GetMouseButton(1) && Input.GetMouseButtonDown(0))
         {
             if (!isAttacking && cooldownTimer <= 0f)
@@ -100,8 +118,8 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
-        isAttacking  = true;
-        attackTimer  = attackDuration;
+        isAttacking   = true;
+        attackTimer   = attackDuration;
         cooldownTimer = attackCooldown;
         weaponHitbox.Activate(attackDamage);
     }

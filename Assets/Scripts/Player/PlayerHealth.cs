@@ -12,55 +12,35 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     [Header("Death Settings")]
     [SerializeField] private float deathSceneReloadDelay = 2f;
 
-    // -------------------------------------------------------------------------
-    // Unity Lifecycle
-    // -------------------------------------------------------------------------
-
     void Awake()
     {
         currentHealth = maxHealth;
     }
 
-    // -------------------------------------------------------------------------
-    // IDamageable
-    // -------------------------------------------------------------------------
-
     public void TakeDamage(int amount)
     {
-        currentHealth -= amount;
+        if (amount <= 0) return;
+        currentHealth = Mathf.Max(0, currentHealth - amount);
         Debug.Log($"[PlayerHealth] Took {amount} damage. HP: {currentHealth}/{maxHealth}");
-
-        if (currentHealth <= 0)
-            Die();
+        if (currentHealth <= 0) Die();
     }
 
     public void Heal(int amount)
     {
-        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
-        Debug.Log("PlayerHealth: Healed " + amount + " HP. Current: " + currentHealth);
+        if (amount <= 0) return;
+        int before = currentHealth;
+        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        Debug.Log($"[PlayerHealth] Healed {currentHealth - before} HP. HP: {currentHealth}/{maxHealth}");
     }
 
     private void Die()
     {
         Debug.Log("[PlayerHealth] Player died.");
-
-        // Matikan kontrol gerakan
-        if (TryGetComponent<PlayerMovement>(out PlayerMovement movement))
-            movement.enabled = false;
-
-        // Matikan CharacterController agar tidak terpengaruh fisika
-        if (TryGetComponent<CharacterController>(out CharacterController cc))
-            cc.enabled = false;
-
-        // Matikan collider agar tidak kena hit lagi
-        if (TryGetComponent<Collider>(out Collider col))
-            col.enabled = false;
-
-        // Trigger animasi mati jika ada
+        if (TryGetComponent<PlayerMovement>(out var movement)) movement.enabled = false;
+        if (TryGetComponent<CharacterController>(out var cc)) cc.enabled = false;
+        if (TryGetComponent<Collider>(out var col)) col.enabled = false;
         Animator animator = GetComponentInChildren<Animator>();
-        if (animator != null)
-            animator.SetTrigger("Die");
-
+        if (animator != null) animator.SetTrigger("Die");
         StartCoroutine(ReloadSceneAfterDelay());
     }
 

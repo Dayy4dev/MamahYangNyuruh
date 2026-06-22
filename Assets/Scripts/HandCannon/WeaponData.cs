@@ -1,33 +1,28 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "WeaponData", menuName = "Weapon/WeaponData")]
+// Klik kanan di Project → Create → Weapons → Weapon Data
+[CreateAssetMenu(fileName = "NewWeaponData", menuName = "Weapons/Weapon Data")]
 public class WeaponData : ScriptableObject
 {
+    [Header("Info")]
+    public string weaponName = "Unnamed Weapon";
+    public Sprite icon;
 
+    [Header("Pickup")]
+    [Tooltip("Prefab WeaponPickup yang di-spawn saat senjata dijatuhkan")]
+    public GameObject pickupPrefab;
 
-    [Header("Weapon Stats")]
-    public int damage = 0;
+    [Header("Melee Stats")]
+    public int   damage           = 10;
+    public float attackDuration   = 0.2f;
+    public float attackCooldown   = 0.5f;
+    public float knockbackForce   = 5f;
+    public float knockbackDuration = 0.2f;
 
-    [Header("Melee Weapon")]
-    [Tooltip("float dalam detik")]
-    public float attackDuration;
-    [Tooltip("float dalam detik")]
-    public float attackCooldown = 0;
-    [Tooltip("float")]
-    public float knockbackForce = 0f;
-    [Tooltip("float dalam detik")]
-    public float knockbackDuration = 0f;
-
-    [Header("Range Weapon")]
-    [Tooltip("Int jumlah peluru default dalam magazin")]
-    [SerializeField] public int defaultCapacity = 0;
-    [Tooltip("Int jumlah peluru maksimal dalam pool")]
-    [SerializeField] public int maxPoolSize = 0;
-    [Tooltip("float")]
-    [SerializeField] public float speed = 0;
-    [Tooltip("Int jumlah peluru dalam magazin")]
-    [SerializeField] public int magazineSize = 0;
-    [Tooltip("float dalam detik")]
-    [SerializeField] public float reloadTime = 0;
-
+    [Header("Ranged Stats")]
+    public int   defaultCapacity = 0;
+    public int   maxPoolSize     = 0;
+    public float speed           = 0f;
+    public int   magazineSize    = 0;
+    public float reloadTime      = 0f;
 }

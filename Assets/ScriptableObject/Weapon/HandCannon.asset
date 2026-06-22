@@ -12,6 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2c7051759f577d4e90bc60644040fe1, type: 3}
   m_Name: HandCannon
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  weaponName: Hand_Cannon
+  icon: {fileID: 0}
+  pickupPrefab: {fileID: 0}
   damage: 15
   attackDuration: 0
   attackCooldown: 0
