@@ -168,7 +168,7 @@ public class PlayerInventory : MonoBehaviour
         if (data.pickupPrefab != null)
         {
             Vector3 spawnPos = dropPoint != null ? dropPoint.position : transform.position + transform.forward * 0.8f;
-            spawnPos.y = transform.position.y;
+            spawnPos.y = dropPoint.position.y;
 
             GameObject dropped = Instantiate(data.pickupPrefab, spawnPos, Quaternion.identity);
 

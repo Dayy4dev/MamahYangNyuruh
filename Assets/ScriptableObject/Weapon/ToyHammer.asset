@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   weaponName: ToyHammer
   icon: {fileID: 0}
-  pickupPrefab: {fileID: 919132149155446097, guid: 381daadbb19d54d43a7b32b7f4750e74, type: 3}
+  pickupPrefab: {fileID: 8489721802318889066, guid: cd036784138778441b23a5c82198b119, type: 3}
   damage: 35
   attackDuration: 0.8
   attackCooldown: 0.65
