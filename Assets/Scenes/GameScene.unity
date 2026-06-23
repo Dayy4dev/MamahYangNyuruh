@@ -212,7 +212,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: -1.8895218, y: 8.28129, z: -7.446225}
+  m_LocalPosition: {x: -0.81652933, y: 8.281289, z: -22.44201}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -431,8 +431,9 @@ GameObject:
   m_Component:
   - component: {fileID: 623941975}
   - component: {fileID: 623941977}
+  - component: {fileID: 623941978}
   m_Layer: 0
-  m_Name: FloorGenerator
+  m_Name: GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -465,18 +466,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 936ec32de19d2524e8a88ec78f472dda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonGenerator
-  spawnRoom: {fileID: 7945557434516615935, guid: f5414d57101ffb54f8cae8ce6a8345e8, type: 3}
-  shopRoom: {fileID: 4139209887339150128, guid: 57c88cdd7d8c3334ca5f446b163c882b, type: 3}
-  eliteRoom: {fileID: 7945557434516615935, guid: 07760499556249d41a6044f440f05000, type: 3}
-  rewardRoom: {fileID: 4139209887339150128, guid: 62896db15b7505445a4b3911b1e6a2eb, type: 3}
-  bossRoom: {fileID: 7945557434516615935, guid: 93fb9e584d015614581782f377cb3193, type: 3}
-  eventRoom: {fileID: 4139209887339150128, guid: 4e827be42faa1c94bbf41b1a00a454e2, type: 3}
-  easyCombatRooms:
-  - {fileID: 7945557434516615935, guid: 529912679d699504190aaf864b74ad85, type: 3}
-  - {fileID: 7945557434516615935, guid: d2df8ec8cdfcc7247b6bbbeb342a0fe9, type: 3}
-  mediumCombatRooms: []
-  hardCombatRooms: []
+  bottomRoomVariants:
+  - {fileID: 6871334240127201030, guid: d2a4b30de39452a4db525f79f8fbede3, type: 3}
+  centerRoomVariants:
+  - {fileID: 8599616117974265876, guid: d4b783d34036da546a69ef7e269ae6d9, type: 3}
+  leftRoomVariants:
+  - {fileID: 7892813928807004251, guid: 5a1de0dedcca8284d8c92fe07d7d1356, type: 3}
+  rightRoomVariants:
+  - {fileID: 157298611956432288, guid: 9e4807b692a2aa640af6a46132051775, type: 3}
+  topRoomVariants:
+  - {fileID: 8681123837613130672, guid: da05eba03f4718e4080e1518e53f0644, type: 3}
   roomSize: 40
+--- !u!114 &623941978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 623941974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2eee2f2ffd75f6b4697ef3ee1266cfe1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DungeonManager
+  dungeonGenerator: {fileID: 623941977}
+  playerTransform: {fileID: 1510361212}
+  spawnPointName: SpawnPoint
+  fallbackOffset: {x: 0, y: 1, z: 0}
+  transitionDelay: 0.5
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -596,7 +613,7 @@ Transform:
   m_GameObject: {fileID: 1427149368}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: -1.8895218, y: 8.28129, z: -7.446225}
+  m_LocalPosition: {x: -0.81652933, y: 8.281289, z: -22.44201}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -671,8 +688,8 @@ CharacterController:
   serializedVersion: 3
   m_Height: 2
   m_Radius: 0.3
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
+  m_SlopeLimit: 90
+  m_StepOffset: 0.4
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1, z: 0}
@@ -685,7 +702,7 @@ Transform:
   m_GameObject: {fileID: 1510361209}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 1.105, y: 0, z: -15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -706,6 +723,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 6
+  gravity: -9.81
 --- !u!1 &1637049134
 GameObject:
   m_ObjectHideFlags: 0
