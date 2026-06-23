@@ -209,7 +209,7 @@ private void EquipSlot(int index)
 {
     WeaponData data = slots[index];
     
-    // Kembalikan perintah kirim data ke PlayerAttack bawaan aslimu
+    // 1. Kirim data stats ke PlayerAttack bawaan aslimu
     if (playerAttack != null)
     {
         playerAttack.EquipWeaponData(data);
@@ -218,35 +218,51 @@ private void EquipSlot(int index)
     // Ambil semua objek di bawah Player (termasuk yang non-aktif)
     Transform[] allChildren = GetComponentsInChildren<Transform>(true);
 
+    // Format nama data senjata saat ini agar bersih
+    string cleanDataName = data != null ? data.weaponName.Replace("_", "").Replace(" ", "").ToLower() : "";
+
     foreach (Transform child in allChildren)
     {
+        // PENTING: Jangan pernah utak-atik atau mematikan objek Player utama itu sendiri!
         if (child == transform) continue;
 
-        // Daftar nama GameObject senjata yang ada di tangan kanan Player kamu
-        bool isWeaponObject = child.gameObject.name == "ToyHammer" || 
-                              child.gameObject.name == "HandCannon" || 
-                              child.gameObject.name == "BalloonSword" ||
-                              child.gameObject.name == "Unarmed";
+        // Daftar objek yang BENAR-BENAR merupakan root/induk dari senjata kamu di tangan
+        // Tambahkan nama GameObject senjata barumu di sini nanti (misal: "BalloonSword")
+        bool isActualWeaponRoot = child.gameObject.name == "ToyHammer" || 
+                                  child.gameObject.name == "HandCannon" || 
+                                  child.gameObject.name == "BalloonSword" ||
+                                  child.gameObject.name == "Unarmed";
 
-        if (!isWeaponObject) continue;
+        // Jika objek yang sedang dicek BUKAN salah satu dari daftar senjata di atas,
+        // biarkan saja tetap menyala (jangan di-SetActive false) agar character tidak hilang!
+        if (!isActualWeaponRoot) continue;
 
-        // Samakan format nama (hilangkan spasi / garis bawah dan buat jadi huruf kecil semua)
+        // Samakan format nama objek senjata untuk dicocokkan dengan WeaponData
         string cleanChildName = child.gameObject.name.Replace("_", "").Replace(" ", "").ToLower();
 
-        if (data != null)
+        if (data != null && cleanChildName == cleanDataName)
         {
-            string cleanDataName = data.weaponName.Replace("_", "").Replace(" ", "").ToLower();
+            // NYALAKAN senjata yang sedang dipilih/di-pickup
+            child.gameObject.SetActive(true);
 
-            if (cleanChildName == cleanDataName)
+            // Jika senjata Melee ini punya Hitbox, hubungkan ke PlayerAttack agar bisa memberi damage
+            WeaponHitbox hitbox = child.GetComponentInChildren<WeaponHitbox>(true);
+            if (playerAttack != null && hitbox != null)
             {
-                // NYALAKAN senjata yang sedang dipilih/di-pickup
-                child.gameObject.SetActive(true);
-                continue;
+                playerAttack.SetWeaponHitbox(hitbox);
             }
+            
+            continue;
         }
 
-        // MATIKAN senjata lain yang tidak dipilih (atau saat Unarmed)
+        // MATIKAN hanya objek root senjata yang tidak sedang dipilih
         child.gameObject.SetActive(false);
+    }
+
+    // Jika beralih ke Unarmed (tangan kosong), bersihkan referensi hitbox di PlayerAttack
+    if (data == null && playerAttack != null)
+    {
+        playerAttack.SetWeaponHitbox(null);
     }
 }
     // -------------------------------------------------------------------------

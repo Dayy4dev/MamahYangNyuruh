@@ -1038,6 +1038,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3807745660598645816, guid: 3aecd6a32eeed7548a99264e7e5a78e9, type: 3}
+      propertyPath: m_TagString
+      value: Enemy
+      objectReference: {fileID: 0}
     - target: {fileID: 3923327205854189747, guid: 3aecd6a32eeed7548a99264e7e5a78e9, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1
