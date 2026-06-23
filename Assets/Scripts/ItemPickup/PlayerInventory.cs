@@ -270,22 +270,22 @@ private void EquipSlot(int index)
     // -------------------------------------------------------------------------
 
    private void HandleSlotSwitch()
-{
-    if (Input.GetKeyDown(KeyCode.Alpha1)) SwitchToSlot(0);
-    if (Input.GetKeyDown(KeyCode.Alpha2)) SwitchToSlot(1);
-    if (Input.GetKeyDown(KeyCode.Alpha3)) SwitchToSlot(2);
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1)) SwitchToSlot(0);
+        if (Input.GetKeyDown(KeyCode.Alpha2)) SwitchToSlot(1);
+        if (Input.GetKeyDown(KeyCode.Alpha3)) SwitchToSlot(2);
 
-    // FIX: Menggunakan GetAxisRaw dan ambang batas (threshold) agar tidak infinite loop
-    float scroll = Input.GetAxisRaw("Mouse ScrollWheel");
-    if (scroll > 0.1f)
-    {
-        SwitchToSlot((currentSlot + 1) % TOTAL_SLOTS);
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        
+        if (scroll > 0f)
+        {
+            SwitchToSlot((currentSlot + 1) % TOTAL_SLOTS);
+        }
+        else if (scroll < 0f)
+        {
+            SwitchToSlot((currentSlot - 1 + TOTAL_SLOTS) % TOTAL_SLOTS);
+        }
     }
-    else if (scroll < -0.1f)
-    {
-        SwitchToSlot((currentSlot - 1 + TOTAL_SLOTS) % TOTAL_SLOTS);
-    }
-}
 
     private void HandleDropInput()
     {
