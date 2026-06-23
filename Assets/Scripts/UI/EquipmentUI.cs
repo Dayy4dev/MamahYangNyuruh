@@ -2,16 +2,30 @@ using UnityEngine;
 
 public class EquipmentUI : MonoBehaviour
 {
+    [Header("Slot References")]
     [SerializeField] private WeaponSlotUI primarySlot;
     [SerializeField] private WeaponSlotUI secondarySlot;
 
-    public void Refresh()
+    private void Start()
     {
-        // Safe guard in case managers are initializing
-        if (WeaponInventory.Instance == null) return;
-        if (primarySlot == null || secondarySlot == null) return;
+        // Force a graphic refresh on boot up as a safety net
+        Invoke(nameof(RefreshUI), 0.1f);
+    }
 
-        primarySlot.SetWeapon(WeaponInventory.Instance.primaryWeapon);
-        secondarySlot.SetWeapon(WeaponInventory.Instance.secondaryWeapon);
+    public void RefreshUI()
+    {
+        // Verify the manager instance exists in the scene
+        if (WeaponInventory.Instance == null) return;
+
+        // Push data to the individual slots
+        if (primarySlot != null)
+        {
+            primarySlot.SetWeapon(WeaponInventory.Instance.primaryWeapon);
+        }
+
+        if (secondarySlot != null)
+        {
+            secondarySlot.SetWeapon(WeaponInventory.Instance.secondaryWeapon);
+        }
     }
 }

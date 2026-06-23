@@ -2,28 +2,19 @@ using UnityEngine;
 
 public class InventoryUI : MonoBehaviour
 {
-    [Header("Panel Context References")]
+    [Header("Panel References")]
     [SerializeField] private GameObject inventoryPanel;
     [SerializeField] private EquipmentUI equipmentUI;
 
-    private void Awake()
-    {
-        if (inventoryPanel == null)
-        {
-            inventoryPanel = this.gameObject;
-        }
-    }
-
     private void Start()
     {
-        // Force the panel to look at the manager's state on frame one
         if (GameManager.Instance != null)
         {
-            UpdateVisibility(GameManager.Instance.CurrentState);
+            EvaluateVisibility(GameManager.Instance.CurrentState);
         }
         else
         {
-            inventoryPanel.SetActive(false); // Fallback safe closure
+            if (inventoryPanel != null) inventoryPanel.SetActive(false);
         }
     }
 
@@ -39,19 +30,20 @@ public class InventoryUI : MonoBehaviour
 
     private void HandleStateChanged(GameState oldState, GameState newState)
     {
-        UpdateVisibility(newState);
+        EvaluateVisibility(newState);
     }
 
-    private void UpdateVisibility(GameState state)
+    private void EvaluateVisibility(GameState state)
     {
         if (inventoryPanel == null) return;
 
-        bool shouldBeOpen = (state == GameState.Inventory);
-        inventoryPanel.SetActive(shouldBeOpen);
+        bool isWindowOpen = (state == GameState.Inventory);
+        inventoryPanel.SetActive(isWindowOpen);
 
-        if (shouldBeOpen && equipmentUI != null)
+        // Refresh the graphics data right when the menu pops up
+        if (isWindowOpen && equipmentUI != null)
         {
-            equipmentUI.Refresh();
+            equipmentUI.RefreshUI();
         }
     }
 }
