@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: d91aac2ab6cacf042bdd81a4b63cc09a, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -465,17 +465,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 936ec32de19d2524e8a88ec78f472dda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonGenerator
-  spawnRoom: {fileID: 7945557434516615935, guid: f5414d57101ffb54f8cae8ce6a8345e8, type: 3}
-  shopRoom: {fileID: 4139209887339150128, guid: 57c88cdd7d8c3334ca5f446b163c882b, type: 3}
-  eliteRoom: {fileID: 7945557434516615935, guid: 07760499556249d41a6044f440f05000, type: 3}
-  rewardRoom: {fileID: 4139209887339150128, guid: 62896db15b7505445a4b3911b1e6a2eb, type: 3}
-  bossRoom: {fileID: 7945557434516615935, guid: 93fb9e584d015614581782f377cb3193, type: 3}
-  eventRoom: {fileID: 4139209887339150128, guid: 4e827be42faa1c94bbf41b1a00a454e2, type: 3}
-  easyCombatRooms:
-  - {fileID: 7945557434516615935, guid: 529912679d699504190aaf864b74ad85, type: 3}
-  - {fileID: 7945557434516615935, guid: d2df8ec8cdfcc7247b6bbbeb342a0fe9, type: 3}
-  mediumCombatRooms: []
-  hardCombatRooms: []
+  bottomRoomVariants: []
+  centerRoomVariants: []
+  leftRoomVariants: []
+  rightRoomVariants: []
+  topRoomVariants: []
   roomSize: 40
 --- !u!1 &832575517
 GameObject:
@@ -706,6 +700,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 6
+  gravity: -9.81
 --- !u!1 &1637049134
 GameObject:
   m_ObjectHideFlags: 0
