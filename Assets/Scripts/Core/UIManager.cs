@@ -3,8 +3,9 @@ using UnityEngine;
 public class UIManager : MonoBehaviour
 {
     [Header("UI Panels")]
-    [SerializeField] private GameObject gameplayHUD;   // Drag your In-Game HUD object here
-    [SerializeField] private GameObject inventoryUI;   // Drag your Inventory UI object here
+    [SerializeField] private GameObject gameplayUI;   // Drag your 'Gameplay Health' here
+    [SerializeField] private GameObject inventoryUI;  // Drag your 'Inventory UI' here
+    [SerializeField] private GameObject pauseUI;      // Drag your 'Pause Panel' here
 
     private void OnEnable()
     {
@@ -38,23 +39,28 @@ public class UIManager : MonoBehaviour
         switch (state)
         {
             case GameState.Playing:
-                if (gameplayHUD != null) gameplayHUD.SetActive(true);
+                if (gameplayUI != null) gameplayUI.SetActive(true);
                 if (inventoryUI != null) inventoryUI.SetActive(false);
+                if (pauseUI != null) pauseUI.SetActive(false);
                 break;
 
             case GameState.Inventory:
-                if (gameplayHUD != null) gameplayHUD.SetActive(false);
+                if (gameplayUI != null) gameplayUI.SetActive(false);
                 if (inventoryUI != null) inventoryUI.SetActive(true);
+                if (pauseUI != null) pauseUI.SetActive(false);
                 break;
 
             case GameState.Paused:
-                // Keep UI states clean if you pause from either menu
+                // Hide gameplay and inventory, show the pause screen
+                if (gameplayUI != null) gameplayUI.SetActive(false);
                 if (inventoryUI != null) inventoryUI.SetActive(false);
+                if (pauseUI != null) pauseUI.SetActive(true);
                 break;
 
             case GameState.GameOver:
-                if (gameplayHUD != null) gameplayHUD.SetActive(false);
+                if (gameplayUI != null) gameplayUI.SetActive(false);
                 if (inventoryUI != null) inventoryUI.SetActive(false);
+                if (pauseUI != null) pauseUI.SetActive(false);
                 break;
         }
     }

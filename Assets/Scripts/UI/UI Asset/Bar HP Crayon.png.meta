@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: b91e8086a09a7594ca6d238a0fb00aa1
+guid: 098e5e0a464c799469bc5381f7bc133e
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -97,13 +97,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Health Bar_0
+      name: Bar HP Crayon_0
       rect:
         serializedVersion: 2
-        x: 61
-        y: 196
-        width: 264
-        height: 52
+        x: 84
+        y: 190
+        width: 86
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -112,20 +112,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 93c9cb4a6a683a642af8eae82c143f77
-      internalID: 1056230723
+      spriteID: bb700bc24621bc34a9686eeaeed37219
+      internalID: 937200751
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Health Bar_1
+      name: Bar HP Crayon_1
       rect:
         serializedVersion: 2
-        x: 64
-        y: 138
-        width: 221
-        height: 36
+        x: 174
+        y: 190
+        width: 245
+        height: 64
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -134,20 +134,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: de147bad4f4f70c42b329c5a23712fa1
-      internalID: -736038691
+      spriteID: 52386de91c71e0c4b840d549311027f6
+      internalID: 206923068
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Health Bar_2
+      name: Bar HP Crayon_2
       rect:
         serializedVersion: 2
-        x: 64
-        y: 98
-        width: 209
-        height: 28
+        x: 176
+        y: 130
+        width: 185
+        height: 48
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -156,8 +156,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7401b790ecb9ff743a1408f959cbd316
-      internalID: -867408417
+      spriteID: aa050307fde78a149a9e108c4df3d64c
+      internalID: -20209820
       vertices: []
       indices: 
       edges: []
@@ -166,7 +166,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 910710abddf4cb54aa5e30d8b31cbc76
+    spriteID: dbf3325c24190be48b8ce501e673872b
     internalID: 0
     vertices: []
     indices: 
@@ -180,9 +180,9 @@ TextureImporter:
       - key: SpriteEditor.SliceSettings
         value: '{"sliceOnImport":true,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      Health Bar_0: 1056230723
-      Health Bar_1: -736038691
-      Health Bar_2: -867408417
+      Bar HP Crayon_0: 937200751
+      Bar HP Crayon_1: 206923068
+      Bar HP Crayon_2: -20209820
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
