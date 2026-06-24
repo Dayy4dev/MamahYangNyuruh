@@ -324,7 +324,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.22414392, y: 0.48296294, z: -0.12940955, w: 0.8365163}
-  m_LocalPosition: {x: -10.981208, y: 7.0730133, z: -1.9334651}
+  m_LocalPosition: {x: -10.981446, y: 7.0730133, z: -1.9330516}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -921,7 +921,7 @@ Transform:
   m_GameObject: {fileID: 1427149368}
   serializedVersion: 2
   m_LocalRotation: {x: 0.22414392, y: 0.48296294, z: -0.12940955, w: 0.8365163}
-  m_LocalPosition: {x: -10.981208, y: 7.0730133, z: -1.9334651}
+  m_LocalPosition: {x: -10.981446, y: 7.0730133, z: -1.9330516}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1010,6 +1010,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: character
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 13cec85251ecd4c44ab6c9c46b407874, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 13cec85251ecd4c44ab6c9c46b407874, type: 3}
       propertyPath: m_Controller
       value: 
@@ -1034,6 +1038,7 @@ GameObject:
   - component: {fileID: 1510361212}
   - component: {fileID: 1510361210}
   - component: {fileID: 1510361213}
+  - component: {fileID: 1510361214}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1096,6 +1101,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 5
+--- !u!114 &1510361214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1510361209}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3757aec53770e564bbe5e0b123f79c54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemPickup
 --- !u!1 &1637049134
 GameObject:
   m_ObjectHideFlags: 0
@@ -1291,6 +1308,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 13cec85251ecd4c44ab6c9c46b407874, type: 3}
       propertyPath: m_Name
       value: character
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 13cec85251ecd4c44ab6c9c46b407874, type: 3}
+      propertyPath: m_TagString
+      value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 13cec85251ecd4c44ab6c9c46b407874, type: 3}
       propertyPath: m_Controller
