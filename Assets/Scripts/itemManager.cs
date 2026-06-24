@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class ItemManager : MonoBehaviour
 {
-    public int maxHealth;
+    [SerializeField] private int maxHealth;
     public int currentHealth;
 
     private void Start()
@@ -12,8 +12,10 @@ public class ItemManager : MonoBehaviour
 
     public void Heal()
     {
-        currentHealth = Mathf.Clamp(currentHealth + 20, 0, maxHealth);
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
         Debug.Log("Healing item used!");
         Debug.Log("Current Health: " + currentHealth);
     } 
+
+
 }

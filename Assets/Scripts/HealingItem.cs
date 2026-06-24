@@ -2,15 +2,19 @@ using UnityEngine;
 
 public class HealingItem : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public int healAmount = 20;
 
-    // Update is called once per frame
-    void Update()
+    void OnTriggerEnter(Collider other)
     {
-        
+        if (other.CompareTag("Player"))
+        {
+            ItemManager itemManager = other.GetComponent<ItemManager>();
+            if (itemManager != null)
+            {
+                itemManager.currentHealth += healAmount;
+                itemManager.Heal();
+                gameObject.SetActive(false);
+            }
+        }
     }
 }
