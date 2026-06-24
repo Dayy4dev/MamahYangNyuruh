@@ -4,6 +4,7 @@ public class ItemManager : MonoBehaviour
 {
     [SerializeField] private int maxHealth;
     public int currentHealth;
+    [SerializeField] public GameObject ItemSocket;
 
     private void Start()
     {
