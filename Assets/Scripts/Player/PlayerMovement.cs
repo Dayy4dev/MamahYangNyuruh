@@ -22,10 +22,11 @@ public class PlayerMovement : MonoBehaviour
     private Animator animator;
     private Vector3 velocity;
     private bool isGrounded;
+    public Vector3 GetMouseTargetPosition { get; private set; }
 
     // Animator parameter hashes (lebih efisien dari string)
     private static readonly int AnimHorizontal = Animator.StringToHash("Horizontal");
-    private static readonly int AnimVertical   = Animator.StringToHash("Vertical");
+    private static readonly int AnimVertical = Animator.StringToHash("Vertical");
 
     // -------------------------------------------------------------------------
     // Unity Lifecycle
@@ -34,7 +35,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        animator   = GetComponentInChildren<Animator>();
+        animator = GetComponentInChildren<Animator>();
     }
 
     void Update()
@@ -53,21 +54,27 @@ public class PlayerMovement : MonoBehaviour
     public void AimTowardsMouse()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+        Plane groundPlane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
 
-        if (!groundPlane.Raycast(ray, out float distance)) return;
+        if (groundPlane.Raycast(ray, out float distance))
+        {
+            Vector3 mouseWorldPos = ray.GetPoint(distance);
 
-        Vector3 mouseWorldPos = ray.GetPoint(distance);
-        Vector3 direction = new Vector3(
-            mouseWorldPos.x - transform.position.x,
-            0f,
-            mouseWorldPos.z - transform.position.z
-        );
+            // Simpan posisi target untuk digunakan script senjata
+            GetMouseTargetPosition = mouseWorldPos;
 
-        if (direction == Vector3.zero) return;
+            Vector3 direction = new Vector3(
+                mouseWorldPos.x - transform.position.x,
+                0f,
+                mouseWorldPos.z - transform.position.z
+            );
 
-        Quaternion targetRotation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
+            if (direction != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 15f * Time.deltaTime);
+            }
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -98,7 +105,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 localMove = transform.InverseTransformDirection(move);
         float smoothSpeed = Time.deltaTime * 5f;
         animator.SetFloat(AnimHorizontal, Mathf.MoveTowards(animator.GetFloat(AnimHorizontal), localMove.x, smoothSpeed));
-        animator.SetFloat(AnimVertical,   Mathf.MoveTowards(animator.GetFloat(AnimVertical),   localMove.z, smoothSpeed));
+        animator.SetFloat(AnimVertical, Mathf.MoveTowards(animator.GetFloat(AnimVertical), localMove.z, smoothSpeed));
     }
 
     private void HandleRotation()

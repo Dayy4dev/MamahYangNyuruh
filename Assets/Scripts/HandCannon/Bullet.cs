@@ -34,7 +34,10 @@ public class Bullet : MonoBehaviour
 
     private void Update()
     {
-        transform.Translate(Vector3.forward * speed * Time.deltaTime);
+        // FIX: Tambahkan Space.World di dalam Translate
+        // Ini memaksa peluru bergerak lurus secara absolut berdasarkan arah hadap globalnya, 
+        // bebas dari distorsi rotasi internal parent/senjata.
+        transform.Translate(transform.forward * speed * Time.deltaTime, Space.World);
 
         currentLifetime -= Time.deltaTime;
         if (currentLifetime <= 0)
