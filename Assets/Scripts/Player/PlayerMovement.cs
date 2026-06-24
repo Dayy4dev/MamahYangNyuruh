@@ -14,6 +14,12 @@ public class PlayerMovement : MonoBehaviour
     [Header("Gravity")]
     [SerializeField] private float gravity = -9.81f;
 
+    // --- TAMBAHAN BARU UNTUK INDIKATOR AIM ---
+    [Header("Aim Indicator")]
+    [Tooltip("Masukkan GameObject Lingkaran Merah di sini")]
+    public Transform aimIndicator;
+    // -----------------------------------------
+
     // -------------------------------------------------------------------------
     // State
     // -------------------------------------------------------------------------
@@ -36,6 +42,11 @@ public class PlayerMovement : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+
+        // --- TAMBAHAN BARU: Sembunyikan kursor OS & kunci di dalam window game ---
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Confined;
+        // -----------------------------------------------------------------------
     }
 
     void Update()
@@ -45,6 +56,7 @@ public class PlayerMovement : MonoBehaviour
         HandleGravity();
         HandleMovement();
         HandleRotation();
+        UpdateAimIndicatorPosition(); // --- TAMBAHAN BARU: Selalu update posisi lingkaran merah ---
     }
 
     // -------------------------------------------------------------------------
@@ -78,8 +90,28 @@ public class PlayerMovement : MonoBehaviour
     }
 
     // -------------------------------------------------------------------------
-    // Private — Movement
+    // Private — Movement & Aim
     // -------------------------------------------------------------------------
+
+    // --- FUNGSI TAMBAHAN BARU: Mengatur posisi lingkaran merah di atas lantai ---
+    private void UpdateAimIndicatorPosition()
+    {
+        if (aimIndicator == null) return;
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Plane groundPlane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
+
+        if (groundPlane.Raycast(ray, out float distance))
+        {
+            Vector3 mouseWorldPos = ray.GetPoint(distance);
+
+            // 1. Update posisi (Y dinaikkan sedikit agar tidak berkedip/Z-fighting dengan lantai)
+            aimIndicator.position = new Vector3(mouseWorldPos.x, transform.position.y + 0.02f, mouseWorldPos.z);
+
+            // 2. PERBAIKAN ROTASI: Putar di sumbu Z lokal menggunakan Space.Self
+            aimIndicator.Rotate(Vector3.forward, 50f * Time.deltaTime, Space.Self);
+        }
+    }
 
     private void HandleGravity()
     {
