@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Input")]
     [SerializeField] private KeyCode pauseKey = KeyCode.Escape;
-    [SerializeField] private KeyCode inventoryKey = KeyCode.I;
+    [SerializeField] private KeyCode inventoryKey = KeyCode.E;
 
     public bool IsPlaying => CurrentState == GameState.Playing;
     public bool IsPaused => CurrentState == GameState.Paused;
