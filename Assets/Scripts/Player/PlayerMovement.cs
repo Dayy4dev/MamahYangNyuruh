@@ -1,162 +1,147 @@
 using UnityEngine;
 
-[AddComponentMenu("Player Movement and Camera Controller")]
+[AddComponentMenu("Player/Player Movement")]
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Movement")]
+    [Tooltip("Kecepatan gerak player")]
+    public float moveSpeed = 2f;
 
-    [Space]
-    [Header("Movement Settings")]
+    [Header("Gravity")]
+    [SerializeField] private float gravity = -9.81f;
+
+    [Header("Aim Indicator")]
+    [Tooltip("Masukkan GameObject Lingkaran Merah di sini")]
+    public Transform aimIndicator;
 
     private CharacterController controller;
     private Animator animator;
-
-    [Tooltip("Movement speed")]
-    public float moveSpeed = 2f;
-
-    [Space]
-    [Header("Weapon Inventory")]
-    [Tooltip("Masukkan semua objek senjata")]
-    public Weapon[] weapons; 
     
-    private int currentWeaponIndex = 0;
-    private Weapon equippedWeapon;
+    // Perubahan logika gabungan gerakan
+    private Vector3 moveDirection = Vector3.zero;
+    private Vector3 verticalVelocity = Vector3.zero;
+    private bool isGrounded;
+    
+    public Vector3 GetMouseTargetPosition { get; private set; }
 
+    private static readonly int AnimHorizontal = Animator.StringToHash("Horizontal");
+    private static readonly int AnimVertical = Animator.StringToHash("Vertical");
 
     void Start()
     {
-        EquipWeapon(0);
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Confined;
     }
 
-    private void Update()
+    void Update()
     {
-        float x = Input.GetAxisRaw("Horizontal");
-        float z = Input.GetAxisRaw("Vertical");
+        if (controller == null) return;
 
-        Vector3 move = new Vector3(x, 0, z).normalized;
-
-        controller.Move(move * moveSpeed * Time.deltaTime);
-
-        if (animator != null)
-        {
-            //biar relatif arahnya
-            Vector3 localMove = transform.InverseTransformDirection(move);
-
-            float currentInputX = animator.GetFloat("Horizontal");
-            float currentInputZ = animator.GetFloat("Vertical");
-
-            animator.SetFloat("Horizontal", Mathf.MoveTowards(currentInputX, localMove.x, Time.deltaTime * 5f));
-            animator.SetFloat("Vertical", Mathf.MoveTowards(currentInputZ, localMove.z, Time.deltaTime * 5f));
-        }
+        // 1. Hitung Kalkulasi Logika Dasar (Tanpa memanggil controller.Move dulu)
+        CalculateGravity();
+        CalculateMovementInput();
         
-        // rotasi klik kanan prioritas mas
-        if (Input.GetMouseButton(1))
-        {
-            PlayerDirection();
+        // 2. Kalkulasi Raycast Mouse (Cukup 1x di sini untuk posisi bidik & indikator)
+        CalculateMouseWorldPosition();
 
-            if (Input.GetKeyDown(KeyCode.Mouse0))
-            {
-                if (equippedWeapon != null)
-                {
-                    // Debug.Log("Shoot!");
-                    equippedWeapon.Attack();
-                }
-            }
-        }
-        // baru rotasi wasd
-        else if (move != Vector3.zero)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(move);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
-        }
+        HandleRotation();
 
-        for (int i = 0; i < weapons.Length && i < 9; i++)
-        {
-            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
-            {
-                EquipWeapon(i);
-            }
-        }
-
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if(scroll > 0f)
-        {
-            int nextIndex = currentWeaponIndex + 1;
-            if(nextIndex >= weapons.Length) nextIndex = 0;
-            EquipWeapon(nextIndex);
-        } else if(scroll < 0f)
-        {
-            int prevIndex = currentWeaponIndex - 1;
-            if(prevIndex < 0) prevIndex = weapons.Length - 1;
-            EquipWeapon(prevIndex);
-        }
-        
+        // 3. FIX DOUBLE MOVE: Gabungkan kecepatan horizontal dan vertikal lalu gerakkan SEKALI SAJA
+        Vector3 finalVelocity = (moveDirection * moveSpeed) + verticalVelocity;
+        controller.Move(finalVelocity * Time.deltaTime);
     }
 
-    private void EquipWeapon(int index)
-    {
-        if (index < 0 || index >= weapons.Length) return;
-
-        //mematikaan semua senjata di tangan
-        for(int i = 0; i < weapons.Length; i++)
-        {
-            weapons[i].OnWeaponDeactivate(); // Reset state saat weapon dinonaktifkan
-            weapons[i].gameObject.SetActive(false);
-
-            if (weapons[i].weaponRig != null)
-            {
-                weapons[i].weaponRig.weight = 0f;
-            }
-        }
-
-        //nyalakan senjata
-        currentWeaponIndex = index;
-        weapons[currentWeaponIndex].gameObject.SetActive(true);
-        equippedWeapon = weapons[currentWeaponIndex];
-        equippedWeapon.OnWeaponActivate(); // Resume state saat weapon diaktifkan
-
-        if (equippedWeapon.weaponRig != null)
-        {
-            equippedWeapon.weaponRig.weight = 1f;
-        }
-    }
-
-    public void PlayerDirection()
+    private void CalculateMouseWorldPosition()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        Plane groundPlane = new Plane(Vector3.up, Vector3.zero);
+        Plane groundPlane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
 
         if (groundPlane.Raycast(ray, out float distance))
         {
             Vector3 mouseWorldPos = ray.GetPoint(distance);
+            
+            // Selalu update posisi target agar sinkron di semua script
+            GetMouseTargetPosition = mouseWorldPos;
 
-            Vector3 direction = new Vector3(mouseWorldPos.x - transform.position.x, 0f, mouseWorldPos.z - transform.position.z);
-
-            if (direction != Vector3.zero)
+            // Update posisi & rotasi lingkaran merah di sini (Hemat Raycast!)
+            if (aimIndicator != null)
             {
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                aimIndicator.position = new Vector3(mouseWorldPos.x, transform.position.y + 0.02f, mouseWorldPos.z);
+                aimIndicator.Rotate(Vector3.forward, 50f * Time.deltaTime, Space.Self);
+            }
+        }
+    }
+
+    public void AimTowardsMouse()
+    {
+        // Menggunakan posisi world dari kalkulasi tunggal di atas
+        Vector3 direction = new Vector3(
+            GetMouseTargetPosition.x - transform.position.x,
+            0f,
+            GetMouseTargetPosition.z - transform.position.z
+        );
+
+        if (direction != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 15f * Time.deltaTime);
+        }
+    }
+
+    private void CalculateGravity()
+    {
+        isGrounded = controller.isGrounded;
+
+        if (isGrounded && verticalVelocity.y < 0f)
+            verticalVelocity.y = -2f; // Nilai penahan agar menempel di tanah
+
+        verticalVelocity.y += gravity * Time.deltaTime;
+    }
+
+    private void CalculateMovementInput()
+    {
+        float x = Input.GetAxisRaw("Horizontal");
+        float z = Input.GetAxisRaw("Vertical");
+        moveDirection = new Vector3(x, 0f, z).normalized;
+
+        if (animator == null) return;
+
+        Vector3 localMove = transform.InverseTransformDirection(moveDirection);
+        float smoothSpeed = Time.deltaTime * 5f;
+        animator.SetFloat(AnimHorizontal, Mathf.MoveTowards(animator.GetFloat(AnimHorizontal), localMove.x, smoothSpeed));
+        animator.SetFloat(AnimVertical, Mathf.MoveTowards(animator.GetFloat(AnimVertical), localMove.z, smoothSpeed));
+    }
+
+    private void HandleRotation()
+    {
+        if (Input.GetMouseButton(1))
+        {
+            // Klik kanan → kunci hadapan ke arah kursor mouse
+            AimTowardsMouse();
+        }
+        else
+        {
+            // Tidak klik kanan → hadap sesuai arah jalan WASD
+            if (moveDirection != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
             }
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    void OnTriggerEnter(Collider other)
     {
-        // Jika menabrak trigger milik dinding yang menghalangi
         if (other.TryGetComponent<WallFader>(out WallFader wall))
-        {
             wall.FadeToTransparent();
-        }
     }
 
-    private void OnTriggerExit(Collider other)
+    void OnTriggerExit(Collider other)
     {
-        // Jika keluar dari area belakang dinding
         if (other.TryGetComponent<WallFader>(out WallFader wall))
-        {
             wall.FadeToOpaque();
-        }
     }
 }

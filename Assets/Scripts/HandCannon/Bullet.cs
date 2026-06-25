@@ -3,13 +3,16 @@ using UnityEngine.Pool;
 
 public class Bullet : MonoBehaviour
 {
-    [SerializeField] private float speed = 25f;
-    [SerializeField] private float lifetime = 2f;
-    [SerializeField] private int damageAmount = 10;
-    
+    private float speed;
+    private float lifetime = 2f;
+    private int damageAmount;
+
     private float currentLifetime;
     private IObjectPool<Bullet> originPool;
     private bool hasHit = false;
+
+    [Header("References")]
+    [SerializeField] private WeaponData weaponData;
 
     public void SetPool(IObjectPool<Bullet> pool)
     {
@@ -20,11 +23,21 @@ public class Bullet : MonoBehaviour
     {
         currentLifetime = lifetime;
         hasHit = false;
+
+        // Diambil di OnEnable bukan Start, biar bener tiap kali bullet di-reuse dari pool
+        if (weaponData != null)
+        {
+            speed = weaponData.speed;
+            damageAmount = weaponData.damage;
+        }
     }
 
     private void Update()
     {
-        transform.Translate(Vector3.forward * speed * Time.deltaTime);
+        // FIX: Tambahkan Space.World di dalam Translate
+        // Ini memaksa peluru bergerak lurus secara absolut berdasarkan arah hadap globalnya, 
+        // bebas dari distorsi rotasi internal parent/senjata.
+        transform.Translate(transform.forward * speed * Time.deltaTime, Space.World);
 
         currentLifetime -= Time.deltaTime;
         if (currentLifetime <= 0)
@@ -35,15 +48,20 @@ public class Bullet : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Cek apakah objek yang tertabrak memiliki IDamageable interface
+        if (hasHit) return;
+
         IDamageable damageable = other.GetComponent<IDamageable>();
-        if (damageable != null && !hasHit)
+        if (damageable != null)
         {
             damageable.TakeDamage(damageAmount);
-            hasHit = true;
             Debug.Log($"Bullet hit {other.gameObject.name} and dealt {damageAmount} damage!");
         }
+        else
+        {
+            Debug.Log($"Bullet hit {other.gameObject.name} but it is not damageable.");
+        }
 
+        hasHit = true;
         ReleaseToPool();
     }
 

@@ -4,6 +4,6 @@ public class Unarmed : Weapon
 {
     public override void Attack()
     {
-        Debug.Log("Unarmed attack!");
-    } 
+        Debug.Log("[Unarmed] Unarmed attack!");
+    }
 }
