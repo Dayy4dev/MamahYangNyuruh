@@ -3,20 +3,12 @@ using System.Collections;
 using UnityEngine.AI;
 
 [AddComponentMenu("Enemies/Melee NavMesh Enemy")]
-public class MeleeEnemy : MonoBehaviour, IDamageable
+public class MeleeEnemy : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private NavMeshAgent navAgent;
     [SerializeField] private Animator animator;
     private Transform playerTransform;
-    private EnemySpawner spawner;
-
-    [Header("Stats")]
-    [SerializeField] private int maxHealth = 100;
-    private int currentHealth;
-
-    [Header("UI")]
-    [SerializeField] private EnemyHealthBar healthBar;
 
     [Header("Layers")]
     [SerializeField] private LayerMask terrainLayer;     // Layer untuk lantai/ground panggung
@@ -36,6 +28,13 @@ public class MeleeEnemy : MonoBehaviour, IDamageable
     [SerializeField] private float visionRange = 10f;       // Jarak mulai mengejar
     [SerializeField] private float engagementRange = 1.8f;  // Jarak mulai memukul
 
+    // -------------------------------------------------------------------------
+    // AUDIO SETUP (UNTUK SERANGAN MELEE MUSUH)
+    // -------------------------------------------------------------------------
+    [Header("Audio Setup")]
+    [SerializeField] private AudioSource enemyAudioSource; // Tarik komponen AudioSource musuh ke sini
+    [SerializeField] private AudioClip meleeAttackSound;   // Masukkan file audio ayunan senjata/pukulan musuh
+
     private bool isPlayerVisible;
     private bool isPlayerInRange;
 
@@ -51,14 +50,9 @@ public class MeleeEnemy : MonoBehaviour, IDamageable
         if (navAgent == null) navAgent = GetComponent<NavMeshAgent>();
         
         if (animator == null) animator = GetComponentInChildren<Animator>();
-
-        // Daftar ke spawner agar counter UI terupdate saat mati
-        spawner = GetComponentInParent<EnemySpawner>();
-        if (spawner == null)
-            spawner = FindObjectOfType<EnemySpawner>();
-
-        currentHealth = maxHealth;
-        if (healthBar != null) healthBar.SetMaxHealth(maxHealth);
+        
+        // Otomatis mengambil AudioSource di objek ini jika belum dipasang manual
+        if (enemyAudioSource == null) enemyAudioSource = GetComponent<AudioSource>();
     }
 
     private void Update()
@@ -180,6 +174,13 @@ public class MeleeEnemy : MonoBehaviour, IDamageable
 
     private void ExecuteMeleeStrike()
     {
+        // --- SUNTIK KODE AUDIO SERANGAN MELEE ---
+        if (enemyAudioSource != null && meleeAttackSound != null)
+        {
+            enemyAudioSource.PlayOneShot(meleeAttackSound);
+            Debug.Log($"[MeleeEnemy] {gameObject.name} memutar suara serangan melee!");
+        }
+
         // if (animator != null) animator.SetTrigger("Attack");
 
         Vector3 spherePos = transform.position + transform.forward * (engagementRange * 0.5f);
@@ -223,30 +224,5 @@ public class MeleeEnemy : MonoBehaviour, IDamageable
             animator.SetFloat("Horizontal", localVelocity.x);
             animator.SetFloat("Vertical", localVelocity.z);
         }
-    }
-
-    // ── IDamageable ───────────────────────────────────────────────────────────
-
-    public void TakeDamage(int amount)
-    {
-        currentHealth -= amount;
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-
-        if (healthBar != null) healthBar.SetHealth(currentHealth);
-
-        Debug.Log($"{gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
-
-        if (currentHealth <= 0)
-            Die();
-    }
-
-    private void Die()
-    {
-        Debug.Log($"{gameObject.name} mati!");
-
-        if (spawner != null)
-            spawner.NotifyEnemyDestroyed(gameObject);
-
-        Destroy(gameObject, 0.1f);
     }
 }

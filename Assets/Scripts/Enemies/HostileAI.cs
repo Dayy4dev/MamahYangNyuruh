@@ -8,6 +8,9 @@ using UnityEngine.AI;
 
 public class HostileAI : MonoBehaviour
 {
+    [Header("Audio Setup Custom")]
+[SerializeField] private AudioSource hostileAudioSource;
+[SerializeField] private AudioClip rangedShootSound;
     [Header("References")]
     [SerializeField] private NavMeshAgent navAgent;
     [SerializeField] private Animator animator;
@@ -131,57 +134,64 @@ public class HostileAI : MonoBehaviour
     }
 
     private void FireProjectile()
+{
+    if (projectilePrefab == null || firePoint == null || playerTransform == null)
+        return;
+
+    // --- SUNTIK KODE AUDIO TEMBAKAN DI SINI ---
+    if (hostileAudioSource != null && rangedShootSound != null)
     {
-        if (projectilePrefab == null || firePoint == null || playerTransform == null)
-            return;
-
-        GameObject bullet = GetProjectileFromPool();
-        bullet.transform.position = firePoint.position;
-        bullet.transform.rotation = Quaternion.identity;
-        bullet.SetActive(true);
-
-        Rigidbody rb = bullet.GetComponent<Rigidbody>();
-        if (rb == null) return;
-
-        Vector3 targetPos = playerTransform.position + Vector3.up * 1f;
-
-        if (usePrediction)
-        {
-            float distToTarget = Vector3.Distance(firePoint.position, targetPos);
-            float travelTime = distToTarget / projectileSpeed;
-
-            Vector3 playerVelocity = Vector3.zero;
-            NavMeshAgent playerAgent = playerTransform.GetComponent<NavMeshAgent>();
-            Rigidbody playerRb = playerTransform.GetComponent<Rigidbody>();
-
-            if (playerAgent != null) playerVelocity = playerAgent.velocity;
-            else if (playerRb != null) playerVelocity = playerRb.linearVelocity;
-
-            targetPos += playerVelocity * travelTime;
-        }
-
-        Vector3 direction = (targetPos - firePoint.position).normalized;
-        float travelEst = Vector3.Distance(firePoint.position, targetPos) / projectileSpeed;
-        float gravOffset = 0.5f * Mathf.Abs(Physics.gravity.y) * travelEst * travelEst;
-        direction = (direction + Vector3.up * (gravOffset / Vector3.Distance(firePoint.position, targetPos))).normalized;
-
-        if (accuracyError > 0f)
-        {
-            direction += new Vector3(
-                Random.Range(-accuracyError, accuracyError),
-                Random.Range(-accuracyError, accuracyError),
-                Random.Range(-accuracyError, accuracyError)
-            ) * 0.05f;
-            direction.Normalize();
-        }
-
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        rb.linearVelocity = direction * projectileSpeed;
-        bullet.transform.forward = direction;
-
-        StartCoroutine(ReturnProjectileToPool(bullet, projectileLifetime));
+        hostileAudioSource.PlayOneShot(rangedShootSound);
+        Debug.Log($"[HostileAI] {gameObject.name} menembakkan peluru dan memutar suara!");
     }
+
+    GameObject bullet = GetProjectileFromPool();
+    bullet.transform.position = firePoint.position;
+    bullet.transform.rotation = Quaternion.identity;
+    bullet.SetActive(true);
+
+    Rigidbody rb = bullet.GetComponent<Rigidbody>();
+    if (rb == null) return;
+
+    Vector3 targetPos = playerTransform.position + Vector3.up * 1f;
+
+    if (usePrediction)
+    {
+        float distToTarget = Vector3.Distance(firePoint.position, targetPos);
+        float travelTime = distToTarget / projectileSpeed;
+
+        Vector3 playerVelocity = Vector3.zero;
+        NavMeshAgent playerAgent = playerTransform.GetComponent<NavMeshAgent>();
+        Rigidbody playerRb = playerTransform.GetComponent<Rigidbody>();
+
+        if (playerAgent != null) playerVelocity = playerAgent.velocity;
+        else if (playerRb != null) playerVelocity = playerRb.linearVelocity;
+
+        targetPos += playerVelocity * travelTime;
+    }
+
+    Vector3 direction = (targetPos - firePoint.position).normalized;
+    float travelEst = Vector3.Distance(firePoint.position, targetPos) / projectileSpeed;
+    float gravOffset = 0.5f * Mathf.Abs(Physics.gravity.y) * travelEst * travelEst;
+    direction = (direction + Vector3.up * (gravOffset / Vector3.Distance(firePoint.position, targetPos))).normalized;
+
+    if (accuracyError > 0f)
+    {
+        direction += new Vector3(
+            Random.Range(-accuracyError, accuracyError),
+            Random.Range(-accuracyError, accuracyError),
+            Random.Range(-accuracyError, accuracyError)
+        ) * 0.05f;
+        direction.Normalize();
+    }
+
+    rb.linearVelocity = Vector3.zero;
+    rb.angularVelocity = Vector3.zero;
+    rb.linearVelocity = direction * projectileSpeed;
+    bullet.transform.forward = direction;
+
+    StartCoroutine(ReturnProjectileToPool(bullet, projectileLifetime));
+}
 
     private IEnumerator ReturnProjectileToPool(GameObject projectile, float delay)
     {

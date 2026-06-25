@@ -8037,7 +8037,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4433459829314455659, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
       propertyPath: m_LinearDamping
-      value: 3
+      value: 7.01
       objectReference: {fileID: 0}
     - target: {fileID: 5192306811957434602, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
       propertyPath: audioSource
@@ -8063,6 +8063,14 @@ PrefabInstance:
       propertyPath: playerTransform
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 6351839981106544148, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: rangedShootSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 695b86140e703c2449cbf19793220945, type: 3}
+    - target: {fileID: 6351839981106544148, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: hostileAudioSource
+      value: 
+      objectReference: {fileID: 923042380}
     - target: {fileID: 8789450234712980830, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
       propertyPath: knockbackForce
       value: 12.33
@@ -10055,7 +10063,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8482846541267236793, guid: 7af46b5cd3264aa4a8090f2900b5ef8a, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -10247,6 +10255,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1154688777401871716, guid: 3aecd6a32eeed7548a99264e7e5a78e9, type: 3}
+      propertyPath: enemyAudioSource
+      value: 
+      objectReference: {fileID: 923042380}
+    - target: {fileID: 1154688777401871716, guid: 3aecd6a32eeed7548a99264e7e5a78e9, type: 3}
+      propertyPath: meleeAttackSound
+      value: 
+      objectReference: {fileID: 8300000, guid: c3a5f61e3b43cdb45afd482349a5d5d4, type: 3}
     - target: {fileID: 3807745660598645816, guid: 3aecd6a32eeed7548a99264e7e5a78e9, type: 3}
       propertyPath: m_Name
       value: EnemyMelee
