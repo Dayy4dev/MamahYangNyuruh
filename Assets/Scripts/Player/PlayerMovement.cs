@@ -3,10 +3,6 @@ using UnityEngine;
 [AddComponentMenu("Player/Player Movement")]
 public class PlayerMovement : MonoBehaviour
 {
-    // -------------------------------------------------------------------------
-    // Inspector
-    // -------------------------------------------------------------------------
-
     [Header("Movement")]
     [Tooltip("Kecepatan gerak player")]
     public float moveSpeed = 2f;
@@ -14,56 +10,51 @@ public class PlayerMovement : MonoBehaviour
     [Header("Gravity")]
     [SerializeField] private float gravity = -9.81f;
 
-    // --- TAMBAHAN BARU UNTUK INDIKATOR AIM ---
     [Header("Aim Indicator")]
     [Tooltip("Masukkan GameObject Lingkaran Merah di sini")]
     public Transform aimIndicator;
-    // -----------------------------------------
-
-    // -------------------------------------------------------------------------
-    // State
-    // -------------------------------------------------------------------------
 
     private CharacterController controller;
     private Animator animator;
-    private Vector3 velocity;
+    
+    // Perubahan logika gabungan gerakan
+    private Vector3 moveDirection = Vector3.zero;
+    private Vector3 verticalVelocity = Vector3.zero;
     private bool isGrounded;
+    
     public Vector3 GetMouseTargetPosition { get; private set; }
 
-    // Animator parameter hashes (lebih efisien dari string)
     private static readonly int AnimHorizontal = Animator.StringToHash("Horizontal");
     private static readonly int AnimVertical = Animator.StringToHash("Vertical");
-
-    // -------------------------------------------------------------------------
-    // Unity Lifecycle
-    // -------------------------------------------------------------------------
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
 
-        // --- TAMBAHAN BARU: Sembunyikan kursor OS & kunci di dalam window game ---
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Confined;
-        // -----------------------------------------------------------------------
     }
 
     void Update()
     {
         if (controller == null) return;
 
-        HandleGravity();
-        HandleMovement();
+        // 1. Hitung Kalkulasi Logika Dasar (Tanpa memanggil controller.Move dulu)
+        CalculateGravity();
+        CalculateMovementInput();
+        
+        // 2. Kalkulasi Raycast Mouse (Cukup 1x di sini untuk posisi bidik & indikator)
+        CalculateMouseWorldPosition();
+
         HandleRotation();
-        UpdateAimIndicatorPosition(); // --- TAMBAHAN BARU: Selalu update posisi lingkaran merah ---
+
+        // 3. FIX DOUBLE MOVE: Gabungkan kecepatan horizontal dan vertikal lalu gerakkan SEKALI SAJA
+        Vector3 finalVelocity = (moveDirection * moveSpeed) + verticalVelocity;
+        controller.Move(finalVelocity * Time.deltaTime);
     }
 
-    // -------------------------------------------------------------------------
-    // Public API
-    // -------------------------------------------------------------------------
-
-    public void AimTowardsMouse()
+    private void CalculateMouseWorldPosition()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         Plane groundPlane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
@@ -71,70 +62,54 @@ public class PlayerMovement : MonoBehaviour
         if (groundPlane.Raycast(ray, out float distance))
         {
             Vector3 mouseWorldPos = ray.GetPoint(distance);
-
-            // Simpan posisi target untuk digunakan script senjata
+            
+            // Selalu update posisi target agar sinkron di semua script
             GetMouseTargetPosition = mouseWorldPos;
 
-            Vector3 direction = new Vector3(
-                mouseWorldPos.x - transform.position.x,
-                0f,
-                mouseWorldPos.z - transform.position.z
-            );
-
-            if (direction != Vector3.zero)
+            // Update posisi & rotasi lingkaran merah di sini (Hemat Raycast!)
+            if (aimIndicator != null)
             {
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
-                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 15f * Time.deltaTime);
+                aimIndicator.position = new Vector3(mouseWorldPos.x, transform.position.y + 0.02f, mouseWorldPos.z);
+                aimIndicator.Rotate(Vector3.forward, 50f * Time.deltaTime, Space.Self);
             }
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Private — Movement & Aim
-    // -------------------------------------------------------------------------
-
-    // --- FUNGSI TAMBAHAN BARU: Mengatur posisi lingkaran merah di atas lantai ---
-    private void UpdateAimIndicatorPosition()
+    public void AimTowardsMouse()
     {
-        if (aimIndicator == null) return;
+        // Menggunakan posisi world dari kalkulasi tunggal di atas
+        Vector3 direction = new Vector3(
+            GetMouseTargetPosition.x - transform.position.x,
+            0f,
+            GetMouseTargetPosition.z - transform.position.z
+        );
 
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        Plane groundPlane = new Plane(Vector3.up, new Vector3(0f, transform.position.y, 0f));
-
-        if (groundPlane.Raycast(ray, out float distance))
+        if (direction != Vector3.zero)
         {
-            Vector3 mouseWorldPos = ray.GetPoint(distance);
-
-            // 1. Update posisi (Y dinaikkan sedikit agar tidak berkedip/Z-fighting dengan lantai)
-            aimIndicator.position = new Vector3(mouseWorldPos.x, transform.position.y + 0.02f, mouseWorldPos.z);
-
-            // 2. PERBAIKAN ROTASI: Putar di sumbu Z lokal menggunakan Space.Self
-            aimIndicator.Rotate(Vector3.forward, 50f * Time.deltaTime, Space.Self);
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 15f * Time.deltaTime);
         }
     }
 
-    private void HandleGravity()
+    private void CalculateGravity()
     {
         isGrounded = controller.isGrounded;
 
-        if (isGrounded && velocity.y < 0f)
-            velocity.y = -2f;
+        if (isGrounded && verticalVelocity.y < 0f)
+            verticalVelocity.y = -2f; // Nilai penahan agar menempel di tanah
 
-        velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
+        verticalVelocity.y += gravity * Time.deltaTime;
     }
 
-    private void HandleMovement()
+    private void CalculateMovementInput()
     {
         float x = Input.GetAxisRaw("Horizontal");
         float z = Input.GetAxisRaw("Vertical");
-        Vector3 move = new Vector3(x, 0f, z).normalized;
-
-        controller.Move(move * moveSpeed * Time.deltaTime);
+        moveDirection = new Vector3(x, 0f, z).normalized;
 
         if (animator == null) return;
 
-        Vector3 localMove = transform.InverseTransformDirection(move);
+        Vector3 localMove = transform.InverseTransformDirection(moveDirection);
         float smoothSpeed = Time.deltaTime * 5f;
         animator.SetFloat(AnimHorizontal, Mathf.MoveTowards(animator.GetFloat(AnimHorizontal), localMove.x, smoothSpeed));
         animator.SetFloat(AnimVertical, Mathf.MoveTowards(animator.GetFloat(AnimVertical), localMove.z, smoothSpeed));
@@ -144,26 +119,19 @@ public class PlayerMovement : MonoBehaviour
     {
         if (Input.GetMouseButton(1))
         {
-            // Klik kanan → aim ke mouse, attack dihandle PlayerAttack
+            // Klik kanan → kunci hadapan ke arah kursor mouse
             AimTowardsMouse();
         }
         else
         {
-            float x = Input.GetAxisRaw("Horizontal");
-            float z = Input.GetAxisRaw("Vertical");
-            Vector3 move = new Vector3(x, 0f, z).normalized;
-
-            if (move != Vector3.zero)
+            // Tidak klik kanan → hadap sesuai arah jalan WASD
+            if (moveDirection != Vector3.zero)
             {
-                Quaternion targetRotation = Quaternion.LookRotation(move);
+                Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10f * Time.deltaTime);
             }
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Trigger — Wall Fader
-    // -------------------------------------------------------------------------
 
     void OnTriggerEnter(Collider other)
     {

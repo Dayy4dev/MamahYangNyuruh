@@ -21,13 +21,23 @@ public class InteractionUI : MonoBehaviour
 
     private void UpdateUI(WeaponPickup nearestPickup)
     {
-        if (nearestPickup != null)
+        // FIX LOGIC: Cek apakah komponen dan GameObject-nya benar-benar ada (tidak null/destroyed)
+        if (nearestPickup != null && nearestPickup.gameObject != null)
         {
-            // Nyalakan UI dan ubah teksnya sesuai nama senjata
-            uiPanel.SetActive(true);
+            // Nyalakan UI global di layar player
+            if (uiPanel != null) uiPanel.SetActive(true);
+            
             if (promptText != null)
             {
-                promptText.text = $"[F] To Pick Up";
+                // TIPS Tambahan: Kamu bisa memunculkan nama senjatanya secara dinamis jika mau!
+                if (nearestPickup.Data != null)
+                {
+                    promptText.text = $"[F] Pick Up {nearestPickup.Data.weaponName}";
+                }
+                else
+                {
+                    promptText.text = "[F] To Pick Up";
+                }
             }
 
             // Opsional: Jika senjatanya punya UI lokal sendiri, nyalakan juga
@@ -35,8 +45,8 @@ public class InteractionUI : MonoBehaviour
         }
         else
         {
-            // Jika tidak ada senjata terdekat, matikan UI
-            uiPanel.SetActive(false);
+            // Jika tidak ada senjata terdekat ATAU senjata baru saja dihancurkan (di-pickup)
+            if (uiPanel != null) uiPanel.SetActive(false);
         }
     }
 }

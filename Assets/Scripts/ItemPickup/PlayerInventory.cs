@@ -1,71 +1,36 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-/// <summary>
-/// Mengelola hotbar player: slot 0 = Unarmed (permanent), slot 1-2 = senjata.
-/// Pickup  : tekan F saat berada di dekat WeaponPickup
-/// Drop    : tekan G untuk menjatuhkan senjata yang sedang dipegang
-/// Switch  : scroll mouse / tombol 1-3
-/// </summary>
 public class PlayerInventory : MonoBehaviour
 {
-    // -------------------------------------------------------------------------
-    // Constants
-    // -------------------------------------------------------------------------
-
-    public const int SLOT_UNARMED  = 0;
+    public const int SLOT_UNARMED = 0;
     public const int SLOT_WEAPON_1 = 1;
     public const int SLOT_WEAPON_2 = 2;
-    public const int TOTAL_SLOTS   = 3;
-
-    // -------------------------------------------------------------------------
-    // Inspector
-    // -------------------------------------------------------------------------
+    public const int TOTAL_SLOTS = 3;
 
     [Header("References")]
     [SerializeField] private PlayerAttack playerAttack;
-
     [Tooltip("Posisi di mana senjata yang dibuang di-spawn (kosongkan = pakai posisi player)")]
     [SerializeField] private Transform dropPoint;
-
     [Tooltip("Jarak deteksi WeaponPickup terdekat untuk tombol F")]
     [SerializeField] private float pickupRadius = 2f;
-
     [Tooltip("Layer yang dianggap sebagai WeaponPickup")]
     [SerializeField] private LayerMask pickupLayer;
 
-    // -------------------------------------------------------------------------
-    // State
-    // -------------------------------------------------------------------------
-
-    // slots[0] = Unarmed (WeaponData == null, tidak bisa di-drop)
-    // slots[1-2] = senjata biasa (null = kosong)
     private WeaponData[] slots = new WeaponData[TOTAL_SLOTS];
-
     private int currentSlot = SLOT_UNARMED;
-
-    // Pickup yang paling dekat dengan player (diupdate tiap frame)
     private WeaponPickup nearestPickup;
 
-    // -------------------------------------------------------------------------
-    // Events  (UI dapat subscribe ke sini)
-    // -------------------------------------------------------------------------
+    // Cache untuk optimasi performa visual senjata
+    private Transform[] allChildrenCache;
 
-    public UnityEvent<int, WeaponData> onSlotChanged;   // (slotIndex, data)  dipanggil saat isi slot berubah
-    public UnityEvent<int> onActiveSlotChanged;          // (slotIndex)        dipanggil saat slot aktif berubah
-    public UnityEvent<WeaponPickup> onNearestPickupChanged; // untuk UI prompt
+    public UnityEvent<int, WeaponData> onSlotChanged;
+    public UnityEvent<int> onActiveSlotChanged;
+    public UnityEvent<WeaponPickup> onNearestPickupChanged;
 
-    // -------------------------------------------------------------------------
-    // Properties
-    // -------------------------------------------------------------------------
-
-    public int         CurrentSlot   => currentSlot;
-    public WeaponData  CurrentWeapon => slots[currentSlot];
-    public WeaponData[] Slots        => slots;
-
-    // -------------------------------------------------------------------------
-    // Unity Lifecycle
-    // -------------------------------------------------------------------------
+    public int CurrentSlot => currentSlot;
+    public WeaponData CurrentWeapon => slots[currentSlot];
+    public WeaponData[] Slots => slots;
 
     void Awake()
     {
@@ -75,7 +40,10 @@ public class PlayerInventory : MonoBehaviour
 
     void Start()
     {
-        // Slot 0 selalu Unarmed — tidak perlu WeaponData, cukup null sebagai penanda
+        // FIX PERFORMA: Ambil referensi semua children SEKALI SAJA saat game dimulai
+        // Hal ini menghindari stuttering/lag saat ganti senjata di komputer/HP spesifikasi rendah
+        allChildrenCache = GetComponentsInChildren<Transform>(true);
+
         EquipSlot(SLOT_UNARMED);
     }
 
@@ -87,49 +55,60 @@ public class PlayerInventory : MonoBehaviour
         HandleSlotSwitch();
     }
 
-    // -------------------------------------------------------------------------
-    // Public API
-    // -------------------------------------------------------------------------
-
-    /// <summary>Dipanggil WeaponPickup saat player menekan F.</summary>
     public void TryPickup(WeaponPickup pickup)
     {
         WeaponData data = pickup.Data;
-
-        // Cari slot kosong dulu (slot 1 atau 2)
         int emptySlot = FindEmptyWeaponSlot();
 
         if (emptySlot != -1)
         {
-            // Ada slot kosong → langsung ambil
             SetSlot(emptySlot, data);
+
+            // --- FIX UI Gantung ---
+            if (nearestPickup == pickup)
+            {
+                nearestPickup = null;
+                onNearestPickupChanged?.Invoke(null);
+            }
+
             pickup.OnPickedUp();
             SwitchToSlot(emptySlot);
         }
         else
         {
-            // Slot penuh → tukar dengan senjata yang sedang dipegang
             if (currentSlot == SLOT_UNARMED)
             {
-                // Sedang unarmed, tukar slot 1
                 DropFromSlot(SLOT_WEAPON_1);
                 SetSlot(SLOT_WEAPON_1, data);
+
+                // --- FIX UI Gantung ---
+                if (nearestPickup == pickup)
+                {
+                    nearestPickup = null;
+                    onNearestPickupChanged?.Invoke(null);
+                }
+
                 pickup.OnPickedUp();
                 SwitchToSlot(SLOT_WEAPON_1);
             }
             else
             {
-                // Tukar senjata di slot aktif
                 DropFromSlot(currentSlot);
                 SetSlot(currentSlot, data);
+
+                // --- FIX UI Gantung ---
+                if (nearestPickup == pickup)
+                {
+                    nearestPickup = null;
+                    onNearestPickupChanged?.Invoke(null);
+                }
+
                 pickup.OnPickedUp();
-                // Tetap di slot yang sama
                 EquipSlot(currentSlot);
             }
         }
     }
 
-    /// <summary>Drop senjata di slot aktif (dipanggil tombol G).</summary>
     public void TryDrop()
     {
         if (currentSlot == SLOT_UNARMED)
@@ -148,10 +127,6 @@ public class PlayerInventory : MonoBehaviour
         SwitchToSlot(SLOT_UNARMED);
     }
 
-    // -------------------------------------------------------------------------
-    // Private — Slot Management
-    // -------------------------------------------------------------------------
-
     private void SetSlot(int index, WeaponData data)
     {
         slots[index] = data;
@@ -164,15 +139,18 @@ public class PlayerInventory : MonoBehaviour
         WeaponData data = slots[index];
         if (data == null) return;
 
-        // Spawn pickup prefab di dunia
         if (data.pickupPrefab != null)
         {
+            // FIX LOGIC BUG: Amankan penentuan posisi spawn agar tidak NullReferenceException
             Vector3 spawnPos = dropPoint != null ? dropPoint.position : transform.position + transform.forward * 0.8f;
-            spawnPos.y = dropPoint.position.y;
+
+            if (dropPoint != null)
+            {
+                spawnPos.y = dropPoint.position.y;
+            }
 
             GameObject dropped = Instantiate(data.pickupPrefab, spawnPos, Quaternion.identity);
 
-            // Tandai sebagai "dropped" agar dihapus saat pindah scene
             if (dropped.TryGetComponent<WeaponPickup>(out WeaponPickup wp))
                 wp.MarkAsDropped();
         }
@@ -193,10 +171,6 @@ public class PlayerInventory : MonoBehaviour
         return -1;
     }
 
-    // -------------------------------------------------------------------------
-    // Private — Equip
-    // -------------------------------------------------------------------------
-
     private void SwitchToSlot(int index)
     {
         if (index < 0 || index >= TOTAL_SLOTS) return;
@@ -205,87 +179,74 @@ public class PlayerInventory : MonoBehaviour
         onActiveSlotChanged?.Invoke(currentSlot);
     }
 
-private void EquipSlot(int index)
-{
-    WeaponData activeData = slots[index];
-    
-    // 1. Kirim data stats ke PlayerAttack bawaan aslimu
-    if (playerAttack != null)
+    private void EquipSlot(int index)
     {
-        playerAttack.EquipWeaponData(activeData);
-    }
+        WeaponData activeData = slots[index];
 
-    // Ambil semua objek di bawah Player (termasuk yang non-aktif)
-    Transform[] allChildren = GetComponentsInChildren<Transform>(true);
-
-    foreach (Transform child in allChildren)
-    {
-        if (child == transform) continue;
-
-        // Ambil nama object dan bersihkan formatnya agar standar huruf kecil
-        string childName = child.gameObject.name.Replace("_", "").Replace(" ", "").ToLower();
-
-        // 2. LOGIKA UNTUK VISUAL DI TANGAN
-        // Cek apakah object ini adalah senjata tangan (akhiran "hand" atau sesuai penamaanmu)
-     // 2. LOGIKA UNTUK VISUAL DI TANGAN
-if (childName.EndsWith("hand"))
-{
-    // Menggunakan Substring agar HANYA memotong 4 huruf terakhir ("hand"), 
-    // sehingga kata "hand" di depan "handcannon" aman dan tidak ikut terhapus.
-    string weaponName = childName.Substring(0, childName.Length - 4);
-    
-    bool isWeaponActive = activeData != null && activeData.weaponName.Replace("_", "").Replace(" ", "").ToLower() == weaponName;
-
-    child.gameObject.SetActive(isWeaponActive);
-
-    if (isWeaponActive)
-    {
-        WeaponHitbox hitbox = child.GetComponentInChildren<WeaponHitbox>(true);
-        if (playerAttack != null && hitbox != null)
+        if (playerAttack != null)
         {
-            playerAttack.SetWeaponHitbox(hitbox);
+            playerAttack.EquipWeaponData(activeData);
+        }
+
+        // Ambil string nama senjata aktif untuk perbandingan agar lebih bersih kodenya
+        string activeWeaponName = activeData != null ? activeData.weaponName.Replace("_", "").Replace(" ", "").ToLower() : string.Empty;
+
+        // FIX PERFORMA: Menggunakan array dari cache Start() agar tidak membebani memori (GC Alloc)
+        foreach (Transform child in allChildrenCache)
+        {
+            if (child == null || child == transform) continue;
+
+            string childName = child.gameObject.name.Replace("_", "").Replace(" ", "").ToLower();
+
+            // LOGIKA UNTUK VISUAL DI TANGAN
+            if (childName.EndsWith("hand"))
+            {
+                string weaponName = childName.Substring(0, childName.Length - 4);
+                bool isWeaponActive = !string.IsNullOrEmpty(activeWeaponName) && activeWeaponName == weaponName;
+
+                child.gameObject.SetActive(isWeaponActive);
+
+                if (isWeaponActive)
+                {
+                    WeaponHitbox hitbox = child.GetComponentInChildren<WeaponHitbox>(true);
+                    if (playerAttack != null && hitbox != null)
+                    {
+                        playerAttack.SetWeaponHitbox(hitbox);
+                    }
+                }
+                continue;
+            }
+
+            // LOGIKA UNTUK VISUAL DI PUNGGUNG
+            if (childName.EndsWith("back"))
+            {
+                string weaponName = childName.Substring(0, childName.Length - 4);
+
+                bool isOwnedInSlot1 = slots[SLOT_WEAPON_1] != null && slots[SLOT_WEAPON_1].weaponName.Replace("_", "").Replace(" ", "").ToLower() == weaponName;
+                bool isOwnedInSlot2 = slots[SLOT_WEAPON_2] != null && slots[SLOT_WEAPON_2].weaponName.Replace("_", "").Replace(" ", "").ToLower() == weaponName;
+                bool isWeaponOwned = isOwnedInSlot1 || isOwnedInSlot2;
+
+                bool isWeaponActive = !string.IsNullOrEmpty(activeWeaponName) && activeWeaponName == weaponName;
+                bool shouldShowOnBack = isWeaponOwned && !isWeaponActive;
+
+                child.gameObject.SetActive(shouldShowOnBack);
+                continue;
+            }
+        }
+
+        if (activeData == null && playerAttack != null)
+        {
+            playerAttack.SetWeaponHitbox(null);
         }
     }
-    continue;
-}
 
-// 3. LOGIKA UNTUK VISUAL DI PUNGGUNG
-if (childName.EndsWith("back"))
-{
-    // Menggunakan Substring agar HANYA memotong 4 huruf terakhir ("back")
-    string weaponName = childName.Substring(0, childName.Length - 4);
-
-    bool isOwnedInSlot1 = slots[SLOT_WEAPON_1] != null && slots[SLOT_WEAPON_1].weaponName.Replace("_", "").Replace(" ", "").ToLower() == weaponName;
-    bool isOwnedInSlot2 = slots[SLOT_WEAPON_2] != null && slots[SLOT_WEAPON_2].weaponName.Replace("_", "").Replace(" ", "").ToLower() == weaponName;
-    bool isWeaponOwned = isOwnedInSlot1 || isOwnedInSlot2;
-
-    bool isWeaponActive = activeData != null && activeData.weaponName.Replace("_", "").Replace(" ", "").ToLower() == weaponName;
-
-    bool shouldShowOnBack = isWeaponOwned && !isWeaponActive;
-
-    child.gameObject.SetActive(shouldShowOnBack);
-    continue;
-}
-    }
-
-    // Jika beralih ke Unarmed (tangan kosong), bersihkan referensi hitbox di PlayerAttack
-    if (activeData == null && playerAttack != null)
-    {
-        playerAttack.SetWeaponHitbox(null);
-    }
-}
-    // -------------------------------------------------------------------------
-    // Private — Input
-    // -------------------------------------------------------------------------
-
-   private void HandleSlotSwitch()
+    private void HandleSlotSwitch()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1)) SwitchToSlot(0);
         if (Input.GetKeyDown(KeyCode.Alpha2)) SwitchToSlot(1);
         if (Input.GetKeyDown(KeyCode.Alpha3)) SwitchToSlot(2);
 
         float scroll = Input.GetAxis("Mouse ScrollWheel");
-        
         if (scroll > 0f)
         {
             SwitchToSlot((currentSlot + 1) % TOTAL_SLOTS);
@@ -302,14 +263,9 @@ if (childName.EndsWith("back"))
             TryDrop();
     }
 
-    // -------------------------------------------------------------------------
-    // Private — Pickup Detection
-    // -------------------------------------------------------------------------
-
     private void HandlePickupDetection()
     {
         Collider[] hits = Physics.OverlapSphere(transform.position, pickupRadius, pickupLayer);
-
         WeaponPickup closest = null;
         float closestDist = float.MaxValue;
 
@@ -337,10 +293,6 @@ if (childName.EndsWith("back"))
         if (Input.GetKeyDown(KeyCode.F) && nearestPickup != null)
             TryPickup(nearestPickup);
     }
-
-    // -------------------------------------------------------------------------
-    // Gizmos
-    // -------------------------------------------------------------------------
 
     void OnDrawGizmosSelected()
     {
