@@ -42,7 +42,7 @@ public class MainMenu : MonoBehaviour
     public void Play()
     {
         MusicManager.Instance.StopLobbyPlaylist();
-        LevelManager.Instance.LoadScene("PauseScene", "CircleWipe");
+        LevelManager.Instance.LoadScene("GameScene", "CircleWipe");
         MusicManager.Instance.PlayMusic("Game");
 
         Time.timeScale = 1f;
