@@ -207,60 +207,69 @@ public class PlayerInventory : MonoBehaviour
 
 private void EquipSlot(int index)
 {
-    WeaponData data = slots[index];
+    WeaponData activeData = slots[index];
     
     // 1. Kirim data stats ke PlayerAttack bawaan aslimu
     if (playerAttack != null)
     {
-        playerAttack.EquipWeaponData(data);
+        playerAttack.EquipWeaponData(activeData);
     }
 
     // Ambil semua objek di bawah Player (termasuk yang non-aktif)
     Transform[] allChildren = GetComponentsInChildren<Transform>(true);
 
-    // Format nama data senjata saat ini agar bersih
-    string cleanDataName = data != null ? data.weaponName.Replace("_", "").Replace(" ", "").ToLower() : "";
-
     foreach (Transform child in allChildren)
     {
-        // PENTING: Jangan pernah utak-atik atau mematikan objek Player utama itu sendiri!
         if (child == transform) continue;
 
-        // Daftar objek yang BENAR-BENAR merupakan root/induk dari senjata kamu di tangan
-        // Tambahkan nama GameObject senjata barumu di sini nanti (misal: "BalloonSword")
-        bool isActualWeaponRoot = child.gameObject.name == "ToyHammer" || 
-                                  child.gameObject.name == "HandCannon" || 
-                                  child.gameObject.name == "BalloonSword" ||
-                                  child.gameObject.name == "Unarmed";
+        // Ambil nama object dan bersihkan formatnya agar standar huruf kecil
+        string childName = child.gameObject.name.Replace("_", "").Replace(" ", "").ToLower();
 
-        // Jika objek yang sedang dicek BUKAN salah satu dari daftar senjata di atas,
-        // biarkan saja tetap menyala (jangan di-SetActive false) agar character tidak hilang!
-        if (!isActualWeaponRoot) continue;
+        // 2. LOGIKA UNTUK VISUAL DI TANGAN
+        // Cek apakah object ini adalah senjata tangan (akhiran "hand" atau sesuai penamaanmu)
+     // 2. LOGIKA UNTUK VISUAL DI TANGAN
+if (childName.EndsWith("hand"))
+{
+    // Menggunakan Substring agar HANYA memotong 4 huruf terakhir ("hand"), 
+    // sehingga kata "hand" di depan "handcannon" aman dan tidak ikut terhapus.
+    string weaponName = childName.Substring(0, childName.Length - 4);
+    
+    bool isWeaponActive = activeData != null && activeData.weaponName.Replace("_", "").Replace(" ", "").ToLower() == weaponName;
 
-        // Samakan format nama objek senjata untuk dicocokkan dengan WeaponData
-        string cleanChildName = child.gameObject.name.Replace("_", "").Replace(" ", "").ToLower();
+    child.gameObject.SetActive(isWeaponActive);
 
-        if (data != null && cleanChildName == cleanDataName)
+    if (isWeaponActive)
+    {
+        WeaponHitbox hitbox = child.GetComponentInChildren<WeaponHitbox>(true);
+        if (playerAttack != null && hitbox != null)
         {
-            // NYALAKAN senjata yang sedang dipilih/di-pickup
-            child.gameObject.SetActive(true);
-
-            // Jika senjata Melee ini punya Hitbox, hubungkan ke PlayerAttack agar bisa memberi damage
-            WeaponHitbox hitbox = child.GetComponentInChildren<WeaponHitbox>(true);
-            if (playerAttack != null && hitbox != null)
-            {
-                playerAttack.SetWeaponHitbox(hitbox);
-            }
-            
-            continue;
+            playerAttack.SetWeaponHitbox(hitbox);
         }
+    }
+    continue;
+}
 
-        // MATIKAN hanya objek root senjata yang tidak sedang dipilih
-        child.gameObject.SetActive(false);
+// 3. LOGIKA UNTUK VISUAL DI PUNGGUNG
+if (childName.EndsWith("back"))
+{
+    // Menggunakan Substring agar HANYA memotong 4 huruf terakhir ("back")
+    string weaponName = childName.Substring(0, childName.Length - 4);
+
+    bool isOwnedInSlot1 = slots[SLOT_WEAPON_1] != null && slots[SLOT_WEAPON_1].weaponName.Replace("_", "").Replace(" ", "").ToLower() == weaponName;
+    bool isOwnedInSlot2 = slots[SLOT_WEAPON_2] != null && slots[SLOT_WEAPON_2].weaponName.Replace("_", "").Replace(" ", "").ToLower() == weaponName;
+    bool isWeaponOwned = isOwnedInSlot1 || isOwnedInSlot2;
+
+    bool isWeaponActive = activeData != null && activeData.weaponName.Replace("_", "").Replace(" ", "").ToLower() == weaponName;
+
+    bool shouldShowOnBack = isWeaponOwned && !isWeaponActive;
+
+    child.gameObject.SetActive(shouldShowOnBack);
+    continue;
+}
     }
 
     // Jika beralih ke Unarmed (tangan kosong), bersihkan referensi hitbox di PlayerAttack
-    if (data == null && playerAttack != null)
+    if (activeData == null && playerAttack != null)
     {
         playerAttack.SetWeaponHitbox(null);
     }

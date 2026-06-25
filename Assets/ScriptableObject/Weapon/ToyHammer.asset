@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2c7051759f577d4e90bc60644040fe1, type: 3}
   m_Name: ToyHammer
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  weaponName: ToyHammer
+  weaponName: SqueekHammer
   icon: {fileID: 0}
   pickupPrefab: {fileID: 8489721802318889066, guid: cd036784138778441b23a5c82198b119, type: 3}
   damage: 35
