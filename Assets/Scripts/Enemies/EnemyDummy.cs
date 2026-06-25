@@ -59,39 +59,39 @@ public class EnemyDummy : MonoBehaviour, IDamageable
     }
 
     public void TakeDamage(int amount)
+{
+    currentHealth -= amount;
+    currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
+    if (healthBar != null)
+        healthBar.SetHealth(currentHealth);
+
+    if (audioSource != null && enemyHurtSound != null)
+        audioSource.PlayOneShot(enemyHurtSound);
+
+    if (skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0)
     {
-        currentHealth -= amount;
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-
-        if (healthBar != null)
-            healthBar.SetHealth(currentHealth);
-
-        if (audioSource != null && enemyHurtSound != null)
-            audioSource.PlayOneShot(enemyHurtSound);
-
-        if (skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0)
-        {
-            StartCoroutine(HitFlash());
-        }
-
-        // --- KNOCKBACK ---
-        // Cari objek player di dalam map
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-
-            if (player.TryGetComponent<PlayerAttack>(out PlayerAttack pAttack))
-            {
-                pAttack.ApplyKnockback(gameObject);
-            }
-        }
-        // ------------------------------------------
-
-        Debug.Log($"{gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
-
-        if (currentHealth <= 0)
-            Die();
+        StartCoroutine(HitFlash());
     }
+
+    // --- KNOCKBACK ---
+    // Cari objek player di dalam map
+    GameObject player = GameObject.FindGameObjectWithTag("Player");
+    if (player != null)
+    {
+
+        if (player.TryGetComponent<PlayerAttack>(out PlayerAttack pAttack))
+        {
+            pAttack.ApplyKnockback(gameObject);
+        }
+    }
+    // ------------------------------------------
+
+    Debug.Log($"{gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
+
+    if (currentHealth <= 0)
+        Die();
+} 
 
     IEnumerator HitFlash()
     {
