@@ -45,7 +45,6 @@ public class GameManager : MonoBehaviour
     {
         if (CurrentState == GameState.GameOver) return;
 
-        // Use GetKeyDown to guarantee it only triggers once per physical finger click
         if (Input.GetKeyDown(pauseKey))
         {
             TogglePause();
@@ -53,6 +52,20 @@ public class GameManager : MonoBehaviour
         else if (Input.GetKeyDown(inventoryKey))
         {
             ToggleInventory();
+        }
+
+        if (CurrentState == GameState.Playing)
+        {
+            if (Input.GetKeyDown(KeyCode.LeftAlt) || Input.GetKeyDown(KeyCode.RightAlt))
+            {
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+            }
+            else if (Input.GetKeyUp(KeyCode.LeftAlt) || Input.GetKeyUp(KeyCode.RightAlt))
+            {
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Confined;
+            }
         }
     }
 
@@ -107,6 +120,19 @@ public class GameManager : MonoBehaviour
     {
         // Unfreeze time scale explicitly when playing, freeze it when navigating UI menus
         Time.timeScale = (CurrentState == GameState.Playing) ? 1f : 0f;
+
+        if (CurrentState == GameState.Playing)
+        {
+            // Sembunyikan kursor putih saat kembali bermain
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Confined;
+        }
+        else
+        {
+            // Munculkan kursor saat membuka UI (Pause, Inventory, GameOver)
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None; 
+        }
     }
 
     public void GameOver()
