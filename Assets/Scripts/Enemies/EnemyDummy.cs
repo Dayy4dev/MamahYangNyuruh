@@ -19,6 +19,13 @@ public class EnemyDummy : MonoBehaviour, IDamageable
     [Header("UI")]
     public EnemyHealthBar healthBar;
 
+    // -------------------------------------------------------------------------
+    // TAMBAHAN: Audio Setup untuk Musuh / Dummy Kesakitan
+    // -------------------------------------------------------------------------
+    [Header("Audio Setup")]
+    [SerializeField] private AudioSource audioSource;   // Komponen AudioSource milik Enemy/Dummy
+    [SerializeField] private AudioClip enemyHurtSound; // File suara placeholder musuh mengaduh
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -51,6 +58,13 @@ public class EnemyDummy : MonoBehaviour, IDamageable
 
         if (healthBar != null)
             healthBar.SetHealth(currentHealth);
+
+        // --- LOGIKA PEMUTAR SUARA KESAKITAN ---
+        if (audioSource != null && enemyHurtSound != null)
+        {
+            audioSource.PlayOneShot(enemyHurtSound);
+        }
+        // --------------------------------------
 
         if (skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0)
         {

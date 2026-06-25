@@ -27,6 +27,39 @@ public class PlayerMovement : MonoBehaviour
     private static readonly int AnimHorizontal = Animator.StringToHash("Horizontal");
     private static readonly int AnimVertical = Animator.StringToHash("Vertical");
 
+[Header("Footstep Audio (Tanpa Animasi)")]
+[SerializeField] private AudioSource movementAudioSource; 
+[SerializeField] private AudioClip footstepSound;         
+[SerializeField] private float footstepInterval = 0.5f; // Jeda waktu antar langkah (makin kecil = makin cepat)
+
+private float footstepTimer;
+private void HandleFootstepSound()
+{
+    // 1. Cek apakah player sedang menekan tombol arah (W, A, S, D)
+    bool isMoving = Input.GetAxisRaw("Horizontal") != 0f || Input.GetAxisRaw("Vertical") != 0f;
+
+    if (isMoving)
+    {
+        // Jika belum ada audio yang berputar, pasang clip-nya dan putar secara loop
+        if (movementAudioSource != null && !movementAudioSource.isPlaying && footstepSound != null)
+        {
+            movementAudioSource.clip = footstepSound;
+            movementAudioSource.loop = true; // Otomatis mengulang selama jalan
+            movementAudioSource.Play();
+            Debug.Log("[Footstep] Mulai memutar suara jalan berkelanjutan.");
+        }
+    }
+    else
+    {
+        // 2. JIKA DILEPAS DAN TIDAK GERAK: Langsung matikan suaranya seketika!
+        if (movementAudioSource != null && movementAudioSource.isPlaying)
+        {
+            movementAudioSource.Stop();
+            Debug.Log("[Footstep] Player diam, suara langsung dimatikan!");
+        }
+    }
+}
+
     void Start()
     {
         controller = GetComponent<CharacterController>();
@@ -52,6 +85,8 @@ public class PlayerMovement : MonoBehaviour
         // 3. FIX DOUBLE MOVE: Gabungkan kecepatan horizontal dan vertikal lalu gerakkan SEKALI SAJA
         Vector3 finalVelocity = (moveDirection * moveSpeed) + verticalVelocity;
         controller.Move(finalVelocity * Time.deltaTime);
+
+        HandleFootstepSound();
     }
 
     private void CalculateMouseWorldPosition()
