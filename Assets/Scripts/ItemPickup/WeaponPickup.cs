@@ -16,10 +16,14 @@ public class WeaponPickup : MonoBehaviour
     [SerializeField] private WeaponData weaponData;
 
     [Header("Animation")]
-    [SerializeField] private bool enableFloat    = true;
+    [SerializeField] private bool enableFloat = true;
     [SerializeField] private float floatAmplitude = 0.2f;
-    [SerializeField] private float floatSpeed     = 2f;
+    [SerializeField] private float floatSpeed = 2f;
     [SerializeField] private Vector3 rotationSpeed = new Vector3(0f, 90f, 0f);
+
+    [Header("UI Prompt Object (Opsional)")]
+    [Tooltip("Jika kamu pakai World-Space UI menempel di senjata, masukkan Canvas-nya di sini")]
+    [SerializeField] private GameObject localPromptUI;
 
     // -------------------------------------------------------------------------
     // State
@@ -33,6 +37,7 @@ public class WeaponPickup : MonoBehaviour
     // -------------------------------------------------------------------------
 
     public WeaponData Data => weaponData;
+    public bool IsDropped => isDropped;
 
     // -------------------------------------------------------------------------
     // Unity Lifecycle
@@ -41,6 +46,7 @@ public class WeaponPickup : MonoBehaviour
     void Awake()
     {
         startY = transform.position.y;
+        TogglePrompt(false);
     }
 
     void Update()
@@ -61,9 +67,19 @@ public class WeaponPickup : MonoBehaviour
     // Public API
     // -------------------------------------------------------------------------
 
+    /// <summary>Untuk menyalakan/mematikan UI lokal di senjata ini</summary>
+    public void TogglePrompt(bool show)
+    {
+        if (localPromptUI != null)
+        {
+            localPromptUI.SetActive(show);
+        }
+    }
+
     /// <summary>Dipanggil PlayerInventory setelah senjata berhasil diambil.</summary>
     public void OnPickedUp()
     {
+        TogglePrompt(false);
         Destroy(gameObject);
     }
 
@@ -71,8 +87,5 @@ public class WeaponPickup : MonoBehaviour
     public void MarkAsDropped()
     {
         isDropped = true;
-        // Tidak DontDestroyOnLoad → otomatis terhapus saat scene berganti
     }
-
-    public bool IsDropped => isDropped;
 }
