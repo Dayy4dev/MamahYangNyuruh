@@ -10,6 +10,9 @@ public class DungeonManager : MonoBehaviour
     public DungeonGenerator dungeonGenerator;
     public Transform playerTransform;
 
+    [Header("Boss Floor")]
+    public GameObject bossRoomPrefab;   // Prefab khusus boss room, di-spawn di floor 4
+
     [Header("Spawn Settings")]
     public string spawnPointName = "SpawnPoint";
     public Vector3 fallbackOffset = new Vector3(0, 1, 0);
@@ -41,9 +44,12 @@ public class DungeonManager : MonoBehaviour
     IEnumerator InitializeDungeon()
     {
         dungeonGenerator.GenerateDungeon();
-        yield return null; // tunggu 1 frame
+        yield return null;
         RegisterAllRooms();
         TeleportPlayerToRoom(RoomType.Bottom);
+
+        int floor = FloorManager.Instance != null ? FloorManager.Instance.CurrentFloor : 1;
+        Debug.Log($"[DungeonManager] Floor {floor} dimulai.");
     }
 
     void RegisterAllRooms()
@@ -139,17 +145,8 @@ public class DungeonManager : MonoBehaviour
 
     void TeleportPlayerToRoom(RoomType type)
     {
-        if (playerTransform == null)
-        {
-            Debug.LogWarning("[DungeonManager] playerTransform belum di-assign!");
-            return;
-        }
-
-        if (!roomMap.TryGetValue(type, out RoomController room))
-        {
-            Debug.LogWarning($"[DungeonManager] Room {type} tidak ditemukan untuk teleport!");
-            return;
-        }
+        if (playerTransform == null) { Debug.LogWarning("[DungeonManager] playerTransform belum di-assign!"); return; }
+        if (!roomMap.TryGetValue(type, out RoomController room)) { Debug.LogWarning($"[DungeonManager] Room {type} tidak ditemukan!"); return; }
 
         Transform spawnPoint = FindSpawnPoint(room.transform);
         playerTransform.position = spawnPoint != null
@@ -165,7 +162,6 @@ public class DungeonManager : MonoBehaviour
     {
         Transform direct = parent.Find(spawnPointName);
         if (direct != null) return direct;
-
         foreach (Transform child in parent)
         {
             Transform found = FindSpawnPoint(child);
@@ -179,6 +175,11 @@ public class DungeonManager : MonoBehaviour
         Debug.Log("[DungeonManager] Memuat map berikutnya...");
         yield return new WaitForSeconds(transitionDelay);
 
+        // Advance floor
+        if (FloorManager.Instance != null)
+            FloorManager.Instance.AdvanceFloor();
+
+        // Hapus semua room lama
         foreach (var room in FindObjectsOfType<RoomController>())
             Destroy(room.gameObject);
 
@@ -188,12 +189,38 @@ public class DungeonManager : MonoBehaviour
 
         yield return null;
 
-        dungeonGenerator.GenerateDungeon();
+        // Cek apakah ini boss floor
+        bool isBossFloor = FloorManager.Instance != null && FloorManager.Instance.IsBossFloor;
+
+        if (isBossFloor && bossRoomPrefab != null)
+        {
+            Debug.Log("[DungeonManager] BOSS FLOOR! Spawning boss room...");
+            SpawnBossRoom();
+        }
+        else
+        {
+            dungeonGenerator.GenerateDungeon();
+        }
+
         yield return null;
 
         RegisterAllRooms();
         TeleportPlayerToRoom(RoomType.Bottom);
 
         Debug.Log("[DungeonManager] Map baru loaded!");
+    }
+
+    void SpawnBossRoom()
+    {
+        // Spawn boss room di posisi (0,0,0) sebagai Bottom room
+        GameObject bossRoomObj = Instantiate(bossRoomPrefab, Vector3.zero, Quaternion.identity);
+        bossRoomObj.name = "BossRoom";
+
+        RoomController roomCtrl = bossRoomObj.GetComponent<RoomController>();
+        if (roomCtrl != null)
+        {
+            roomCtrl.roomType = RoomType.Bottom;
+            roomCtrl.GridPosition = Vector2Int.zero;
+        }
     }
 }

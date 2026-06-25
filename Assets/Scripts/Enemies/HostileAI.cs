@@ -3,14 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.AI;
 
-// HA HAYO JELASKAN KODENYA
-// GTW PAK NYOLONG YUTUB (Sudah dijinakkan biar gak ndongak lagi, Pak!)
-
-public class HostileAI : MonoBehaviour
+public class HostileAI : MonoBehaviour, IDamageable
 {
-    [Header("Audio Setup Custom")]
-[SerializeField] private AudioSource hostileAudioSource;
-[SerializeField] private AudioClip rangedShootSound;
     [Header("References")]
     [SerializeField] private NavMeshAgent navAgent;
     [SerializeField] private Animator animator;
@@ -22,6 +16,14 @@ public class HostileAI : MonoBehaviour
     [SerializeField] private LayerMask terrainLayer;
     [SerializeField] private LayerMask playerLayerMask;
 
+    [Header("Stats")]
+    [SerializeField] private int maxHealth = 80;
+    [SerializeField] private int projectileDamage = 15;
+    private int currentHealth;
+
+    [Header("UI")]
+    private EnemyHealthBar healthBar;
+
     [Header("Patrol Settings")]
     [SerializeField] private float patrolRadius = 10f;
     private Vector3 currentPatrolPoint;
@@ -30,9 +32,9 @@ public class HostileAI : MonoBehaviour
     [Header("Combat Settings")]
     [SerializeField] private float attackCooldown = 1f;
     private bool isOnAttackCooldown;
-    [SerializeField] private float projectileSpeed = 20f;       // pisahkan jadi variabel
-    [SerializeField] private float accuracyError = 0.5f;        // 0 = tepat, makin tinggi makin meleset
-    [SerializeField] private bool usePrediction = true;         // toggle lead prediction
+    [SerializeField] private float projectileSpeed = 20f;
+    [SerializeField] private float accuracyError = 0.5f;   // 0 = tepat, makin tinggi makin meleset
+    [SerializeField] private bool usePrediction = true;    // toggle lead prediction
     [SerializeField] private int projectilePoolSize = 10;
     [SerializeField] private float projectileLifetime = 3f;
 
@@ -40,28 +42,50 @@ public class HostileAI : MonoBehaviour
     [SerializeField] private float visionRange = 20f;
     [SerializeField] private float engagementRange = 10f;
 
+    [Header("Audio")]
+    [SerializeField] private AudioSource hostileAudioSource;
+    [SerializeField] private AudioClip rangedShootSound;
+
     private bool isPlayerVisible;
     private bool isPlayerInRange;
     private readonly Queue<GameObject> projectilePool = new Queue<GameObject>();
     private Transform projectilePoolRoot;
+    private EnemySpawner spawner;
+
+    // ── Scaling API ───────────────────────────────────────────────────────────
+
+    public int   GetBaseHP()     => maxHealth;
+    public int   GetBaseDamage() => projectileDamage;
+    public float GetBaseSpeed()  => navAgent != null ? navAgent.speed : 3.5f;
+
+    public void SetScaledStats(int hp, int dmg, float speed)
+    {
+        maxHealth        = hp;
+        projectileDamage = dmg;
+        currentHealth    = hp;
+
+        if (navAgent  != null) navAgent.speed = speed;
+        if (healthBar != null) healthBar.SetMaxHealth(hp);
+    }
+
+    // ── Unity Lifecycle ───────────────────────────────────────────────────────
 
     private void Awake()
     {
         GameObject playerObj = GameObject.FindWithTag("Player");
-        if (playerObj != null)
-        {
-            playerTransform = playerObj.transform;
-        }
+        if (playerObj != null) playerTransform = playerObj.transform;
 
-        if (navAgent == null)
-        {
-            navAgent = GetComponent<NavMeshAgent>();
-        }
+        if (navAgent           == null) navAgent           = GetComponent<NavMeshAgent>();
+        if (animator           == null) animator           = GetComponent<Animator>();
+        if (hostileAudioSource == null) hostileAudioSource = GetComponent<AudioSource>();
 
-        if (animator == null)
-        {
-            animator = GetComponent<Animator>();
-        }
+        healthBar = GetComponentInChildren<EnemyHealthBar>();
+
+        spawner = GetComponentInParent<EnemySpawner>();
+        if (spawner == null) spawner = FindObjectOfType<EnemySpawner>();
+
+        currentHealth = maxHealth;
+        if (healthBar != null) healthBar.SetMaxHealth(maxHealth);
 
         InitializeProjectilePool();
     }
@@ -76,20 +100,18 @@ public class HostileAI : MonoBehaviour
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, engagementRange);
-
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, visionRange);
     }
+
+    // ── Detection ─────────────────────────────────────────────────────────────
 
     private void DetectPlayer()
     {
         if (playerTransform == null)
         {
             GameObject playerObj = GameObject.FindWithTag("Player");
-            if (playerObj != null)
-            {
-                playerTransform = playerObj.transform;
-            }
+            if (playerObj != null) playerTransform = playerObj.transform;
         }
 
         if (playerTransform == null)
@@ -99,25 +121,24 @@ public class HostileAI : MonoBehaviour
             return;
         }
 
-        float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
-        isPlayerVisible = distanceToPlayer <= visionRange;
-        isPlayerInRange = distanceToPlayer <= engagementRange;
+        float dist      = Vector3.Distance(transform.position, playerTransform.position);
+        isPlayerVisible = dist <= visionRange;
+        isPlayerInRange = dist <= engagementRange;
     }
+
+    // ── Projectile Pool ───────────────────────────────────────────────────────
 
     private void InitializeProjectilePool()
     {
         if (projectilePrefab == null) return;
 
-        if (projectilePoolRoot == null)
-        {
-            projectilePoolRoot = new GameObject("ProjectilePool - " + gameObject.name).transform;
-        }
+        projectilePoolRoot = new GameObject("ProjectilePool - " + gameObject.name).transform;
 
         for (int i = 0; i < projectilePoolSize; i++)
         {
-            GameObject projectile = Instantiate(projectilePrefab, projectilePoolRoot);
-            projectile.SetActive(false);
-            projectilePool.Enqueue(projectile);
+            GameObject p = Instantiate(projectilePrefab, projectilePoolRoot);
+            p.SetActive(false);
+            projectilePool.Enqueue(p);
         }
     }
 
@@ -125,73 +146,71 @@ public class HostileAI : MonoBehaviour
     {
         if (projectilePool.Count == 0)
         {
-            GameObject projectile = Instantiate(projectilePrefab, projectilePoolRoot);
-            projectile.SetActive(false);
-            projectilePool.Enqueue(projectile);
+            GameObject p = Instantiate(projectilePrefab, projectilePoolRoot);
+            p.SetActive(false);
+            projectilePool.Enqueue(p);
         }
-
         return projectilePool.Dequeue();
     }
 
     private void FireProjectile()
-{
-    if (projectilePrefab == null || firePoint == null || playerTransform == null)
-        return;
-
-    // --- SUNTIK KODE AUDIO TEMBAKAN DI SINI ---
-    if (hostileAudioSource != null && rangedShootSound != null)
     {
-        hostileAudioSource.PlayOneShot(rangedShootSound);
-        Debug.Log($"[HostileAI] {gameObject.name} menembakkan peluru dan memutar suara!");
+        if (projectilePrefab == null || firePoint == null || playerTransform == null) return;
+
+        if (hostileAudioSource != null && rangedShootSound != null)
+            hostileAudioSource.PlayOneShot(rangedShootSound);
+
+        GameObject bullet = GetProjectileFromPool();
+        bullet.transform.position = firePoint.position;
+        bullet.transform.rotation = Quaternion.identity;
+        bullet.SetActive(true);
+
+        // Sinkronkan damage ke Projectile sesuai scaling
+        Projectile proj = bullet.GetComponent<Projectile>();
+        if (proj != null) proj.damage = projectileDamage;
+
+        Rigidbody rb = bullet.GetComponent<Rigidbody>();
+        if (rb == null) return;
+
+        Vector3 targetPos = playerTransform.position + Vector3.up * 1f;
+
+        if (usePrediction)
+        {
+            float dist      = Vector3.Distance(firePoint.position, targetPos);
+            float travelTime = dist / projectileSpeed;
+
+            // Coba ambil velocity dari NavMeshAgent atau Rigidbody player
+            Vector3 playerVel   = Vector3.zero;
+            NavMeshAgent pAgent = playerTransform.GetComponent<NavMeshAgent>();
+            Rigidbody    pRb    = playerTransform.GetComponent<Rigidbody>();
+
+            if      (pAgent != null) playerVel = pAgent.velocity;
+            else if (pRb    != null) playerVel = pRb.linearVelocity;
+
+            targetPos += playerVel * travelTime;
+        }
+
+        Vector3 dir      = (targetPos - firePoint.position).normalized;
+        float   tEst     = Vector3.Distance(firePoint.position, targetPos) / projectileSpeed;
+        float   gravOff  = 0.5f * Mathf.Abs(Physics.gravity.y) * tEst * tEst;
+        dir = (dir + Vector3.up * (gravOff / Vector3.Distance(firePoint.position, targetPos))).normalized;
+
+        if (accuracyError > 0f)
+        {
+            dir += new Vector3(
+                Random.Range(-accuracyError, accuracyError),
+                Random.Range(-accuracyError, accuracyError),
+                Random.Range(-accuracyError, accuracyError)) * 0.05f;
+            dir.Normalize();
+        }
+
+        rb.linearVelocity  = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.linearVelocity  = dir * projectileSpeed;
+        bullet.transform.forward = dir;
+
+        StartCoroutine(ReturnProjectileToPool(bullet, projectileLifetime));
     }
-
-    GameObject bullet = GetProjectileFromPool();
-    bullet.transform.position = firePoint.position;
-    bullet.transform.rotation = Quaternion.identity;
-    bullet.SetActive(true);
-
-    Rigidbody rb = bullet.GetComponent<Rigidbody>();
-    if (rb == null) return;
-
-    Vector3 targetPos = playerTransform.position + Vector3.up * 1f;
-
-    if (usePrediction)
-    {
-        float distToTarget = Vector3.Distance(firePoint.position, targetPos);
-        float travelTime = distToTarget / projectileSpeed;
-
-        Vector3 playerVelocity = Vector3.zero;
-        NavMeshAgent playerAgent = playerTransform.GetComponent<NavMeshAgent>();
-        Rigidbody playerRb = playerTransform.GetComponent<Rigidbody>();
-
-        if (playerAgent != null) playerVelocity = playerAgent.velocity;
-        else if (playerRb != null) playerVelocity = playerRb.linearVelocity;
-
-        targetPos += playerVelocity * travelTime;
-    }
-
-    Vector3 direction = (targetPos - firePoint.position).normalized;
-    float travelEst = Vector3.Distance(firePoint.position, targetPos) / projectileSpeed;
-    float gravOffset = 0.5f * Mathf.Abs(Physics.gravity.y) * travelEst * travelEst;
-    direction = (direction + Vector3.up * (gravOffset / Vector3.Distance(firePoint.position, targetPos))).normalized;
-
-    if (accuracyError > 0f)
-    {
-        direction += new Vector3(
-            Random.Range(-accuracyError, accuracyError),
-            Random.Range(-accuracyError, accuracyError),
-            Random.Range(-accuracyError, accuracyError)
-        ) * 0.05f;
-        direction.Normalize();
-    }
-
-    rb.linearVelocity = Vector3.zero;
-    rb.angularVelocity = Vector3.zero;
-    rb.linearVelocity = direction * projectileSpeed;
-    bullet.transform.forward = direction;
-
-    StartCoroutine(ReturnProjectileToPool(bullet, projectileLifetime));
-}
 
     private IEnumerator ReturnProjectileToPool(GameObject projectile, float delay)
     {
@@ -205,17 +224,62 @@ public class HostileAI : MonoBehaviour
         }
     }
 
+    // ── Behaviour State Machine ───────────────────────────────────────────────
+
+    private void UpdateBehaviourState()
+    {
+        if      (!isPlayerVisible && !isPlayerInRange) PerformPatrol();
+        else if ( isPlayerVisible && !isPlayerInRange) PerformChase();
+        else if ( isPlayerVisible &&  isPlayerInRange) PerformAttack();
+
+        UpdateAnimatorParameters();
+    }
+
     private void FindPatrolPoint()
     {
-        float randomX = Random.Range(-patrolRadius, patrolRadius);
-        float randomZ = Random.Range(-patrolRadius, patrolRadius);
+        float rx = Random.Range(-patrolRadius, patrolRadius);
+        float rz = Random.Range(-patrolRadius, patrolRadius);
+        Vector3 candidate = new Vector3(transform.position.x + rx, transform.position.y, transform.position.z + rz);
 
-        Vector3 potentialPoint = new Vector3(transform.position.x + randomX, transform.position.y, transform.position.z + randomZ);
-
-        if (Physics.Raycast(potentialPoint, -transform.up, 2f, terrainLayer))
+        if (Physics.Raycast(candidate, -transform.up, 2f, terrainLayer))
         {
-            currentPatrolPoint = potentialPoint;
-            hasPatrolPoint = true;
+            currentPatrolPoint = candidate;
+            hasPatrolPoint     = true;
+        }
+    }
+
+    private void PerformPatrol()
+    {
+        if (!hasPatrolPoint) FindPatrolPoint();
+
+        if (hasPatrolPoint && navAgent != null && navAgent.isOnNavMesh)
+            navAgent.SetDestination(currentPatrolPoint);
+
+        if (Vector3.Distance(transform.position, currentPatrolPoint) < 1f)
+            hasPatrolPoint = false;
+    }
+
+    private void PerformChase()
+    {
+        if (playerTransform != null && navAgent != null && navAgent.isOnNavMesh)
+            navAgent.SetDestination(playerTransform.position);
+    }
+
+    private void PerformAttack()
+    {
+        if (navAgent != null && navAgent.isOnNavMesh)
+            navAgent.SetDestination(transform.position); // berhenti di tempat
+
+        if (playerTransform != null)
+        {
+            Vector3 lookTarget = new Vector3(playerTransform.position.x, transform.position.y, playerTransform.position.z);
+            transform.LookAt(lookTarget);
+        }
+
+        if (!isOnAttackCooldown)
+        {
+            FireProjectile();
+            StartCoroutine(AttackCooldownRoutine());
         }
     }
 
@@ -226,73 +290,35 @@ public class HostileAI : MonoBehaviour
         isOnAttackCooldown = false;
     }
 
-    private void PerformPatrol()
-    {
-        if (!hasPatrolPoint)
-            FindPatrolPoint();
-
-        if (hasPatrolPoint)
-            navAgent.SetDestination(currentPatrolPoint);
-
-        if (Vector3.Distance(transform.position, currentPatrolPoint) < 1f)
-            hasPatrolPoint = false;
-    }
-
-    private void PerformChase()
-    {
-        if (playerTransform != null)
-        {
-            navAgent.SetDestination(playerTransform.position);
-        }
-    }
-
-    private void PerformAttack()
-    {
-        // Berhenti bergerak saat menyerang
-        navAgent.SetDestination(transform.position);
-
-        if (playerTransform != null)
-        {
-
-            Vector3 targetPosition = new Vector3(playerTransform.position.x, transform.position.y, playerTransform.position.z);
-
-            transform.LookAt(targetPosition);
-        }
-
-        if (!isOnAttackCooldown)
-        {
-            FireProjectile();
-            StartCoroutine(AttackCooldownRoutine());
-        }
-    }
-
-    private void UpdateBehaviourState()
-    {
-        if (!isPlayerVisible && !isPlayerInRange)
-        {
-            PerformPatrol();
-        }
-        else if (isPlayerVisible && !isPlayerInRange)
-        {
-            PerformChase();
-        }
-        else if (isPlayerVisible && isPlayerInRange)
-        {
-            PerformAttack();
-        }
-
-        // Update animator with movement parameters
-        UpdateAnimatorParameters();
-    }
-
     private void UpdateAnimatorParameters()
     {
-        if (animator == null) return;
+        if (animator == null || navAgent == null) return;
 
-        Vector3 velocity = navAgent.velocity;
-        Vector3 localVelocity = transform.InverseTransformDirection(velocity);
-
+        Vector3 localVelocity = transform.InverseTransformDirection(navAgent.velocity);
         animator.SetFloat("Horizontal", localVelocity.x);
-        animator.SetFloat("Vertical", localVelocity.z);
+        animator.SetFloat("Vertical",   localVelocity.z);
+    }
+
+    // ── IDamageable ───────────────────────────────────────────────────────────
+
+    public void TakeDamage(int amount)
+    {
+        currentHealth = Mathf.Clamp(currentHealth - amount, 0, maxHealth);
+
+        if (healthBar != null) healthBar.SetHealth(currentHealth);
+
+        Debug.Log($"[HostileAI] {gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
+
+        if (currentHealth <= 0) Die();
+    }
+
+    private void Die()
+    {
+        Debug.Log($"[HostileAI] {gameObject.name} mati!");
+
+        if (spawner           != null) spawner.NotifyEnemyDestroyed(gameObject);
+        if (projectilePoolRoot != null) Destroy(projectilePoolRoot.gameObject);
+
+        Destroy(gameObject, 0.1f);
     }
 }

@@ -3,16 +3,24 @@ using System.Collections;
 using UnityEngine.AI;
 
 [AddComponentMenu("Enemies/Melee NavMesh Enemy")]
-public class MeleeEnemy : MonoBehaviour
+public class MeleeEnemy : MonoBehaviour, IDamageable
 {
     [Header("References")]
     [SerializeField] private NavMeshAgent navAgent;
     [SerializeField] private Animator animator;
     private Transform playerTransform;
+    private EnemySpawner spawner;
+
+    [Header("Stats")]
+    [SerializeField] private int maxHealth = 100;
+    private int currentHealth;
+
+    [Header("UI")]
+    [SerializeField] private EnemyHealthBar healthBar;
 
     [Header("Layers")]
-    [SerializeField] private LayerMask terrainLayer;     // Layer untuk lantai/ground panggung
-    [SerializeField] private LayerMask playerLayerMask; // Layer untuk mendeteksi player saat memukul
+    [SerializeField] private LayerMask terrainLayer;      // Layer lantai/ground untuk patrol
+    [SerializeField] private LayerMask playerLayerMask;   // Layer player untuk deteksi hit
 
     [Header("Patrol Settings")]
     [SerializeField] private float patrolRadius = 8f;
@@ -28,31 +36,49 @@ public class MeleeEnemy : MonoBehaviour
     [SerializeField] private float visionRange = 10f;       // Jarak mulai mengejar
     [SerializeField] private float engagementRange = 1.8f;  // Jarak mulai memukul
 
-    // -------------------------------------------------------------------------
-    // AUDIO SETUP (UNTUK SERANGAN MELEE MUSUH)
-    // -------------------------------------------------------------------------
-    [Header("Audio Setup")]
-    [SerializeField] private AudioSource enemyAudioSource; // Tarik komponen AudioSource musuh ke sini
-    [SerializeField] private AudioClip meleeAttackSound;   // Masukkan file audio ayunan senjata/pukulan musuh
+    [Header("Audio")]
+    [SerializeField] private AudioSource enemyAudioSource;
+    [SerializeField] private AudioClip meleeAttackSound;
 
     private bool isPlayerVisible;
     private bool isPlayerInRange;
 
+    // ── Scaling API ───────────────────────────────────────────────────────────
+
+    public int   GetBaseHP()     => maxHealth;
+    public int   GetBaseDamage() => damage;
+    public float GetBaseSpeed()  => navAgent != null ? navAgent.speed : 3.5f;
+
+    public void SetScaledStats(int hp, int dmg, float speed)
+    {
+        maxHealth     = hp;
+        currentHealth = hp;
+        damage        = dmg;
+
+        if (navAgent  != null) navAgent.speed = speed;
+        if (healthBar != null) healthBar.SetMaxHealth(hp);
+    }
+
+    // ── Unity Lifecycle ───────────────────────────────────────────────────────
+
     private void Awake()
     {
-        // Cari player otomatis menggunakan Tag "Player"
         if (playerTransform == null)
         {
             GameObject playerObj = GameObject.FindWithTag("Player");
             if (playerObj != null) playerTransform = playerObj.transform;
         }
 
-        if (navAgent == null) navAgent = GetComponent<NavMeshAgent>();
-        
-        if (animator == null) animator = GetComponentInChildren<Animator>();
-        
-        // Otomatis mengambil AudioSource di objek ini jika belum dipasang manual
-        if (enemyAudioSource == null) enemyAudioSource = GetComponent<AudioSource>();
+        if (navAgent          == null) navAgent          = GetComponent<NavMeshAgent>();
+        if (animator          == null) animator          = GetComponentInChildren<Animator>();
+        if (enemyAudioSource  == null) enemyAudioSource  = GetComponent<AudioSource>();
+
+        // Cari spawner: cek parent dulu, lalu scene
+        spawner = GetComponentInParent<EnemySpawner>();
+        if (spawner == null) spawner = FindObjectOfType<EnemySpawner>();
+
+        currentHealth = maxHealth;
+        if (healthBar != null) healthBar.SetMaxHealth(maxHealth);
     }
 
     private void Update()
@@ -71,13 +97,14 @@ public class MeleeEnemy : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, visionRange);
     }
 
+    // ── Detection ─────────────────────────────────────────────────────────────
+
     private void DetectPlayer()
     {
         if (playerTransform == null)
         {
             GameObject playerObj = GameObject.FindWithTag("Player");
-            if (playerObj != null)
-                playerTransform = playerObj.transform;
+            if (playerObj != null) playerTransform = playerObj.transform;
         }
 
         if (playerTransform == null)
@@ -87,54 +114,38 @@ public class MeleeEnemy : MonoBehaviour
             return;
         }
 
-        float distanceToPlayer = Vector3.Distance(transform.position, playerTransform.position);
-
-        isPlayerVisible = distanceToPlayer <= visionRange;
-        isPlayerInRange = distanceToPlayer <= engagementRange;
+        float dist      = Vector3.Distance(transform.position, playerTransform.position);
+        isPlayerVisible = dist <= visionRange;
+        isPlayerInRange = dist <= engagementRange;
     }
+
+    // ── Behaviour State Machine ───────────────────────────────────────────────
 
     private void UpdateBehaviourState()
     {
-        if (playerTransform == null)
-        {
-            PerformPatrol();
-            return;
-        }
+        if (playerTransform == null) { PerformPatrol(); return; }
 
-        // State Machine penentu aksi musuh
-        if (!isPlayerVisible && !isPlayerInRange)
-        {
-            PerformPatrol();
-        }
-        else if (isPlayerVisible && !isPlayerInRange)
-        {
-            PerformChase();
-        }
-        else if (isPlayerVisible && isPlayerInRange)
-        {
-            PerformAttack();
-        }
+        if      (!isPlayerVisible && !isPlayerInRange) PerformPatrol();
+        else if ( isPlayerVisible && !isPlayerInRange) PerformChase();
+        else if ( isPlayerVisible &&  isPlayerInRange) PerformAttack();
     }
 
     private void FindPatrolPoint()
     {
-        float randomX = Random.Range(-patrolRadius, patrolRadius);
-        float randomZ = Random.Range(-patrolRadius, patrolRadius);
+        float rx = Random.Range(-patrolRadius, patrolRadius);
+        float rz = Random.Range(-patrolRadius, patrolRadius);
+        Vector3 candidate = new Vector3(transform.position.x + rx, transform.position.y, transform.position.z + rz);
 
-        Vector3 potentialPoint = new Vector3(transform.position.x + randomX, transform.position.y, transform.position.z + randomZ);
-
-        // Menembakkan raycast ke bawah untuk mendeteksi tanah panggung
-        if (Physics.Raycast(potentialPoint + Vector3.up * 2f, Vector3.down, out RaycastHit hit, 5f, terrainLayer))
+        if (Physics.Raycast(candidate + Vector3.up * 2f, Vector3.down, out RaycastHit hit, 5f, terrainLayer))
         {
             currentPatrolPoint = hit.point;
-            hasPatrolPoint = true;
+            hasPatrolPoint     = true;
         }
     }
 
     private void PerformPatrol()
     {
-        if (!hasPatrolPoint)
-            FindPatrolPoint();
+        if (!hasPatrolPoint) FindPatrolPoint();
 
         if (hasPatrolPoint && navAgent != null && navAgent.isOnNavMesh)
             navAgent.SetDestination(currentPatrolPoint);
@@ -145,24 +156,21 @@ public class MeleeEnemy : MonoBehaviour
 
     private void PerformChase()
     {
-        if (playerTransform != null && navAgent != null && navAgent.isOnNavMesh)
-        {
-            navAgent.stoppingDistance = 0f;
-            navAgent.SetDestination(playerTransform.position);
-        }
+        if (playerTransform == null || navAgent == null || !navAgent.isOnNavMesh) return;
+
+        navAgent.stoppingDistance = 0f;
+        navAgent.SetDestination(playerTransform.position);
     }
 
     private void PerformAttack()
     {
         if (navAgent != null && navAgent.isOnNavMesh)
-        {
-            navAgent.SetDestination(transform.position);
-        }
+            navAgent.SetDestination(transform.position); // berhenti di tempat
 
         if (playerTransform != null)
         {
-            Vector3 targetPosition = new Vector3(playerTransform.position.x, transform.position.y, playerTransform.position.z);
-            transform.LookAt(targetPosition);
+            Vector3 lookTarget = new Vector3(playerTransform.position.x, transform.position.y, playerTransform.position.z);
+            transform.LookAt(lookTarget);
         }
 
         if (!isOnAttackCooldown)
@@ -174,35 +182,23 @@ public class MeleeEnemy : MonoBehaviour
 
     private void ExecuteMeleeStrike()
     {
-        // --- SUNTIK KODE AUDIO SERANGAN MELEE ---
         if (enemyAudioSource != null && meleeAttackSound != null)
-        {
             enemyAudioSource.PlayOneShot(meleeAttackSound);
-            Debug.Log($"[MeleeEnemy] {gameObject.name} memutar suara serangan melee!");
-        }
 
         // if (animator != null) animator.SetTrigger("Attack");
 
-        Vector3 spherePos = transform.position + transform.forward * (engagementRange * 0.5f);
-        Collider[] hits = Physics.OverlapSphere(spherePos, engagementRange, playerLayerMask);
-        
+        Vector3    spherePos = transform.position + transform.forward * (engagementRange * 0.5f);
+        Collider[] hits      = Physics.OverlapSphere(spherePos, engagementRange, playerLayerMask);
+
         foreach (var c in hits)
         {
             if (c == null) continue;
 
             if (c.CompareTag("Player"))
-            {
-                Debug.Log("MeleeEnemy: BERHASIL MEMUKUL PLAYER -> " + c.gameObject.name);
-            }
+                Debug.Log($"[MeleeEnemy] {gameObject.name} memukul player: {c.gameObject.name}");
 
-            if (c.TryGetComponent<PlayerHealth>(out var ph))
-            {
-                ph.TakeDamage(damage);
-            }
-            else if (c.TryGetComponent<IDamageable>(out var d))
-            {
-                d.TakeDamage(damage);
-            }
+            if      (c.TryGetComponent<PlayerHealth>(out var ph)) ph.TakeDamage(damage);
+            else if (c.TryGetComponent<IDamageable> (out var d )) d.TakeDamage(damage);
         }
     }
 
@@ -215,14 +211,32 @@ public class MeleeEnemy : MonoBehaviour
 
     private void UpdateAnimation()
     {
-        if (animator != null && navAgent != null)
-        {
-            Vector3 velocity = navAgent.velocity;
-            
-            Vector3 localVelocity = transform.InverseTransformDirection(velocity);
+        if (animator == null || navAgent == null) return;
 
-            animator.SetFloat("Horizontal", localVelocity.x);
-            animator.SetFloat("Vertical", localVelocity.z);
-        }
+        Vector3 localVelocity = transform.InverseTransformDirection(navAgent.velocity);
+        animator.SetFloat("Horizontal", localVelocity.x);
+        animator.SetFloat("Vertical",   localVelocity.z);
+    }
+
+    // ── IDamageable ───────────────────────────────────────────────────────────
+
+    public void TakeDamage(int amount)
+    {
+        currentHealth = Mathf.Clamp(currentHealth - amount, 0, maxHealth);
+
+        if (healthBar != null) healthBar.SetHealth(currentHealth);
+
+        Debug.Log($"[MeleeEnemy] {gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
+
+        if (currentHealth <= 0) Die();
+    }
+
+    private void Die()
+    {
+        Debug.Log($"[MeleeEnemy] {gameObject.name} mati!");
+
+        if (spawner != null) spawner.NotifyEnemyDestroyed(gameObject);
+
+        Destroy(gameObject, 0.1f);
     }
 }
