@@ -42,8 +42,10 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         Animator animator = GetComponentInChildren<Animator>();
         if (animator != null) animator.SetTrigger("Die");
 
+        // Matikan auto-reload lama biar diatur sepenuhnya oleh GameManager yang baru
         // StartCoroutine(ReloadSceneAfterDelay());
 
+        // Panggil sistem transisi COOKED di GameManager
         if (GameManager.Instance != null)
         {
             GameManager.Instance.GameOver();

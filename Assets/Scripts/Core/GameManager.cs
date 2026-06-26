@@ -105,19 +105,41 @@ public class GameManager : MonoBehaviour
 
     private void ApplyStateEffects()
     {
-        // Unfreeze time scale explicitly when playing, freeze it when navigating UI menus
-        Time.timeScale = (CurrentState == GameState.Playing) ? 1f : 0f;
-
-        if (CurrentState == GameState.GameOver)
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
+        Time.timeScale = (CurrentState == GameState.Playing || CurrentState == GameState.GameOver) ? 1f : 0f;
     }
 
     public void GameOver()
     {
+        // Ubah state ke GameOver agar panel COOKED aktif
         SetState(GameState.GameOver);
+
+        // Waktu tetap berjalan normal agar animasi tidak macet
+        Time.timeScale = 1f;
+
+        // Jalankan hitung mundur kelipatan 2 detik
+        StartCoroutine(ProsesAutoRespawnKelipatan2());
+    }
+
+    private System.Collections.IEnumerator ProsesAutoRespawnKelipatan2()
+    {
+        // 1. FADE IN PANEL COOKED (2 Detik): Menunggu animasi masuk sampai layar hitam pekat
+        yield return new WaitForSeconds(2f);
+
+        // 2. TAHAN GELAP (3 Detik): Layar diam penuh menampilkan tulisan "COOKED"
+        yield return new WaitForSeconds(2f);
+
+        // 3. FADE OUT & RESPAWN (3 Detik):
+        string sceneSekarang = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+
+        if (LevelManager.Instance != null)
+        {
+            // Ganti "CircleWipe" dengan efek memudar ("Fade") bawaan dari LevelManager-mu
+            LevelManager.Instance.LoadScene(sceneSekarang, "CrossFade");
+        }
+        else
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene(sceneSekarang);
+        }
     }
 
     public void ResumeGame()
