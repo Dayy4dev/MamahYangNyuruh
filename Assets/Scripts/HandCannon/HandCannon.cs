@@ -14,15 +14,17 @@ public class HandCannon : Weapon
 
     [Header("References")]
     [SerializeField] private WeaponData weaponData;
-    [SerializeField] private PlayerMovement playerMovement; // Tarik script PlayerMovement ke sini di Inspector
+    [SerializeField] private PlayerMovement playerMovement;
 
     // Internal state
     private int magazineSize;
     private float reloadTime;
+    private float fireRate;
     private int currentBullet;
     private bool isReloading;
     private Coroutine reloadCoroutine;
     private float remainingReloadTime;
+    private float fireRateTimer;
 
     private IObjectPool<Bullet> bulletPool;
 
@@ -45,12 +47,11 @@ public class HandCannon : Weapon
         {
             reloadTime = weaponData.reloadTime;
             magazineSize = weaponData.magazineSize;
+            fireRate = weaponData.fireRate;
         }
 
-        // Diisi setelah weaponData dibaca, biar nilainya bener
         currentBullet = magazineSize;
 
-        // Pastikan laser mati di awal game jika tidak klik kanan
         if (laserLineRenderer != null)
         {
             laserLineRenderer.enabled = false;
@@ -59,54 +60,61 @@ public class HandCannon : Weapon
 
     private void Update()
     {
+        if (fireRateTimer > 0f)
+            fireRateTimer -= Time.deltaTime;
+
         if (laserLineRenderer == null || firePoint == null || playerMovement == null) return;
 
-        // CEK INPUT: 1 adalah index untuk Klik Kanan
         if (Input.GetMouseButton(1))
         {
-            // Aktifkan LineRenderer jika sedang menahan klik kanan
             if (!laserLineRenderer.enabled) laserLineRenderer.enabled = true;
 
-            // Pangkal laser tetap di moncong
             laserLineRenderer.SetPosition(0, firePoint.position);
 
-            // Ambil target horizontal dari posisi mouse
             Vector3 targetPos = playerMovement.GetMouseTargetPosition;
 
-            // Kunci tinggi Y agar sejajar dengan moncong senjata, biar gak menukik ke lantai
             targetPos.y = firePoint.position.y;
 
-            // Paksa ujung laser menunjuk ke target tersebut!
             laserLineRenderer.SetPosition(1, targetPos);
         }
         else
         {
-            // Matikan LineRenderer jika klik kanan dilepas
             if (laserLineRenderer.enabled) laserLineRenderer.enabled = false;
+        }
+    }
+
+    public bool CanFire()
+    {
+        return !isReloading && currentBullet > 0 && fireRateTimer <= 0f;
+    }
+
+    public void ConsumeBullet()
+    {
+        currentBullet--;
+
+        fireRateTimer = fireRate;
+
+        if (currentBullet <= 0)
+        {
+            reloadCoroutine = StartCoroutine(ReloadCoroutine());
         }
     }
 
     public override void Attack()
     {
-        if (isReloading || playerMovement == null) return;
+        if (!CanFire() || playerMovement == null) return;
 
         Bullet bullet = bulletPool.Get();
         bullet.transform.position = firePoint.position;
 
-        // Hitung arah dari moncong ke target mouse
         Vector3 targetPos = playerMovement.GetMouseTargetPosition;
-        targetPos.y = firePoint.position.y; // Samakan tinggi Y
+        targetPos.y = firePoint.position.y;
 
         Vector3 shootDirection = (targetPos - firePoint.position).normalized;
 
-        // Paksa peluru menghadap ke arah tembakan yang benar
         bullet.transform.rotation = Quaternion.LookRotation(shootDirection);
 
-        currentBullet--;
-        if (currentBullet <= 0)
-        {
-            reloadCoroutine = StartCoroutine(ReloadCoroutine());
-        }
+        ConsumeBullet();
     }
 
     public void ResetReloadState()
@@ -130,7 +138,6 @@ public class HandCannon : Weapon
             Debug.Log($"Reload paused. Sisa waktu: {remainingReloadTime:F1}s");
         }
 
-        // Matikan laser saat senjata diganti/dimatikan
         if (laserLineRenderer != null) laserLineRenderer.enabled = false;
     }
 
@@ -170,7 +177,7 @@ public class HandCannon : Weapon
         Debug.Log("Reloaded!");
     }
 
-    // OBJECT POOL CALLBACKS
+    //pooled object
 
     private Bullet CreateBullet()
     {

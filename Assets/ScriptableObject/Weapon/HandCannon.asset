@@ -20,8 +20,9 @@ MonoBehaviour:
   attackCooldown: 0
   knockbackForce: 0
   knockbackDuration: 0
-  defaultCapacity: 30
-  maxPoolSize: 50
+  defaultCapacity: 10
+  maxPoolSize: 10
   speed: 30
   magazineSize: 10
-  reloadTime: 1.2
+  reloadTime: 2
+  fireRate: 0.1

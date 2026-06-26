@@ -179,25 +179,24 @@ public class PlayerInventory : MonoBehaviour
         onActiveSlotChanged?.Invoke(currentSlot);
     }
 
-   private void EquipSlot(int index)
+  private void EquipSlot(int index)
 {
     WeaponData activeData = slots[index];
+    
+    // HAPUS: playerAttack.EquipWeaponData(activeData); 
+    // (Pindahkan ke bawah setelah kita mendapatkan komponen Weapon-nya)
 
-    if (playerAttack != null)
-    {
-        playerAttack.EquipWeaponData(activeData);
-    }
+    string activeWeaponName = activeData != null ? activeData.weaponName.Replace("_", " ").Replace("  ", " ").ToLower() : string.Empty;
 
-    string activeWeaponName = activeData != null ? activeData.weaponName.Replace("_", "").Replace(" ", "").ToLower() : string.Empty;
-
-    // Simpan referensi hitbox yang ditemukan di frame ini
+    // Simpan referensi hitbox dan komponen Weapon yang ditemukan di frame ini
     WeaponHitbox foundHitbox = null;
+    Weapon foundWeaponComponent = null; // <--- TAMBAHKAN INI
 
     foreach (Transform child in allChildrenCache)
     {
         if (child == null || child == transform) continue;
 
-        string childName = child.gameObject.name.Replace("_", "").Replace(" ", "").ToLower();
+        string childName = child.gameObject.name.Replace("_", " ").Replace("  ", " ").ToLower();
 
         // LOGIKA UNTUK VISUAL DI TANGAN
         if (childName.EndsWith("hand"))
@@ -209,19 +208,20 @@ public class PlayerInventory : MonoBehaviour
 
             if (isWeaponActive)
             {
-                // PERBAIKAN: Gunakan 'true' agar tetap mencari komponen meskipun objek/parent-nya sempat nonaktif
+                // Gunakan 'true' agar tetap mencari komponen meskipun objek/parent-nya sempat nonaktif
                 foundHitbox = child.GetComponentInChildren<WeaponHitbox>(true);
+                foundWeaponComponent = child.GetComponentInChildren<Weapon>(true); // <--- TAMBAHKAN INI (Mencari HandCannon/Sword)
             }
             continue;
         }
 
-        // LOGIKA UNTUK VISUAL DI PUNGGUNG
+        // LOGIKA UNTUK VISUAL DI PUNGGUNG (Tetap sama)
         if (childName.EndsWith("back"))
         {
             string weaponName = childName.Substring(0, childName.Length - 4);
 
-            bool isOwnedInSlot1 = slots[SLOT_WEAPON_1] != null && slots[SLOT_WEAPON_1].weaponName.Replace("_", "").Replace(" ", "").ToLower() == weaponName;
-            bool isOwnedInSlot2 = slots[SLOT_WEAPON_2] != null && slots[SLOT_WEAPON_2].weaponName.Replace("_", "").Replace(" ", "").ToLower() == weaponName;
+            bool isOwnedInSlot1 = slots[SLOT_WEAPON_1] != null && slots[SLOT_WEAPON_1].weaponName.Replace("_", " ").Replace("  ", " ").ToLower() == weaponName;
+            bool isOwnedInSlot2 = slots[SLOT_WEAPON_2] != null && slots[SLOT_WEAPON_2].weaponName.Replace("_", " ").Replace("  ", " ").ToLower() == weaponName;
             bool isWeaponOwned = isOwnedInSlot1 || isOwnedInSlot2;
 
             bool isWeaponActive = !string.IsNullOrEmpty(activeWeaponName) && activeWeaponName == weaponName;
@@ -232,15 +232,18 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-    // PERBAIKAN UTAMA: Amankan pengiriman hitbox ke PlayerAttack setelah siklus foreach visual selesai
+    // PERBAIKAN UTAMA: Kirim data dan komponen Weapon ke PlayerAttack
     if (playerAttack != null)
     {
         playerAttack.SetWeaponHitbox(foundHitbox);
         
-        if (foundHitbox != null)
+        // PANGGIL METHOD BARU (Bukan EquipWeaponData lagi)
+        playerAttack.EquipWeapon(activeData, foundWeaponComponent); // <--- UBAH INI
+        
+        if (foundWeaponComponent != null)
+            Debug.Log($"[PlayerInventory] Berhasil mengirim Komponen Senjata: {foundWeaponComponent.GetType().Name}");
+        else if (foundHitbox != null)
             Debug.Log($"[PlayerInventory] Berhasil mengirim Hitbox Melee: {foundHitbox.gameObject.name}");
-        else if (activeData != null && activeData.weaponName != "Hand_Cannon" && activeData.weaponName != "HandCannon")
-            Debug.LogWarning($"[PlayerInventory] Gagal menemukan WeaponHitbox di objek anak berakhiran 'hand' untuk senjata: {activeData.weaponName}");
     }
 }
     private void HandleSlotSwitch()

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Pool;
 
 public class PlayerAttack : MonoBehaviour
 {
@@ -19,15 +20,17 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private AudioClip genericMeleeEquipSound; // Suara cabut pedang / angkat palu
     [SerializeField] private AudioClip handCannonEquipSound;   // Suara kokang / jepretan HandCannon
 
-    [Header("Ranged Setup")]
+    [Header("Ranged Setup ")]
     [SerializeField] private GameObject bulletPrefab; 
-    [SerializeField] private Transform firePoint;     
+    [SerializeField] private Transform firePoint; 
+    private ObjectPool<Bullet> bulletPool;   
 
     // -------------------------------------------------------------------------
     // State
     // -------------------------------------------------------------------------
 
     private WeaponData currentWeaponData;
+    private Weapon activeWeapon; 
     private int comboStep = 0; // Melacak index ayunan pedang (0 -> 1 -> 2)
 
     private int   attackDamage;
@@ -45,6 +48,48 @@ public class PlayerAttack : MonoBehaviour
     // Unity Lifecycle
     // -------------------------------------------------------------------------
 
+
+    private void Awake()
+    {
+        bulletPool = new ObjectPool<Bullet>(
+            createFunc: CreateBullet,
+            actionOnGet: OnBulletGet,
+            actionOnRelease: OnBulletRelease,
+            actionOnDestroy: OnBulletDestroy,
+            collectionCheck: true,
+            defaultCapacity: 10,
+            maxSize: 50        
+        );
+    }
+
+    // Fungsi Callback untuk Pool
+    private Bullet CreateBullet()
+    {
+        GameObject bulletObj = Instantiate(bulletPrefab);
+        bulletObj.SetActive(false);
+        return bulletObj.GetComponent<Bullet>();
+    }
+
+    private void OnBulletGet(Bullet bullet)
+    {
+        bullet.gameObject.SetActive(true);
+    }
+
+    private void OnBulletRelease(Bullet bullet)
+    {
+        bullet.gameObject.SetActive(false);
+        if (bullet.TryGetComponent<Rigidbody>(out Rigidbody rb))
+        {
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+    }
+
+    private void OnBulletDestroy(Bullet bullet)
+    {
+        Destroy(bullet.gameObject);
+    }
+
     void Update()
     {
         TickAttack();
@@ -52,20 +97,15 @@ public class PlayerAttack : MonoBehaviour
         HandleInput();
     }
 
-    // -------------------------------------------------------------------------
-    // Public API
-    // -------------------------------------------------------------------------
-
-    /// <summary>
-    /// Dipanggil PlayerInventory saat slot aktif berubah.
-    /// </summary>
-    public void EquipWeaponData(WeaponData data)
+    
+    public void EquipWeapon(WeaponData data, Weapon weaponComponent)
     {
         EndAttack(); 
 
         currentWeaponData = data;
-        isArmed           = data != null;
-        comboStep         = 0; // Setiap ganti senjata, urutan ayunan pedang di-reset ke awal
+        activeWeapon = weaponComponent;
+        isArmed = data != null;
+        comboStep = 0; 
 
         if (isArmed)
         {
@@ -75,10 +115,9 @@ public class PlayerAttack : MonoBehaviour
             knockbackForce    = data.knockbackForce;
             knockbackDuration = data.knockbackDuration;
             
-            // --- LOGIKA SUARA EQUIP ---
             if (audioSource != null)
             {
-                if (data.weaponName == "Hand_Cannon" || data.weaponName == "HandCannon")
+                if (data.weaponName.Contains("Hand_Cannon") || data.weaponName.Contains("HandCannon"))
                 {
                     if (handCannonEquipSound != null) audioSource.PlayOneShot(handCannonEquipSound);
                 }
@@ -87,12 +126,6 @@ public class PlayerAttack : MonoBehaviour
                     if (genericMeleeEquipSound != null) audioSource.PlayOneShot(genericMeleeEquipSound);
                 }
             }
-            
-            Debug.Log($"[PlayerAttack] Berhasil Sinkron Data & Suara Equip: {data.weaponName}");
-        }
-        else
-        {
-            Debug.Log("[PlayerAttack] Tidak memegang senjata (Unarmed)");
         }
     }
 
@@ -149,21 +182,29 @@ public class PlayerAttack : MonoBehaviour
         attackTimer   = attackDuration;
         cooldownTimer = attackCooldown;
 
-        // CEK JALUR SUARA DAN MEKANIK SENJATA
         if (currentWeaponData != null)
         {
             if (currentWeaponData.weaponName == "Hand_Cannon" || currentWeaponData.weaponName == "HandCannon")
             {
-                // Putar suara HandCannon tembak
+                HandCannon handCannon = activeWeapon as HandCannon;
+                if (handCannon != null && !handCannon.CanFire())
+                {
+                    isAttacking = false;
+                    return;
+                }
+
                 if (audioSource != null && handCannonSound != null) 
                     audioSource.PlayOneShot(handCannonSound);
 
-                FireRangedWeapon(); 
-                Debug.Log("[PlayerAttack] HandCannon menembak!");
+                FireRangedWeapon();
+
+                if (handCannon != null)
+                    handCannon.ConsumeBullet();
+
+                cooldownTimer = currentWeaponData.fireRate;
             }
             else if (currentWeaponData.weaponName == "SqueekHammer" || currentWeaponData.weaponName == "ToyHammer")
             {
-                // Putar suara SqueekHammer mengayun
                 if (audioSource != null && squeekHammerSound != null) 
                     audioSource.PlayOneShot(squeekHammerSound);
 
@@ -171,7 +212,6 @@ public class PlayerAttack : MonoBehaviour
             }
             else
             {
-                // Senjata default dianggap pedang (memiliki 3 cycle suara ayunan bergantian)
                 PlaySwordComboSound();
                 TriggerMeleeHitbox();
             }
@@ -182,13 +222,11 @@ public class PlayerAttack : MonoBehaviour
     {
         if (swordAttackCycles == null || swordAttackCycles.Length == 0) return;
 
-        // Putar clip sesuai langkah combo saat ini (0, 1, atau 2)
         if (audioSource != null && swordAttackCycles[comboStep] != null)
         {
             audioSource.PlayOneShot(swordAttackCycles[comboStep]);
         }
 
-        // Geser ke langkah berikutnya, kalau sudah ke-3 balik lagi ke-0
         comboStep = (comboStep + 1) % swordAttackCycles.Length;
     }
 
@@ -203,28 +241,31 @@ public class PlayerAttack : MonoBehaviour
     }
 
     private void FireRangedWeapon()
+{
+    if (bulletPrefab == null)
     {
-        if (bulletPrefab == null)
-        {
-            Debug.LogError("[PlayerAttack] Bullet Prefab belum dimasukkan di Inspector!");
-            return;
-        }
-
-        Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + transform.forward * 1f;
-        Quaternion spawnRot = transform.rotation;
-
-        GameObject bulletObj = Instantiate(bulletPrefab, spawnPos, spawnRot);
-
-        if (bulletObj.TryGetComponent<Bullet>(out Bullet bullet))
-        {
-            if (bulletObj.TryGetComponent<Rigidbody>(out Rigidbody rb))
-            {
-                rb.linearVelocity = transform.forward * currentWeaponData.speed;
-            }
-        }
-        
-        Debug.Log($"[PlayerAttack] Menembakkan {currentWeaponData.weaponName}!");
+        Debug.LogError("[PlayerAttack] Bullet Prefab belum dimasukkan di Inspector!");
+        return;
     }
+
+    Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + transform.forward * 1f;
+    Quaternion spawnRot = transform.rotation;
+
+    Bullet bullet = bulletPool.Get();
+    
+    bullet.transform.SetPositionAndRotation(spawnPos, spawnRot);
+    
+    bullet.SetPool(bulletPool);
+    
+    bullet.Setup(currentWeaponData.speed, currentWeaponData.damage);
+
+    if (bullet.TryGetComponent<Rigidbody>(out Rigidbody rb))
+    {
+        rb.linearVelocity = Vector3.zero; 
+    }
+    
+    Debug.Log($"[PlayerAttack] Menembakkan {currentWeaponData.weaponName}!");
+}
 
     private void EndAttack()
     {

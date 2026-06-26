@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// Klik kanan di Project → Create → Weapons → Weapon Data
 [CreateAssetMenu(fileName = "NewWeaponData", menuName = "Weapons/Weapon Data")]
 public class WeaponData : ScriptableObject
 {
@@ -25,4 +24,5 @@ public class WeaponData : ScriptableObject
     public float speed           = 0f;
     public int   magazineSize    = 0;
     public float reloadTime      = 0f;
+    public float fireRate        = 0.3f; // cd tiap tembakan (detik)
 }
