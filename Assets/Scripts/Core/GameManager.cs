@@ -84,7 +84,7 @@ public class GameManager : MonoBehaviour
             case GameState.Inventory:
                 SetState(GameState.Playing);
                 break;
-            
+
             case GameState.Paused:
                 // Do nothing if the pause panel is open to prevent overlapping state conflicts
                 break;
@@ -107,6 +107,12 @@ public class GameManager : MonoBehaviour
     {
         // Unfreeze time scale explicitly when playing, freeze it when navigating UI menus
         Time.timeScale = (CurrentState == GameState.Playing) ? 1f : 0f;
+
+        if (CurrentState == GameState.GameOver)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
     }
 
     public void GameOver()
@@ -119,6 +125,35 @@ public class GameManager : MonoBehaviour
         if (CurrentState == GameState.Paused)
         {
             SetState(previousState);
+        }
+    }
+    public void RespawnGame()
+    {
+        Time.timeScale = 1f; // Kembalikan waktu jadi normal
+
+        string playedScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+
+        if (LevelManager.Instance != null)
+        {
+            LevelManager.Instance.LoadScene(playedScene, "CircleWipe");
+        }
+        else
+        {
+            // Cadangan aman jika LevelManager tidak sengaja tidak ada di scene
+            UnityEngine.SceneManagement.SceneManager.LoadScene(playedScene);
+        }
+    }
+
+    public void LoadMainMenu()
+    {
+        Time.timeScale = 1f; // Kembalikan waktu jadi normal
+        if (LevelManager.Instance != null)
+        {
+            LevelManager.Instance.LoadScene("MainMenu", "CircleWipe");
+        }
+        else
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
         }
     }
 }

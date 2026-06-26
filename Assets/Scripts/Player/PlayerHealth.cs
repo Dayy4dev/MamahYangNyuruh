@@ -41,7 +41,13 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (TryGetComponent<Collider>(out var col)) col.enabled = false;
         Animator animator = GetComponentInChildren<Animator>();
         if (animator != null) animator.SetTrigger("Die");
-        StartCoroutine(ReloadSceneAfterDelay());
+
+        // StartCoroutine(ReloadSceneAfterDelay());
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.GameOver();
+        }
     }
 
     private IEnumerator ReloadSceneAfterDelay()

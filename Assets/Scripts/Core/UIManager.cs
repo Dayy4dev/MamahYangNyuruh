@@ -6,6 +6,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject gameplayUI;   // Drag your 'Gameplay Health' here
     [SerializeField] private GameObject inventoryUI;  // Drag your 'Inventory UI' here
     [SerializeField] private GameObject pauseUI;      // Drag your 'Pause Panel' here
+    [SerializeField] private GameObject gameOverUI;
 
     private void OnEnable()
     {
@@ -61,6 +62,7 @@ public class UIManager : MonoBehaviour
                 if (gameplayUI != null) gameplayUI.SetActive(false);
                 if (inventoryUI != null) inventoryUI.SetActive(false);
                 if (pauseUI != null) pauseUI.SetActive(false);
+                if (gameOverUI != null) gameOverUI.SetActive(true);
                 break;
         }
     }

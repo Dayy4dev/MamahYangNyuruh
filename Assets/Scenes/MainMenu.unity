@@ -3733,11 +3733,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MusicLibrary
   tracks:
   - trackName: Lobby Sound 1
-    clip: {fileID: 8300000, guid: 3b234dc977f63c942bf363f6c5917600, type: 3}
+    clip: {fileID: 8300000, guid: 59c31d3bb2c29c84f8e75ca09b6ffcaa, type: 3}
   - trackName: Lobby Sound 2
     clip: {fileID: 8300000, guid: 7fe6b5ef93356094e8d10ad32d6d5b06, type: 3}
   - trackName: Game
-    clip: {fileID: 8300000, guid: df4a1f344c34501489e790e62cd1402f, type: 3}
+    clip: {fileID: 8300000, guid: 1c34fbb24f9c1014a919b922f21c8769, type: 3}
 --- !u!4 &1524929854
 Transform:
   m_ObjectHideFlags: 0
