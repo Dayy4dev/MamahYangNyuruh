@@ -2950,6 +2950,7 @@ GameObject:
   - component: {fileID: 6127565424378667084}
   - component: {fileID: 7214650350086101758}
   - component: {fileID: 2410079404887067153}
+  - component: {fileID: -4867004715899401255}
   m_Layer: 7
   m_Name: Boss 1
   m_TagString: Untagged
@@ -3170,6 +3171,39 @@ MonoBehaviour:
   baseHP: 500
   baseDamage: 67
   baseSpeed: 5
+--- !u!114 &-4867004715899401255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7734134644095645850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8903cd4aceb5a141ad3791c93021ec8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossController
+  maxHealth: 2000
+  contactDamage: 30
+  minionPrefabs:
+  - {fileID: 3807745660598645816, guid: 3aecd6a32eeed7548a99264e7e5a78e9, type: 3}
+  - {fileID: 3807745660598645816, guid: 3aecd6a32eeed7548a99264e7e5a78e9, type: 3}
+  minionSpawnPoints:
+  - {fileID: 5692171124671383029}
+  - {fileID: 3547048216193071088}
+  - {fileID: 213099347722408547}
+  - {fileID: 5708921403225138634}
+  maxMinions: 4
+  minionSpawnInterval: 8
+  minionsPerWave: 2
+  moveSpeed: 4
+  chargeSpeed: 12
+  engagementRange: 3
+  visionRange: 30
+  phase2Threshold: 0.5
+  phase2SpeedBonus: 2
+  phase2SpawnIntervalBonus: 3
+  healthBar: {fileID: 505768877341836158}
 --- !u!1 &7905407779495633571
 GameObject:
   m_ObjectHideFlags: 0

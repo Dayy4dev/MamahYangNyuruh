@@ -3092,7 +3092,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonManager
   dungeonGenerator: {fileID: 634518726}
   playerTransform: {fileID: 385315478}
-  bossRoomPrefab: {fileID: 0}
+  bossRoomPrefab: {fileID: 5283480134956359917, guid: aace9374df8588446b0556ed235fcd3c, type: 3}
   spawnPointName: SpawnPoint
   fallbackOffset: {x: 0, y: 1, z: 0}
   transitionDelay: 0.5
@@ -9628,6 +9628,63 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2100307099}
   m_Mesh: {fileID: -2013351144842259380, guid: 5455bdffdbd89c545b339591e9051e55, type: 3}
+--- !u!1001 &2101176702
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3701116094243297836, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.0687
+      objectReference: {fileID: 0}
+    - target: {fileID: 3701116094243297836, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3701116094243297836, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.88992
+      objectReference: {fileID: 0}
+    - target: {fileID: 3701116094243297836, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3701116094243297836, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3701116094243297836, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3701116094243297836, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3701116094243297836, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3701116094243297836, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3701116094243297836, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4041648436681506966, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
+      propertyPath: m_Name
+      value: HandCannon
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
 --- !u!1 &2108304721
 GameObject:
   m_ObjectHideFlags: 0
@@ -10195,3 +10252,4 @@ SceneRoots:
   - {fileID: 668540481}
   - {fileID: 795282908}
   - {fileID: 326520870}
+  - {fileID: 2101176702}
