@@ -126,6 +126,8 @@ public class GameManager : MonoBehaviour
         {
             SetState(previousState);
         }
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
     public void RespawnGame()
     {
@@ -155,5 +157,7 @@ public class GameManager : MonoBehaviour
         {
             UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
         }
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 }

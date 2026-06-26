@@ -37,6 +37,8 @@ public class MainMenu : MonoBehaviour
     {
         LevelManager.Instance.LoadScene("MainMenu", "CircleWipe");
         Time.timeScale = 1f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void Play()
@@ -52,21 +54,29 @@ public class MainMenu : MonoBehaviour
     public void PauseGame()
     {
         currentState = MenuState.Paused;
-        Time.timeScale = 0f;
+        // Time.timeScale = 0f;
         if (pauseMenu != null)
         {
             pauseMenu.SetActive(true);
+        }
+
+        if (currentState == MenuState.Paused)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
     }
 
     public void ResumeGame()
     {
         currentState = MenuState.Playing;
-        Time.timeScale = 1f;
+        // Time.timeScale = 1f;
         if (pauseMenu != null)
         {
             pauseMenu.SetActive(false);
         }
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
     public void Quit()
@@ -87,5 +97,11 @@ public class MainMenu : MonoBehaviour
     public void LoadVolume()
     {
         musicSlider.value = PlayerPrefs.GetFloat("MusicVolume");
+    }
+
+    public void ShowCursorSettings()
+    {
+        Cursor.lockState = CursorLockMode.None; // Lepas kunci kursor
+        Cursor.visible = true;                  // Tampilkan visual panah kursor
     }
 }
