@@ -88,6 +88,11 @@ public class HandCannon : Weapon
         return !isReloading && currentBullet > 0 && fireRateTimer <= 0f;
     }
 
+    public override bool CanAttack()
+    {
+        return CanFire();
+    }
+
     public void ConsumeBullet()
     {
         currentBullet--;
@@ -117,6 +122,23 @@ public class HandCannon : Weapon
         ConsumeBullet();
     }
 
+    private void OnDisable()
+    {
+        // Jika senjata dihancurkan/dibuang saat reload, amankan statenya
+        if (reloadCoroutine != null)
+        {
+            StopCoroutine(reloadCoroutine);
+            reloadCoroutine = null;
+        }
+
+        // Matikan laser agar tidak gantung di layar
+        if (laserLineRenderer != null) laserLineRenderer.enabled = false;
+
+        // RESET UTAMA: Jika dibuang, paksa senjata dalam kondisi siap pakai saat diambil lagi
+        isReloading = false;
+        remainingReloadTime = 0f;
+    }
+
     public void ResetReloadState()
     {
         if (reloadCoroutine != null)
@@ -135,7 +157,7 @@ public class HandCannon : Weapon
         {
             StopCoroutine(reloadCoroutine);
             reloadCoroutine = null;
-            Debug.Log($"Reload paused. Sisa waktu: {remainingReloadTime:F1}s");
+            Debug.Log($"Reload dipause. Sisa waktu: {remainingReloadTime:F1}s");
         }
 
         if (laserLineRenderer != null) laserLineRenderer.enabled = false;
@@ -143,10 +165,18 @@ public class HandCannon : Weapon
 
     public override void OnWeaponActivate()
     {
+        // Jika peluru kosong dan sedang tidak reload, paksa reload baru
+        if (currentBullet <= 0 && !isReloading)
+        {
+            reloadCoroutine = StartCoroutine(ReloadCoroutine());
+            return;
+        }
+
+        // Resume reload yang tertunda
         if (isReloading && reloadCoroutine == null && remainingReloadTime > 0)
         {
             reloadCoroutine = StartCoroutine(ReloadCoroutineWithRemainingTime(remainingReloadTime));
-            Debug.Log($"Reload resumed. Sisa waktu: {remainingReloadTime:F1}s");
+            Debug.Log($"Reload dilanjutkan. Sisa waktu: {remainingReloadTime:F1}s");
         }
     }
 
@@ -155,7 +185,13 @@ public class HandCannon : Weapon
         isReloading = true;
         remainingReloadTime = reloadTime;
         Debug.Log("Reloading... " + reloadTime + "s");
-        yield return new WaitForSeconds(remainingReloadTime);
+
+        while (remainingReloadTime > 0f)
+        {
+            remainingReloadTime -= Time.deltaTime;
+            yield return null; // Tunggu sampai frame berikutnya
+        }
+
         CompleteReload();
     }
 
@@ -164,7 +200,13 @@ public class HandCannon : Weapon
         isReloading = true;
         remainingReloadTime = remainingTime;
         Debug.Log($"Reloading resumed... {remainingTime:F1}s");
-        yield return new WaitForSeconds(remainingReloadTime);
+
+        while (remainingReloadTime > 0f)
+        {
+            remainingReloadTime -= Time.deltaTime;
+            yield return null;
+        }
+
         CompleteReload();
     }
 
@@ -199,5 +241,15 @@ public class HandCannon : Weapon
     private void OnDestroyPoolObject(Bullet bullet)
     {
         Destroy(bullet.gameObject);
+    }
+
+    public override float GetCooldownPercentage()
+    {
+        if (isReloading && reloadTime > 0f)
+        {
+            // Menghitung persentase sisa reload (1 = baru mulai reload, 0 = selesai)
+            return remainingReloadTime / reloadTime;
+        }
+        return 0f;
     }
 }

@@ -179,73 +179,111 @@ public class PlayerInventory : MonoBehaviour
         onActiveSlotChanged?.Invoke(currentSlot);
     }
 
-  private void EquipSlot(int index)
-{
-    WeaponData activeData = slots[index];
-    
-    // HAPUS: playerAttack.EquipWeaponData(activeData); 
-    // (Pindahkan ke bawah setelah kita mendapatkan komponen Weapon-nya)
-
-    string activeWeaponName = activeData != null ? activeData.weaponName.Replace("_", " ").Replace("  ", " ").ToLower() : string.Empty;
-
-    // Simpan referensi hitbox dan komponen Weapon yang ditemukan di frame ini
-    WeaponHitbox foundHitbox = null;
-    Weapon foundWeaponComponent = null; // <--- TAMBAHKAN INI
-
-    foreach (Transform child in allChildrenCache)
+    private void EquipSlot(int index)
     {
-        if (child == null || child == transform) continue;
+        WeaponData activeData = slots[index];
 
-        string childName = child.gameObject.name.Replace("_", " ").Replace("  ", " ").ToLower();
+        // HAPUS: playerAttack.EquipWeaponData(activeData); 
+        // (Pindahkan ke bawah setelah kita mendapatkan komponen Weapon-nya)
 
-        // LOGIKA UNTUK VISUAL DI TANGAN
-        if (childName.EndsWith("hand"))
+        string activeWeaponName = activeData != null ? activeData.weaponName.Replace("_", " ").Replace("  ", " ").ToLower() : string.Empty;
+
+        // Simpan referensi hitbox dan komponen Weapon yang ditemukan di frame ini
+        WeaponHitbox foundHitbox = null;
+        Weapon foundWeaponComponent = null; // <--- TAMBAHKAN INI
+
+        foreach (Transform child in allChildrenCache)
         {
-            string weaponName = childName.Substring(0, childName.Length - 4);
-            bool isWeaponActive = !string.IsNullOrEmpty(activeWeaponName) && activeWeaponName == weaponName;
+            if (child == null || child == transform) continue;
 
-            child.gameObject.SetActive(isWeaponActive);
+            string childName = child.gameObject.name.Replace("_", " ").Replace("  ", " ").ToLower();
 
-            if (isWeaponActive)
+            // LOGIKA UNTUK VISUAL DI TANGAN
+            if (childName.EndsWith("hand"))
             {
-                // Gunakan 'true' agar tetap mencari komponen meskipun objek/parent-nya sempat nonaktif
-                foundHitbox = child.GetComponentInChildren<WeaponHitbox>(true);
-                foundWeaponComponent = child.GetComponentInChildren<Weapon>(true); // <--- TAMBAHKAN INI (Mencari HandCannon/Sword)
+                string weaponName = childName.Substring(0, childName.Length - 4);
+                bool isWeaponActive = !string.IsNullOrEmpty(activeWeaponName) && activeWeaponName == weaponName;
+
+                child.gameObject.SetActive(isWeaponActive);
+
+                if (isWeaponActive)
+                {
+                    // Ambil Hitbox terlebih dahulu
+                    foundHitbox = child.GetComponent<WeaponHitbox>();
+                    if (foundHitbox == null) foundHitbox = child.GetComponentInChildren<WeaponHitbox>(true);
+
+                    // PERBAIKAN TOTAL: Kita cari komponen Weapon sejati secara spesifik pada objek hand atau anak-anaknya
+                    // Menggunakan loop untuk memastikan kita tidak salah mengambil WeaponHitbox jika ia tidak sengaja turunan Weapon
+                    Weapon[] weapons = child.GetComponents<Weapon>();
+                    foreach (Weapon w in weapons)
+                    {
+                        if (w is not WeaponHitbox) // Jika WeaponHitbox mu ternyata turunan Weapon, baris ini mengamankannya
+                        {
+                            foundWeaponComponent = w;
+                            break;
+                        }
+                    }
+
+                    // Jika di objek utama tidak ketemu, cari di anak-anaknya (children)
+                    if (foundWeaponComponent == null)
+                    {
+                        Weapon[] childWeapons = child.GetComponentsInChildren<Weapon>(true);
+                        foreach (Weapon w in childWeapons)
+                        {
+                            if (w is not WeaponHitbox)
+                            {
+                                foundWeaponComponent = w;
+                                break;
+                            }
+                        }
+                    }
+                }
+                continue;
             }
-            continue;
+
+            // LOGIKA UNTUK VISUAL DI PUNGGUNG (Tetap sama)
+            if (childName.EndsWith("back"))
+            {
+                string weaponName = childName.Substring(0, childName.Length - 4);
+
+                bool isOwnedInSlot1 = slots[SLOT_WEAPON_1] != null && slots[SLOT_WEAPON_1].weaponName.Replace("_", " ").Replace("  ", " ").ToLower() == weaponName;
+                bool isOwnedInSlot2 = slots[SLOT_WEAPON_2] != null && slots[SLOT_WEAPON_2].weaponName.Replace("_", " ").Replace("  ", " ").ToLower() == weaponName;
+                bool isWeaponOwned = isOwnedInSlot1 || isOwnedInSlot2;
+
+                bool isWeaponActive = !string.IsNullOrEmpty(activeWeaponName) && activeWeaponName == weaponName;
+                bool shouldShowOnBack = isWeaponOwned && !isWeaponActive;
+
+                child.gameObject.SetActive(shouldShowOnBack);
+                continue;
+            }
         }
 
-        // LOGIKA UNTUK VISUAL DI PUNGGUNG (Tetap sama)
-        if (childName.EndsWith("back"))
+        // PERBAIKAN UTAMA: Kirim data dan komponen Weapon ke PlayerAttack
+        if (playerAttack != null)
         {
-            string weaponName = childName.Substring(0, childName.Length - 4);
+            // --- 1. MATIKAN SENJATA LAMA SEBELUM DIGANTI (PENTING!) ---
+            if (playerAttack.GetActiveWeapon() != null)
+            {
+                playerAttack.GetActiveWeapon().OnWeaponDeactivate();
+            }
 
-            bool isOwnedInSlot1 = slots[SLOT_WEAPON_1] != null && slots[SLOT_WEAPON_1].weaponName.Replace("_", " ").Replace("  ", " ").ToLower() == weaponName;
-            bool isOwnedInSlot2 = slots[SLOT_WEAPON_2] != null && slots[SLOT_WEAPON_2].weaponName.Replace("_", " ").Replace("  ", " ").ToLower() == weaponName;
-            bool isWeaponOwned = isOwnedInSlot1 || isOwnedInSlot2;
+            playerAttack.SetWeaponHitbox(foundHitbox);
 
-            bool isWeaponActive = !string.IsNullOrEmpty(activeWeaponName) && activeWeaponName == weaponName;
-            bool shouldShowOnBack = isWeaponOwned && !isWeaponActive;
+            // PANGGIL METHOD BARU
+            playerAttack.EquipWeapon(activeData, foundWeaponComponent);
 
-            child.gameObject.SetActive(shouldShowOnBack);
-            continue;
+            // --- 2. AKTIFKAN SENJATA BARU SETELAH DIPASANG ---
+            if (foundWeaponComponent != null)
+            {
+                foundWeaponComponent.OnWeaponActivate();
+                Debug.Log($"[PlayerInventory] Berhasil mengirim & mengaktifkan Komponen Senjata: {foundWeaponComponent.GetType().Name}");
+            }
+            else if (foundHitbox != null)
+            {
+                Debug.Log($"[PlayerInventory] Berhasil mengirim Hitbox Melee: {foundHitbox.gameObject.name}");
+            }
         }
     }
-
-    // PERBAIKAN UTAMA: Kirim data dan komponen Weapon ke PlayerAttack
-    if (playerAttack != null)
-    {
-        playerAttack.SetWeaponHitbox(foundHitbox);
-        
-        // PANGGIL METHOD BARU (Bukan EquipWeaponData lagi)
-        playerAttack.EquipWeapon(activeData, foundWeaponComponent); // <--- UBAH INI
-        
-        if (foundWeaponComponent != null)
-            Debug.Log($"[PlayerInventory] Berhasil mengirim Komponen Senjata: {foundWeaponComponent.GetType().Name}");
-        else if (foundHitbox != null)
-            Debug.Log($"[PlayerInventory] Berhasil mengirim Hitbox Melee: {foundHitbox.gameObject.name}");
-    }
-}
     private void HandleSlotSwitch()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1)) SwitchToSlot(0);

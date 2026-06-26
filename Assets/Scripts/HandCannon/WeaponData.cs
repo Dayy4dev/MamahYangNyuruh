@@ -17,6 +17,10 @@ public class WeaponData : ScriptableObject
     public float attackCooldown   = 0.5f;
     public float knockbackForce   = 5f;
     public float knockbackDuration = 0.2f;
+    [Tooltip("Berapa kali ayunan sebelum senjata harus rehat/reload")]
+    public int   maxComboCount    = 3; 
+    [Tooltip("Durasi rehat/reload melee (detik)")]
+    public float meleeReloadTime  = 1.5f;
 
     [Header("Ranged Stats")]
     public int   defaultCapacity = 0;

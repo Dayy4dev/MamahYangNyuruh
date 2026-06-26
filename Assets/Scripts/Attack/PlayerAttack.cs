@@ -21,19 +21,22 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private AudioClip handCannonEquipSound;   // Suara kokang / jepretan HandCannon
 
     [Header("Ranged Setup ")]
-    [SerializeField] private GameObject bulletPrefab; 
-    [SerializeField] private Transform firePoint; 
-    private ObjectPool<Bullet> bulletPool;   
+    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private Transform firePoint;
+
+    [Header("UI Cooldown Setup")]
+    [SerializeField] private UnityEngine.UI.Image cooldownUiImage; // Tarik objek CooldownIndicator ke sini via Inspector
+    private ObjectPool<Bullet> bulletPool;
 
     // -------------------------------------------------------------------------
     // State
     // -------------------------------------------------------------------------
 
     private WeaponData currentWeaponData;
-    private Weapon activeWeapon; 
+    private Weapon activeWeapon;
     private int comboStep = 0; // Melacak index ayunan pedang (0 -> 1 -> 2)
 
-    private int   attackDamage;
+    private int attackDamage;
     private float attackDuration;
     private float attackCooldown;
     private float knockbackForce;
@@ -41,8 +44,8 @@ public class PlayerAttack : MonoBehaviour
 
     private float attackTimer;
     private float cooldownTimer;
-    private bool  isAttacking;
-    private bool  isArmed; 
+    private bool isAttacking;
+    private bool isArmed;
 
     // -------------------------------------------------------------------------
     // Unity Lifecycle
@@ -58,7 +61,7 @@ public class PlayerAttack : MonoBehaviour
             actionOnDestroy: OnBulletDestroy,
             collectionCheck: true,
             defaultCapacity: 10,
-            maxSize: 50        
+            maxSize: 50
         );
     }
 
@@ -95,26 +98,27 @@ public class PlayerAttack : MonoBehaviour
         TickAttack();
         TickCooldown();
         HandleInput();
+        UpdateCooldownUI();
     }
 
-    
+
     public void EquipWeapon(WeaponData data, Weapon weaponComponent)
     {
-        EndAttack(); 
+        EndAttack();
 
         currentWeaponData = data;
         activeWeapon = weaponComponent;
         isArmed = data != null;
-        comboStep = 0; 
+        comboStep = 0;
 
         if (isArmed)
         {
-            attackDamage      = data.damage;
-            attackDuration    = data.attackDuration;
-            attackCooldown    = data.attackCooldown;
-            knockbackForce    = data.knockbackForce;
+            attackDamage = data.damage;
+            attackDuration = data.attackDuration;
+            attackCooldown = data.attackCooldown;
+            knockbackForce = data.knockbackForce;
             knockbackDuration = data.knockbackDuration;
-            
+
             if (audioSource != null)
             {
                 if (data.weaponName.Contains("Hand_Cannon") || data.weaponName.Contains("HandCannon"))
@@ -178,43 +182,52 @@ public class PlayerAttack : MonoBehaviour
 
     private void StartAttack()
     {
-        isAttacking   = true;
-        attackTimer   = attackDuration;
-        cooldownTimer = attackCooldown;
+        if (currentWeaponData == null) return;
 
-        if (currentWeaponData != null)
+        // 1. CEK REHAT/RELOAD UTAMA (Sekarang HandCannon akan terdeteksi di sini dengan benar!)
+        if (activeWeapon != null && !activeWeapon.CanAttack())
         {
-            if (currentWeaponData.weaponName == "Hand_Cannon" || currentWeaponData.weaponName == "HandCannon")
-            {
-                HandCannon handCannon = activeWeapon as HandCannon;
-                if (handCannon != null && !handCannon.CanFire())
-                {
-                    isAttacking = false;
-                    return;
-                }
+            Debug.Log($"[PlayerAttack] Serangan dibatalkan karena {currentWeaponData.weaponName} sedang rehat/reload/cooldown.");
+            isAttacking = false;
+            return;
+        }
 
-                if (audioSource != null && handCannonSound != null) 
-                    audioSource.PlayOneShot(handCannonSound);
+        // 2. JIKA LOLOS CEK, SET TIMER DEFAULT
+        isAttacking = true;
+        attackTimer = attackDuration;
+        cooldownTimer = attackCooldown; // Ini akan dioverride di bawah khusus untuk HandCannon
 
-                FireRangedWeapon();
+        // 3. LOGIKA KHUSUS HANDCANNON
+        if (currentWeaponData.weaponName == "Hand_Cannon" || currentWeaponData.weaponName == "HandCannon")
+        {
+            if (audioSource != null && handCannonSound != null)
+                audioSource.PlayOneShot(handCannonSound);
 
-                if (handCannon != null)
-                    handCannon.ConsumeBullet();
+            FireRangedWeapon();
 
-                cooldownTimer = currentWeaponData.fireRate;
-            }
-            else if (currentWeaponData.weaponName == "SqueekHammer" || currentWeaponData.weaponName == "ToyHammer")
-            {
-                if (audioSource != null && squeekHammerSound != null) 
-                    audioSource.PlayOneShot(squeekHammerSound);
+            HandCannon handCannon = activeWeapon as HandCannon;
+            if (handCannon != null)
+                handCannon.ConsumeBullet();
 
-                TriggerMeleeHitbox();
-            }
-            else
-            {
-                PlaySwordComboSound();
-                TriggerMeleeHitbox();
-            }
+            // Gunakan fireRate khusus ranged agar jeda antar peluru normal
+            cooldownTimer = currentWeaponData.fireRate;
+        }
+        // 4. LOGIKA UNTUK TOY HAMMER
+        else if (currentWeaponData.weaponName == "SqueekHammer" || currentWeaponData.weaponName == "ToyHammer")
+        {
+            if (audioSource != null && squeekHammerSound != null)
+                audioSource.PlayOneShot(squeekHammerSound);
+
+            if (activeWeapon != null) activeWeapon.Attack();
+            else TriggerMeleeHitbox();
+        }
+        // 5. LOGIKA UNTUK BALLOON SWORD
+        else
+        {
+            PlaySwordComboSound();
+
+            if (activeWeapon != null) activeWeapon.Attack();
+            else TriggerMeleeHitbox();
         }
     }
 
@@ -241,35 +254,68 @@ public class PlayerAttack : MonoBehaviour
     }
 
     private void FireRangedWeapon()
-{
-    if (bulletPrefab == null)
     {
-        Debug.LogError("[PlayerAttack] Bullet Prefab belum dimasukkan di Inspector!");
-        return;
+        if (bulletPrefab == null)
+        {
+            Debug.LogError("[PlayerAttack] Bullet Prefab belum dimasukkan di Inspector!");
+            return;
+        }
+
+        Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + transform.forward * 1f;
+        Quaternion spawnRot = transform.rotation;
+
+        Bullet bullet = bulletPool.Get();
+
+        bullet.transform.SetPositionAndRotation(spawnPos, spawnRot);
+
+        bullet.SetPool(bulletPool);
+
+        bullet.Setup(currentWeaponData.speed, currentWeaponData.damage);
+
+        if (bullet.TryGetComponent<Rigidbody>(out Rigidbody rb))
+        {
+            rb.linearVelocity = Vector3.zero;
+        }
+
+        Debug.Log($"[PlayerAttack] Menembakkan {currentWeaponData.weaponName}!");
     }
-
-    Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + transform.forward * 1f;
-    Quaternion spawnRot = transform.rotation;
-
-    Bullet bullet = bulletPool.Get();
-    
-    bullet.transform.SetPositionAndRotation(spawnPos, spawnRot);
-    
-    bullet.SetPool(bulletPool);
-    
-    bullet.Setup(currentWeaponData.speed, currentWeaponData.damage);
-
-    if (bullet.TryGetComponent<Rigidbody>(out Rigidbody rb))
-    {
-        rb.linearVelocity = Vector3.zero; 
-    }
-    
-    Debug.Log($"[PlayerAttack] Menembakkan {currentWeaponData.weaponName}!");
-}
 
     private void EndAttack()
     {
         isAttacking = false;
         weaponHitbox?.Deactivate();
+    }
+
+    // Tambahkan ini di PlayerAttack.cs agar PlayerInventory bisa mengakses senjata saat ini
+    public Weapon GetActiveWeapon()
+    {
+        return activeWeapon;
+    }
+
+    private void UpdateCooldownUI()
+    {
+        if (cooldownUiImage == null) return;
+
+        // Jika tidak memegang senjata, sembunyikan UI
+        if (!isArmed || activeWeapon == null)
+        {
+            cooldownUiImage.gameObject.SetActive(false);
+            return;
+        }
+
+        // Ambil persentase cooldown dari senjata aktif
+        float cooldownProgress = activeWeapon.GetCooldownPercentage();
+
+        if (cooldownProgress > 0f)
+        {
+            // Aktifkan UI dan isi fillem-nya sesuai sisa waktu rehat
+            cooldownUiImage.gameObject.SetActive(true);
+            cooldownUiImage.fillAmount = cooldownProgress;
+        }
+        else
+        {
+            // Sembunyikan UI jika senjata siap digunakan kembali
+            cooldownUiImage.gameObject.SetActive(false);
+        }
     }
 }
