@@ -3092,7 +3092,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DungeonManager
   dungeonGenerator: {fileID: 634518726}
   playerTransform: {fileID: 385315478}
-  bossRoomPrefab: {fileID: 5283480134956359917, guid: aace9374df8588446b0556ed235fcd3c, type: 3}
+  bossRoomPrefab: {fileID: 789193209607343952, guid: 31c0a312b4c22604788876fce3318a87, type: 3}
   spawnPointName: SpawnPoint
   fallbackOffset: {x: 0, y: 1, z: 0}
   transitionDelay: 0.5

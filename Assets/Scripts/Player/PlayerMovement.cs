@@ -46,7 +46,6 @@ private void HandleFootstepSound()
             movementAudioSource.clip = footstepSound;
             movementAudioSource.loop = true; // Otomatis mengulang selama jalan
             movementAudioSource.Play();
-            Debug.Log("[Footstep] Mulai memutar suara jalan berkelanjutan.");
         }
     }
     else
@@ -54,9 +53,7 @@ private void HandleFootstepSound()
         // 2. JIKA DILEPAS DAN TIDAK GERAK: Langsung matikan suaranya seketika!
         if (movementAudioSource != null && movementAudioSource.isPlaying)
         {
-            movementAudioSource.Stop();
-            Debug.Log("[Footstep] Player diam, suara langsung dimatikan!");
-        }
+            movementAudioSource.Stop();        }
     }
 }
 

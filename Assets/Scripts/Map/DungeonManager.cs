@@ -205,6 +205,8 @@ public class DungeonManager : MonoBehaviour
         yield return null;
 
         RegisterAllRooms();
+        WaitForEndOfFrame wait = new WaitForEndOfFrame();
+        yield return wait; // Tunggu frame berikutnya agar semua room ter-initialize
         TeleportPlayerToRoom(RoomType.Bottom);
 
         Debug.Log("[DungeonManager] Map baru loaded!");
