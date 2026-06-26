@@ -47,8 +47,16 @@ public class MusicManager : MonoBehaviour
 
             playlistCoroutine = StartCoroutine(PlayLobbyPlaylistAutomatically());
         }
-    }
+        // TAMBAHKAN BLOK ELSE IF INI (Sesuaikan "GameScene" dengan nama scene permainanmu)
+        else if (scene.name == "GameScene")
+        {
+            // Pastikan playlist lobby dimatikan total saat masuk atau reload game scene
+            StopLobbyPlaylist();
 
+            // Mainkan kembali lagu in-game agar saat respawn tidak balik ke lagu lobby
+            PlayMusic("Game");
+        }
+    }
     private void Start()
     {
         playlistCoroutine = StartCoroutine(PlayLobbyPlaylistAutomatically());

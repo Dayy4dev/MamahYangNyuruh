@@ -10848,7 +10848,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1709576658}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
@@ -12111,6 +12111,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   pauseKey: 27
   inventoryKey: 101
+  gameOverCanvasGroup: {fileID: 1709576661}
 --- !u!4 &2087125243
 Transform:
   m_ObjectHideFlags: 0
