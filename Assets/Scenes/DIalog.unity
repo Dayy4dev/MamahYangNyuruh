@@ -1342,6 +1342,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttack
   weaponHitbox: {fileID: 0}
+  audioSource: {fileID: 0}
+  swordAttackCycles: []
+  handCannonSound: {fileID: 0}
+  squeekHammerSound: {fileID: 0}
+  genericMeleeEquipSound: {fileID: 0}
+  handCannonEquipSound: {fileID: 0}
   bulletPrefab: {fileID: 4859117371281068152, guid: 3b1ffcdb23098ee48a2062b0b11a6352, type: 3}
   firePoint: {fileID: 1166357738}
 --- !u!114 &1415410222
@@ -1400,6 +1406,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
   moveSpeed: 6
   gravity: -9.81
+  aimIndicator: {fileID: 0}
+  movementAudioSource: {fileID: 0}
+  footstepSound: {fileID: 0}
+  footstepInterval: 0.5
 --- !u!143 &1415410225
 CharacterController:
   m_ObjectHideFlags: 0
@@ -2533,13 +2543,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc647d232f7e29f44a4eac48b5889564, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueManager
-  nextSceneName: GameScene
   dialoguePanel: {fileID: 610163976}
+  dialogueText: {fileID: 1656203025}
+  spaceToContinueText: {fileID: 1749993703}
+  typingSpeed: 0.05
+  nextSceneName: GameScene
   fadeImage: {fileID: 403824451}
   fadeDuration: 3.18
-  spaceToContinueText: {fileID: 1749993703}
-  dialogueText: {fileID: 1656203025}
-  typingSpeed: 0.05
 --- !u!4 &1753466299
 Transform:
   m_ObjectHideFlags: 0
@@ -3246,7 +3256,6 @@ MonoBehaviour:
   dialogueLines:
   - 'You: Where am I?'
   - '???: Sigma Boi'
-  minimapUI: {fileID: 1285317416}
   playerMovementScript: {fileID: 1415410224}
 --- !u!65 &1912879297
 BoxCollider:

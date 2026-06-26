@@ -5,15 +5,17 @@ public class DialogueTrigger : MonoBehaviour
     public DialogueManager dialogueManager;
     public string[] dialogueLines;
 
-    [Header("Minimap Settings")]
-    public GameObject minimapUI; 
-
     [Header("Player Movement Settings")]
-    // 1. Ganti 'MonoBehaviour' di bawah ini dengan nama script jalan Player kamu (misal: PlayerMovement)
-    // jika kamu menggunakan script buatan sendiri.
     public MonoBehaviour playerMovementScript; 
 
+    [Header("Scene Transition Settings")]
+    [Tooltip("Centang jika ingin pindah scene setelah dialog ini selesai.")]
+    public bool changeSceneAfterDialogue = false;
+    [Tooltip("Tulis nama scene tujuan (Hanya diisi jika opsi di atas dicentang).")]
+    public string nextSceneName;
+
     private bool triggered = false; 
+    private bool dialogueStartedInThisTrigger = false;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -21,13 +23,6 @@ public class DialogueTrigger : MonoBehaviour
         {
             triggered = true; 
             
-            // Matikan minimap
-            if (minimapUI != null)
-            {
-                minimapUI.SetActive(false);
-            }
-
-            // 2. Matikan script gerakan Player agar tidak bisa jalan
             if (playerMovementScript != null)
             {
                 playerMovementScript.enabled = false;
@@ -35,8 +30,37 @@ public class DialogueTrigger : MonoBehaviour
 
             if (dialogueManager != null)
             {
-                dialogueManager.StartDialogue(dialogueLines);
+                if (changeSceneAfterDialogue && !string.IsNullOrEmpty(nextSceneName))
+                {
+                    // Kirim dialog SEKALIGUS perintah pindah scene ke scene tujuan
+                    dialogueManager.StartDialogue(dialogueLines, nextSceneName);
+                }
+                else
+                {
+                    // Hanya putar dialog biasa tanpa pindah scene
+                    dialogueManager.StartDialogue(dialogueLines);
+                }
+                
+                dialogueStartedInThisTrigger = true;
             }
+        }
+    }
+
+    private void Update()
+    {
+        if (dialogueStartedInThisTrigger && dialogueManager != null && !dialogueManager.DialogueActive)
+        {
+            ResetPlayerMovement();
+        }
+    }
+
+    private void ResetPlayerMovement()
+    {
+        dialogueStartedInThisTrigger = false;
+
+        if (playerMovementScript != null)
+        {
+            playerMovementScript.enabled = true;
         }
     }
 
@@ -46,21 +70,10 @@ public class DialogueTrigger : MonoBehaviour
         {
             triggered = false;
 
-            // Nyalakan kembali minimap
-            if (minimapUI != null)
-            {
-                minimapUI.SetActive(true);
-            }
-
-            // 3. Nyalakan kembali script gerakan Player agar bisa jalan lagi
-            if (playerMovementScript != null)
-            {
-                playerMovementScript.enabled = true;
-            }
-
-            if (dialogueManager != null && dialogueManager.DialogueActive)
+            if (dialogueManager != null && dialogueManager.DialogueActive && dialogueStartedInThisTrigger)
             {
                 dialogueManager.EndDialogue();
+                ResetPlayerMovement();
             }
         }
     }
