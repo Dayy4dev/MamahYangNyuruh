@@ -3109,16 +3109,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonGenerator
   bottomRoomVariants:
-  - {fileID: 0}
+  - {fileID: 6871334240127201030, guid: d2a4b30de39452a4db525f79f8fbede3, type: 3}
   centerRoomVariants:
-  - {fileID: 0}
+  - {fileID: 8599616117974265876, guid: d4b783d34036da546a69ef7e269ae6d9, type: 3}
   leftRoomVariants:
-  - {fileID: 0}
+  - {fileID: 7892813928807004251, guid: 5a1de0dedcca8284d8c92fe07d7d1356, type: 3}
   rightRoomVariants:
-  - {fileID: 0}
+  - {fileID: 157298611956432288, guid: 9e4807b692a2aa640af6a46132051775, type: 3}
   topRoomVariants:
-  - {fileID: 0}
-  roomSize: 30
+  - {fileID: 8681123837613130672, guid: da05eba03f4718e4080e1518e53f0644, type: 3}
+  roomSize: 40
 --- !u!1 &635497718
 GameObject:
   m_ObjectHideFlags: 0
@@ -10184,6 +10184,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 634518723}
   - {fileID: 373971690}
+  - {fileID: 1572686748}
   - {fileID: 2099797341}
   - {fileID: 1852456955}
   - {fileID: 1221553390}
@@ -10192,6 +10193,5 @@ SceneRoots:
   - {fileID: 1774844247}
   - {fileID: 385315478}
   - {fileID: 668540481}
-  - {fileID: 1572686748}
   - {fileID: 795282908}
   - {fileID: 326520870}

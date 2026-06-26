@@ -1335,6 +1335,7 @@ GameObject:
   - component: {fileID: 1210440286633072247}
   - component: {fileID: 6926897763404924081}
   - component: {fileID: 3838396402797061184}
+  - component: {fileID: -99885767059885274}
   m_Layer: 7
   m_Name: EnemyMelee
   m_TagString: Untagged
@@ -1440,6 +1441,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MeleeEnemy
   navAgent: {fileID: 2255285491697273875}
   animator: {fileID: 2243213015419743282}
+  maxHealth: 100
+  healthBar: {fileID: 2003538304596154773}
   terrainLayer:
     serializedVersion: 2
     m_Bits: 8
@@ -1451,6 +1454,8 @@ MonoBehaviour:
   attackCooldown: 1.2
   visionRange: 10
   engagementRange: 2.43
+  enemyAudioSource: {fileID: 0}
+  meleeAttackSound: {fileID: 0}
 --- !u!136 &4578677544186981569
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1529,6 +1534,23 @@ MonoBehaviour:
   hitFlashDuration: 0.1
   hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
   healthBar: {fileID: 2003538304596154773}
+  audioSource: {fileID: 0}
+  enemyHurtSound: {fileID: 0}
+--- !u!114 &-99885767059885274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3807745660598645816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d48d60ccfda7902459edd6326006428a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyScaling
+  baseHP: 300
+  baseDamage: 25
+  baseSpeed: 10
 --- !u!1 &3829775114430976104
 GameObject:
   m_ObjectHideFlags: 0
@@ -3438,6 +3460,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponHitbox
   weaponRig: {fileID: 2692968200872996422}
   hitCollider: {fileID: 7963803008576480447}
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  audioSource: {fileID: 0}
+  hitWallSound: {fileID: 0}
+  hitEnemySound: {fileID: 0}
 --- !u!65 &7963803008576480447 stripped
 BoxCollider:
   m_CorrespondingSourceObject: {fileID: 1537226874727325128, guid: 9018edc178f79bd488296b9f5f61e63c, type: 3}

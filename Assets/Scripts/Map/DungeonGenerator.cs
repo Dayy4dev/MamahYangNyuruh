@@ -22,9 +22,9 @@ public class DungeonGenerator : MonoBehaviour
 
         CreateRoom(GetRandomVariant(bottomRoomVariants), new Vector2Int(0,  0), RoomType.Bottom);
         CreateRoom(GetRandomVariant(centerRoomVariants), new Vector2Int(0,  1), RoomType.Center);
-        CreateRoom(GetRandomVariant(leftRoomVariants),   new Vector2Int(-1, 2), RoomType.Left);
-        CreateRoom(GetRandomVariant(rightRoomVariants),  new Vector2Int(1,  2), RoomType.Right);
-        CreateRoom(GetRandomVariant(topRoomVariants),    new Vector2Int(0,  3), RoomType.Top);
+        CreateRoom(GetRandomVariant(leftRoomVariants),   new Vector2Int(-1, 1), RoomType.Left);
+        CreateRoom(GetRandomVariant(rightRoomVariants),  new Vector2Int(1,  1), RoomType.Right);
+        CreateRoom(GetRandomVariant(topRoomVariants),    new Vector2Int(0,  2), RoomType.Top);
 
         Debug.Log("[DungeonGenerator] Dungeon berhasil di-generate!");
     }
