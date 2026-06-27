@@ -41,7 +41,15 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (TryGetComponent<Collider>(out var col)) col.enabled = false;
         Animator animator = GetComponentInChildren<Animator>();
         if (animator != null) animator.SetTrigger("Die");
-        StartCoroutine(ReloadSceneAfterDelay());
+
+        // Matikan auto-reload lama biar diatur sepenuhnya oleh GameManager yang baru
+        // StartCoroutine(ReloadSceneAfterDelay());
+
+        // Panggil sistem transisi COOKED di GameManager
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.GameOver();
+        }
     }
 
     private IEnumerator ReloadSceneAfterDelay()
