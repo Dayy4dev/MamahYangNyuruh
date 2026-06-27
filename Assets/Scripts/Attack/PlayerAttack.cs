@@ -198,56 +198,62 @@ public class PlayerAttack : MonoBehaviour
             cooldownTimer -= Time.deltaTime;
     }
 
-    private void StartAttack()
+   private void StartAttack()
+{
+    if (currentWeaponData == null) return;
+
+    // FIX TAMBAHAN: Jika player mati, batalkan paksa serangan di sini sebelum masuk ke logika HandCannon
+    if (playerHealth != null && playerHealth.IsDead)
     {
-        if (currentWeaponData == null) return;
-
-        // 1. CEK REHAT/RELOAD UTAMA (Sekarang HandCannon akan terdeteksi di sini dengan benar!)
-        if (activeWeapon != null && !activeWeapon.CanAttack())
-        {
-            Debug.Log($"[PlayerAttack] Serangan dibatalkan karena {currentWeaponData.weaponName} sedang rehat/reload/cooldown.");
-            isAttacking = false;
-            return;
-        }
-
-        // 2. JIKA LOLOS CEK, SET TIMER DEFAULT
-        isAttacking = true;
-        attackTimer = attackDuration;
-        cooldownTimer = attackCooldown; // Ini akan dioverride di bawah khusus untuk HandCannon
-
-        // 3. LOGIKA KHUSUS HANDCANNON
-        if (currentWeaponData.weaponName == "Hand_Cannon" || currentWeaponData.weaponName == "HandCannon")
-        {
-            if (audioSource != null && handCannonSound != null)
-                audioSource.PlayOneShot(handCannonSound);
-
-            FireRangedWeapon();
-
-            HandCannon handCannon = activeWeapon as HandCannon;
-            if (handCannon != null)
-                handCannon.ConsumeBullet();
-
-            // Gunakan fireRate khusus ranged agar jeda antar peluru normal
-            cooldownTimer = currentWeaponData.fireRate;
-        }
-        // 4. LOGIKA UNTUK TOY HAMMER
-        else if (currentWeaponData.weaponName == "SqueekHammer" || currentWeaponData.weaponName == "ToyHammer")
-        {
-            if (audioSource != null && squeekHammerSound != null)
-                audioSource.PlayOneShot(squeekHammerSound);
-
-            if (activeWeapon != null) activeWeapon.Attack();
-            else TriggerMeleeHitbox();
-        }
-        // 5. LOGIKA UNTUK BALLOON SWORD
-        else
-        {
-            PlaySwordComboSound();
-
-            if (activeWeapon != null) activeWeapon.Attack();
-            else TriggerMeleeHitbox();
-        }
+        isAttacking = false;
+        return;
     }
+
+    // 1. CEK REHAT/RELOAD UTAMA
+    if (activeWeapon != null && !activeWeapon.CanAttack())
+    {
+        Debug.Log($"[PlayerAttack] Serangan dibatalkan karena {currentWeaponData.weaponName} sedang rehat/reload/cooldown.");
+        isAttacking = false;
+        return;
+    }
+
+    // 2. JIKA LOLOS CEK, SET TIMER DEFAULT
+    isAttacking = true;
+    attackTimer = attackDuration;
+    cooldownTimer = attackCooldown;
+
+    // 3. LOGIKA KHUSUS HANDCANNON
+    if (currentWeaponData.weaponName == "Hand_Cannon" || currentWeaponData.weaponName == "HandCannon")
+    {
+        if (audioSource != null && handCannonSound != null)
+            audioSource.PlayOneShot(handCannonSound);
+
+        FireRangedWeapon(); // <--- Fungsi ini yang menembakkan peluru
+
+        HandCannon handCannon = activeWeapon as HandCannon;
+        if (handCannon != null)
+            handCannon.ConsumeBullet();
+
+        cooldownTimer = currentWeaponData.fireRate;
+    }
+    // 4. LOGIKA UNTUK TOY HAMMER
+    else if (currentWeaponData.weaponName == "SqueekHammer" || currentWeaponData.weaponName == "ToyHammer")
+    {
+        if (audioSource != null && squeekHammerSound != null)
+            audioSource.PlayOneShot(squeekHammerSound);
+
+        if (activeWeapon != null) activeWeapon.Attack();
+        else TriggerMeleeHitbox();
+    }
+    // 5. LOGIKA UNTUK BALLOON SWORD
+    else
+    {
+        PlaySwordComboSound();
+
+        if (activeWeapon != null) activeWeapon.Attack();
+        else TriggerMeleeHitbox();
+    }
+}
 
     private void PlaySwordComboSound()
     {
@@ -271,32 +277,32 @@ public class PlayerAttack : MonoBehaviour
         weaponHitbox.Activate(attackDamage);
     }
 
-    private void FireRangedWeapon()
+   private void FireRangedWeapon()
+{
+    // FIX TAMBAHAN: Peluru tidak akan di-spawn sama sekali jika player mati
+    if (playerHealth != null && playerHealth.IsDead) return;
+
+    if (bulletPrefab == null)
     {
-        if (bulletPrefab == null)
-        {
-            Debug.LogError("[PlayerAttack] Bullet Prefab belum dimasukkan di Inspector!");
-            return;
-        }
-
-        Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + transform.forward * 1f;
-        Quaternion spawnRot = transform.rotation;
-
-        Bullet bullet = bulletPool.Get();
-
-        bullet.transform.SetPositionAndRotation(spawnPos, spawnRot);
-
-        bullet.SetPool(bulletPool);
-
-        bullet.Setup(currentWeaponData.speed, currentWeaponData.damage);
-
-        if (bullet.TryGetComponent<Rigidbody>(out Rigidbody rb))
-        {
-            rb.linearVelocity = Vector3.zero;
-        }
-
-        Debug.Log($"[PlayerAttack] Menembakkan {currentWeaponData.weaponName}!");
+        Debug.LogError("[PlayerAttack] Bullet Prefab belum dimasukkan di Inspector!");
+        return;
     }
+
+    Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + transform.forward * 1f;
+    Quaternion spawnRot = transform.rotation;
+
+    Bullet bullet = bulletPool.Get();
+    bullet.transform.SetPositionAndRotation(spawnPos, spawnRot);
+    bullet.SetPool(bulletPool);
+    bullet.Setup(currentWeaponData.speed, currentWeaponData.damage);
+
+    if (bullet.TryGetComponent<Rigidbody>(out Rigidbody rb))
+    {
+        rb.linearVelocity = Vector3.zero;
+    }
+
+    Debug.Log($"[PlayerAttack] Menembakkan {currentWeaponData.weaponName}!");
+}
 
     private void EndAttack()
     {
