@@ -20,6 +20,11 @@ public class DungeonManager : MonoBehaviour
     [Header("Transition")]
     public float transitionDelay = 0.5f;
 
+    [Header("Room UI Bar Setup")]
+    public RoomUIBar roomUIBar; // Tarik script UI Bar ke sini di Inspector
+    private int maxEnemiesInRoom = 0;
+    private int currentEnemiesInRoom = 0;
+
     // Internal state
     private RoomController currentRoom;
     private Dictionary<RoomType, RoomController> roomMap = new Dictionary<RoomType, RoomController>();
@@ -167,6 +172,9 @@ public class DungeonManager : MonoBehaviour
         currentRoom = room;
         currentRoomType = type;
         Debug.Log($"[DungeonManager] Player diteleport ke {type}.");
+
+        // TAMBAHAN: Jalankan counter UI setelah teleportasi selesai dan musuh sudah ter-spawn
+        RefreshRoomEnemyCounter(type, room.gameObject);
     }
 
     Transform FindSpawnPoint(Transform parent)
@@ -233,6 +241,43 @@ public class DungeonManager : MonoBehaviour
         {
             roomCtrl.roomType = RoomType.Bottom;
             roomCtrl.GridPosition = Vector2Int.zero;
+        }
+    }
+
+    // Fungsi yang dipanggil setiap kali player masuk room baru untuk menghitung musuh
+    public void RefreshRoomEnemyCounter(RoomType type, GameObject roomObject)
+    {
+        // Cari semua objek dengan komponen EnemyDummy di dalam room ini
+        EnemyDummy[] enemies = roomObject.GetComponentsInChildren<EnemyDummy>();
+
+        maxEnemiesInRoom = enemies.Length;
+        currentEnemiesInRoom = maxEnemiesInRoom;
+
+        if (maxEnemiesInRoom > 0)
+        {
+            if (roomUIBar != null)
+            {
+                roomUIBar.ShowBar(true);
+                roomUIBar.UpdateRoomText(type.ToString());
+                roomUIBar.UpdateBarValue(currentEnemiesInRoom, maxEnemiesInRoom);
+            }
+        }
+        else
+        {
+            // Jika room tidak punya musuh, sembunyikan bar
+            if (roomUIBar != null) roomUIBar.ShowBar(false);
+        }
+    }
+
+    // Fungsi yang akan dipanggil oleh EnemySpawner saat musuh mati
+    public void OnEnemyKilled()
+    {
+        currentEnemiesInRoom--;
+        if (currentEnemiesInRoom < 0) currentEnemiesInRoom = 0;
+
+        if (roomUIBar != null)
+        {
+            roomUIBar.UpdateBarValue(currentEnemiesInRoom, maxEnemiesInRoom);
         }
     }
 }

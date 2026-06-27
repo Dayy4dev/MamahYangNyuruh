@@ -28,7 +28,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         currentHealth = Mathf.Max(0, currentHealth - amount);
         Debug.Log($"[PlayerHealth] Took {amount} damage. HP: {currentHealth}/{maxHealth}");
-        
+
         if (currentHealth <= 0) Die();
     }
 
@@ -48,15 +48,23 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         IsDead = true;
 
         Debug.Log("[PlayerHealth] Player died. Freezing game and auto-reloading scene.");
-        
+
+        // ─────────────────────────────────────────────────────────────────────────
+        // TAMBAHAN: Sembunyikan UI Room Bar saat player mati
+        // ─────────────────────────────────────────────────────────────────────────
+        if (DungeonManager.Instance != null && DungeonManager.Instance.roomUIBar != null)
+        {
+            DungeonManager.Instance.roomUIBar.ShowBar(false);
+        }
+        // ─────────────────────────────────────────────────────────────────────────
+
         // 1. FIX SUARA JALAN: Cari AudioSource di anak/komponen Player dan matikan suaranya seketika
-        // Ini akan menghentikan footstep sound yang terjebak looping karena PlayerMovement dimatikan
         AudioSource[] allAudioSources = GetComponentsInChildren<AudioSource>();
         foreach (AudioSource audio in allAudioSources)
         {
-            if (audio != null && audio.loop) 
+            if (audio != null && audio.loop)
             {
-                audio.Stop(); 
+                audio.Stop();
             }
         }
 
@@ -64,12 +72,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (TryGetComponent<PlayerMovement>(out var movement)) movement.enabled = false;
         if (TryGetComponent<CharacterController>(out var cc)) cc.enabled = false;
         if (TryGetComponent<Collider>(out var col)) col.enabled = false;
-        
+
         // 3. Paksa Animator membeku total di pose terakhirnya (Tanpa memicu animasi death)
         Animator animator = GetComponentInChildren<Animator>();
-        if (animator != null) 
+        if (animator != null)
         {
-            animator.speed = 0f; 
+            animator.speed = 0f;
         }
 
         // 4. BEKUKAN WAKTU GAME TOTAL (Hand Cannon, proyektil, dan musuh langsung mogok)

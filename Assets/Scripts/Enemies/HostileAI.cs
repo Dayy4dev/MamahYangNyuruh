@@ -51,20 +51,21 @@ public class HostileAI : MonoBehaviour, IDamageable
     private readonly Queue<GameObject> projectilePool = new Queue<GameObject>();
     private Transform projectilePoolRoot;
     private EnemySpawner spawner;
+    private bool isDead = false;
 
     // ── Scaling API ───────────────────────────────────────────────────────────
 
-    public int   GetBaseHP()     => maxHealth;
-    public int   GetBaseDamage() => projectileDamage;
-    public float GetBaseSpeed()  => navAgent != null ? navAgent.speed : 3.5f;
+    public int GetBaseHP() => maxHealth;
+    public int GetBaseDamage() => projectileDamage;
+    public float GetBaseSpeed() => navAgent != null ? navAgent.speed : 3.5f;
 
     public void SetScaledStats(int hp, int dmg, float speed)
     {
-        maxHealth        = hp;
+        maxHealth = hp;
         projectileDamage = dmg;
-        currentHealth    = hp;
+        currentHealth = hp;
 
-        if (navAgent  != null) navAgent.speed = speed;
+        if (navAgent != null) navAgent.speed = speed;
         if (healthBar != null) healthBar.SetMaxHealth(hp);
     }
 
@@ -75,8 +76,8 @@ public class HostileAI : MonoBehaviour, IDamageable
         GameObject playerObj = GameObject.FindWithTag("Player");
         if (playerObj != null) playerTransform = playerObj.transform;
 
-        if (navAgent           == null) navAgent           = GetComponent<NavMeshAgent>();
-        if (animator           == null) animator           = GetComponent<Animator>();
+        if (navAgent == null) navAgent = GetComponent<NavMeshAgent>();
+        if (animator == null) animator = GetComponent<Animator>();
         if (hostileAudioSource == null) hostileAudioSource = GetComponent<AudioSource>();
 
         healthBar = GetComponentInChildren<EnemyHealthBar>();
@@ -92,6 +93,8 @@ public class HostileAI : MonoBehaviour, IDamageable
 
     private void Update()
     {
+        if (isDead) return;
+
         DetectPlayer();
         UpdateBehaviourState();
     }
@@ -121,7 +124,7 @@ public class HostileAI : MonoBehaviour, IDamageable
             return;
         }
 
-        float dist      = Vector3.Distance(transform.position, playerTransform.position);
+        float dist = Vector3.Distance(transform.position, playerTransform.position);
         isPlayerVisible = dist <= visionRange;
         isPlayerInRange = dist <= engagementRange;
     }
@@ -180,23 +183,23 @@ public class HostileAI : MonoBehaviour, IDamageable
 
         if (usePrediction)
         {
-            float dist      = Vector3.Distance(firePoint.position, targetPos);
+            float dist = Vector3.Distance(firePoint.position, targetPos);
             float travelTime = dist / projectileSpeed;
 
             // Coba ambil velocity dari NavMeshAgent atau Rigidbody player
-            Vector3 playerVel   = Vector3.zero;
+            Vector3 playerVel = Vector3.zero;
             NavMeshAgent pAgent = playerTransform.GetComponent<NavMeshAgent>();
-            Rigidbody    pRb    = playerTransform.GetComponent<Rigidbody>();
+            Rigidbody pRb = playerTransform.GetComponent<Rigidbody>();
 
-            if      (pAgent != null) playerVel = pAgent.velocity;
-            else if (pRb    != null) playerVel = pRb.linearVelocity;
+            if (pAgent != null) playerVel = pAgent.velocity;
+            else if (pRb != null) playerVel = pRb.linearVelocity;
 
             targetPos += playerVel * travelTime;
         }
 
-        Vector3 dir      = (targetPos - firePoint.position).normalized;
-        float   tEst     = Vector3.Distance(firePoint.position, targetPos) / projectileSpeed;
-        float   gravOff  = 0.5f * Mathf.Abs(Physics.gravity.y) * tEst * tEst;
+        Vector3 dir = (targetPos - firePoint.position).normalized;
+        float tEst = Vector3.Distance(firePoint.position, targetPos) / projectileSpeed;
+        float gravOff = 0.5f * Mathf.Abs(Physics.gravity.y) * tEst * tEst;
         dir = (dir + Vector3.up * (gravOff / Vector3.Distance(firePoint.position, targetPos))).normalized;
 
         if (accuracyError > 0f)
@@ -208,9 +211,9 @@ public class HostileAI : MonoBehaviour, IDamageable
             dir.Normalize();
         }
 
-        rb.linearVelocity  = Vector3.zero;
+        rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        rb.linearVelocity  = dir * projectileSpeed;
+        rb.linearVelocity = dir * projectileSpeed;
         bullet.transform.forward = dir;
 
         StartCoroutine(ReturnProjectileToPool(bullet, projectileLifetime));
@@ -220,11 +223,17 @@ public class HostileAI : MonoBehaviour, IDamageable
     {
         yield return new WaitForSeconds(delay);
 
-        if (projectile != null)
+        // Pastikan projectile dan pool root-nya masih ada sebelum dikembalikan
+        if (projectile != null && projectilePoolRoot != null)
         {
             projectile.SetActive(false);
             projectile.transform.SetParent(projectilePoolRoot);
             projectilePool.Enqueue(projectile);
+        }
+        else if (projectile != null && projectilePoolRoot == null)
+        {
+            // Jika pool-nya sudah hancur (musuh mati), hancurkan saja pelurunya langsung
+            Destroy(projectile);
         }
     }
 
@@ -232,9 +241,9 @@ public class HostileAI : MonoBehaviour, IDamageable
 
     private void UpdateBehaviourState()
     {
-        if      (!isPlayerVisible && !isPlayerInRange) PerformPatrol();
-        else if ( isPlayerVisible && !isPlayerInRange) PerformChase();
-        else if ( isPlayerVisible &&  isPlayerInRange) PerformAttack();
+        if (!isPlayerVisible && !isPlayerInRange) PerformPatrol();
+        else if (isPlayerVisible && !isPlayerInRange) PerformChase();
+        else if (isPlayerVisible && isPlayerInRange) PerformAttack();
 
         UpdateAnimatorParameters();
     }
@@ -248,7 +257,7 @@ public class HostileAI : MonoBehaviour, IDamageable
         if (Physics.Raycast(candidate, -transform.up, 2f, terrainLayer))
         {
             currentPatrolPoint = candidate;
-            hasPatrolPoint     = true;
+            hasPatrolPoint = true;
         }
     }
 
@@ -300,28 +309,43 @@ public class HostileAI : MonoBehaviour, IDamageable
 
         Vector3 localVelocity = transform.InverseTransformDirection(navAgent.velocity);
         animator.SetFloat("Horizontal", localVelocity.x);
-        animator.SetFloat("Vertical",   localVelocity.z);
+        animator.SetFloat("Vertical", localVelocity.z);
     }
 
     // ── IDamageable ───────────────────────────────────────────────────────────
 
     public void TakeDamage(int amount)
     {
+        if (isDead) return; // Jaga agar tidak memproses damage jika sudah mati
+
         currentHealth = Mathf.Clamp(currentHealth - amount, 0, maxHealth);
 
         if (healthBar != null) healthBar.SetHealth(currentHealth);
 
         Debug.Log($"[HostileAI] {gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
 
-        if (currentHealth <= 0) Die();
+        if (currentHealth <= 0)
+        {
+            isDead = true; // Tandai sudah mati
+            Die();
+        }
     }
 
     private void Die()
     {
         Debug.Log($"[HostileAI] {gameObject.name} mati!");
 
-        if (spawner           != null) spawner.NotifyEnemyDestroyed(gameObject);
-        if (projectilePoolRoot != null) Destroy(projectilePoolRoot.gameObject);
+        if (spawner != null) spawner.NotifyEnemyDestroyed(gameObject);
+
+        if (projectilePoolRoot != null)
+        {
+            Destroy(projectilePoolRoot.gameObject);
+        }
+
+        // Mematikan agent dan collider agar tidak mengganggu game saat proses hancur 0.1 detik
+        if (navAgent != null) navAgent.enabled = false;
+        Collider col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
 
         Destroy(gameObject, 0.1f);
     }

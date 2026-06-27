@@ -24,8 +24,8 @@ public class EnemySpawner : MonoBehaviour
             // 1. Ambil koordinat acak di dalam radius lingkaran (X dan Z)
             Vector2 randomCircle = Random.insideUnitCircle * spawnRadius;
             Vector3 spawnPos = new Vector3(
-                transform.position.x + randomCircle.x, 
-                transform.position.y, 
+                transform.position.x + randomCircle.x,
+                transform.position.y,
                 transform.position.z + randomCircle.y
             );
 
@@ -37,9 +37,9 @@ public class EnemySpawner : MonoBehaviour
 
             // 3. Spawn musuh dan masukkan sebagai child dari Room agar terdeteksi
             GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity, transform.parent);
-            
+
             // Set tag musuh agar sesuai dengan deteksi RoomController
-            enemy.tag = "Enemy"; 
+            enemy.tag = "Enemy";
         }
 
         Debug.Log($"[EnemySpawner] Berhasil spawn {spawnCount} musuh di {transform.parent.name}");
@@ -51,9 +51,12 @@ public class EnemySpawner : MonoBehaviour
     public void NotifyEnemyDestroyed(GameObject enemy)
     {
         Debug.Log($"[EnemySpawner] Musuh {enemy.name} melaporkan kematian.");
-        
-        // Di sini kamu bisa menambahkan logika tambahan jika dibutuhkan kelak, 
-        // misalnya menghitung sisa musuh wave di spawner, memicu UI counter, dll.
+
+        // Hubungkan ke DungeonManager agar Bar berkurang
+        if (DungeonManager.Instance != null)
+        {
+            DungeonManager.Instance.OnEnemyKilled();
+        }
     }
 
     // Menggambar area jangkauan spawn di Unity Editor (tidak muncul di game)
