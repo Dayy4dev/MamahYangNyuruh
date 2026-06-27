@@ -494,9 +494,45 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1778648047573239195}
     m_Modifications:
+    - target: {fileID: -4867004715899401255, guid: 62083466e61628a4982e852d4ca0b48c, type: 3}
+      propertyPath: moveSpeed
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: -4867004715899401255, guid: 62083466e61628a4982e852d4ca0b48c, type: 3}
+      propertyPath: contactDamage
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 1399616740618223131, guid: 62083466e61628a4982e852d4ca0b48c, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2410079404887067153, guid: 62083466e61628a4982e852d4ca0b48c, type: 3}
+      propertyPath: baseHP
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 2410079404887067153, guid: 62083466e61628a4982e852d4ca0b48c, type: 3}
+      propertyPath: baseSpeed
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 2410079404887067153, guid: 62083466e61628a4982e852d4ca0b48c, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2410079404887067153, guid: 62083466e61628a4982e852d4ca0b48c, type: 3}
+      propertyPath: baseDamage
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 6401883331013972782, guid: 62083466e61628a4982e852d4ca0b48c, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7214650350086101758, guid: 62083466e61628a4982e852d4ca0b48c, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7214650350086101758, guid: 62083466e61628a4982e852d4ca0b48c, type: 3}
+      propertyPath: maxHealth
+      value: 1000
       objectReference: {fileID: 0}
     - target: {fileID: 7734134644095645850, guid: 62083466e61628a4982e852d4ca0b48c, type: 3}
       propertyPath: m_Name

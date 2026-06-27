@@ -21,7 +21,7 @@ MonoBehaviour:
   knockbackForce: 0
   knockbackDuration: 0
   maxComboCount: 3
-  meleeReloadTime: 5
+  meleeReloadTime: 3
   defaultCapacity: 0
   maxPoolSize: 0
   speed: 0

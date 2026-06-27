@@ -507,9 +507,21 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4669038041546032923, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: baseHP
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 4669038041546032923, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: baseDamage
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 6077987226358072364, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
       propertyPath: m_Name
       value: EnemyGun
+      objectReference: {fileID: 0}
+    - target: {fileID: 6351839981106544148, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: projectileDamage
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
       propertyPath: m_LocalPosition.x
