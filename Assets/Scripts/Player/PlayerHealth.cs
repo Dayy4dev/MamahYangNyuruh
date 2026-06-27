@@ -12,7 +12,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     [Header("Death Settings")]
     [SerializeField] private float deathSceneReloadDelay = 2f;
 
-    // Properti baru untuk melacak status kematian player
+    // Properti untuk melacak status kematian player (dicek oleh PlayerAttack dan PlayerInventory)
     public bool IsDead { get; private set; }
 
     void Awake()
@@ -47,28 +47,53 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         if (IsDead) return; // Mencegah fungsi Die terpanggil berkali-kali
         IsDead = true;
 
-        Debug.Log("[PlayerHealth] Player died.");
+        Debug.Log("[PlayerHealth] Player died. Freezing game and auto-reloading scene.");
         
-        // 1. Matikan komponen pergerakan dan fisik agar player berhenti di tempat
+        // 1. FIX SUARA JALAN: Cari AudioSource di anak/komponen Player dan matikan suaranya seketika
+        // Ini akan menghentikan footstep sound yang terjebak looping karena PlayerMovement dimatikan
+        AudioSource[] allAudioSources = GetComponentsInChildren<AudioSource>();
+        foreach (AudioSource audio in allAudioSources)
+        {
+            if (audio != null && audio.loop) 
+            {
+                audio.Stop(); 
+            }
+        }
+
+        // 2. Matikan komponen pergerakan dan fisik agar player kaku di tempat
         if (TryGetComponent<PlayerMovement>(out var movement)) movement.enabled = false;
         if (TryGetComponent<CharacterController>(out var cc)) cc.enabled = false;
         if (TryGetComponent<Collider>(out var col)) col.enabled = false;
         
-        // 2. Jalankan animasi kematian
+        // 3. Paksa Animator membeku total di pose terakhirnya (Tanpa memicu animasi death)
         Animator animator = GetComponentInChildren<Animator>();
-        if (animator != null) animator.SetTrigger("Die");
+        if (animator != null) 
+        {
+            animator.speed = 0f; 
+        }
 
-        // 3. Panggil sistem transisi GAME OVER di GameManager kamu
+        // 4. BEKUKAN WAKTU GAME TOTAL (Hand Cannon, proyektil, dan musuh langsung mogok)
+        Time.timeScale = 0f;
+
+        // 5. Panggil sistem transisi GAME OVER di GameManager (untuk memicu canvas jika ada)
         if (GameManager.Instance != null)
         {
             GameManager.Instance.GameOver();
         }
+
+        // 6. Jalankan hitung mundur otomatis tanpa tombol restart
+        StartCoroutine(AutoReloadSceneRoutine());
     }
 
-    // Fungsi lama (bisa dihapus jika GameManager sudah menghandle reload scene sepenuhnya)
-    private IEnumerator ReloadSceneAfterDelay()
+    private IEnumerator AutoReloadSceneRoutine()
     {
-        yield return new WaitForSeconds(deathSceneReloadDelay);
+        // WAJIB: Gunakan Realtime karena Time.timeScale sedang di posisi 0f
+        yield return new WaitForSecondsRealtime(deathSceneReloadDelay);
+
+        // KEMBALIKAN WAKTU KE NORMAL SEBELUM SCENE BARU DIMULAI
+        Time.timeScale = 1f;
+
+        // Muat ulang level secara otomatis
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
