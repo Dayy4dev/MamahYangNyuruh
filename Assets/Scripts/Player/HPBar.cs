@@ -5,34 +5,51 @@ using TMPro; // Needed to control the TextMeshPro component
 public class HPBar : MonoBehaviour
 {
     [Header("Dependencies")]
-    public HealthData healthData; // Drag your 'PlayerHPAsset' file here
-    public Image fillImage;         // Drag your 'Health Bar Fill' image here
-    public TextMeshProUGUI hpText;  // Drag your UI 'Text (TMP)' here
+    public PlayerHealth playerHealth;  // Drag your Player object here
+    public HealthData healthData;      // Optional fallback (legacy)
+    public Image fillImage;            // Drag your 'Health Bar Fill' image here
+    public TextMeshProUGUI hpText;     // Drag your UI 'Text (TMP)' here
+
+    void Start()
+    {
+        // Auto-find PlayerHealth if not assigned in the inspector
+        if (playerHealth == null)
+        {
+            GameObject player = GameObject.FindWithTag("Player");
+            if (player != null) playerHealth = player.GetComponent<PlayerHealth>();
+        }
+    }
 
     void Update()
     {
-        // Debug Test Tool: Press Spacebar to test damage functionality
-        if (Input.GetKeyDown(KeyCode.Space) && healthData != null)
+        int currentHP = 0;
+        int maxHP = 0;
+
+        if (playerHealth != null)
         {
-            healthData.TakeDamage(10);
-            Debug.Log("Spacebar pressed. Player took 10 damage! Current HP: " + healthData.currentHP);
+            currentHP = playerHealth.currentHealth;
+            maxHP     = playerHealth.maxHealth;
+        }
+        else if (healthData != null)
+        {
+            currentHP = healthData.currentHP;
+            maxHP     = healthData.maxHP;
+        }
+        else
+        {
+            return;
         }
 
-        // Continually push data values to screen UI elements
-        if (healthData != null)
+        // 1. Update the horizontal fill slider amount
+        if (fillImage != null && maxHP > 0)
         {
-            // 1. Update the horizontal fill slider amount
-            if (fillImage != null)
-            {
-                float percent = (float)healthData.currentHP / healthData.maxHP;
-                fillImage.fillAmount = percent;
-            }
+            fillImage.fillAmount = (float)currentHP / maxHP;
+        }
 
-            // 2. Format and display the health numbers text (e.g., "100 / 100")
-            if (hpText != null)
-            {
-                hpText.text = healthData.currentHP + " / " + healthData.maxHP;
-            }
+        // 2. Format and display the health numbers text (e.g., "100 / 100")
+        if (hpText != null)
+        {
+            hpText.text = currentHP + " / " + maxHP;
         }
     }
 }
