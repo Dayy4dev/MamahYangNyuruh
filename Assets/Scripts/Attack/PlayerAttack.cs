@@ -28,6 +28,7 @@ public class PlayerAttack : MonoBehaviour
     [SerializeField] private UnityEngine.UI.Image cooldownUiImage; // Tarik objek CooldownIndicator ke sini via Inspector
     private ObjectPool<Bullet> bulletPool;
 
+
     // -------------------------------------------------------------------------
     // State
     // -------------------------------------------------------------------------
@@ -47,6 +48,7 @@ public class PlayerAttack : MonoBehaviour
     private bool isAttacking;
     private bool isArmed;
     private PlayerHealth playerHealth;
+    
 
     // -------------------------------------------------------------------------
     // Unity Lifecycle
@@ -100,24 +102,25 @@ public class PlayerAttack : MonoBehaviour
     }
 
     void Update()
+{
+    // 1. FIX PAUSE & MENU: Jangan izinkan menyerang/menembak jika game sedang di-pause atau membuka UI
+    if (GameManager.Instance != null && !GameManager.Instance.IsPlaying)
     {
-        TickAttack();
-        TickCooldown();
-        HandleInput();
-        UpdateCooldownUI();
+        return;
+    }
 
-        if (playerHealth != null && playerHealth.IsDead) 
+    if (playerHealth != null && playerHealth.IsDead)
     {
         // Pastikan hitbox langsung mati jika player mendadak mati saat mengayunkan senjata
-        if (isAttacking) EndAttack(); 
-        return; 
+        if (isAttacking) EndAttack();
+        return;
     }
 
     TickAttack();
     TickCooldown();
     HandleInput();
     UpdateCooldownUI();
-    }
+}
 
 
     public void EquipWeapon(WeaponData data, Weapon weaponComponent)

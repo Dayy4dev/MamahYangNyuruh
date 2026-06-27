@@ -32,28 +32,35 @@ public class PlayerMovement : MonoBehaviour
 [SerializeField] private AudioClip footstepSound;         
 [SerializeField] private float footstepInterval = 0.5f; // Jeda waktu antar langkah (makin kecil = makin cepat)
 
-private float footstepTimer;
 private void HandleFootstepSound()
 {
-    // 1. Cek apakah player sedang menekan tombol arah (W, A, S, D)
-    bool isMoving = Input.GetAxisRaw("Horizontal") != 0f || Input.GetAxisRaw("Vertical") != 0f;
+    // Jika game di-pause atau inven buka, matikan suara jalannya seketika!
+    if (GameManager.Instance != null && !GameManager.Instance.IsPlaying)
+    {
+        if (movementAudioSource != null && movementAudioSource.isPlaying)
+        {
+            movementAudioSource.Stop();
+        }
+        return; 
+    }
 
+    // Logika deteksi tombol WASD kamu di bawahnya...
+    bool isMoving = Input.GetAxisRaw("Horizontal") != 0f || Input.GetAxisRaw("Vertical") != 0f;
     if (isMoving)
     {
-        // Jika belum ada audio yang berputar, pasang clip-nya dan putar secara loop
         if (movementAudioSource != null && !movementAudioSource.isPlaying && footstepSound != null)
         {
             movementAudioSource.clip = footstepSound;
-            movementAudioSource.loop = true; // Otomatis mengulang selama jalan
+            movementAudioSource.loop = true;
             movementAudioSource.Play();
         }
     }
     else
     {
-        // 2. JIKA DILEPAS DAN TIDAK GERAK: Langsung matikan suaranya seketika!
         if (movementAudioSource != null && movementAudioSource.isPlaying)
         {
-            movementAudioSource.Stop();        }
+            movementAudioSource.Stop();
+        }
     }
 }
 
@@ -67,24 +74,37 @@ private void HandleFootstepSound()
     }
 
     void Update()
+{
+    if (controller == null) return;
+
+    // 1. PINDAHKAN KE SINI: Jalankan pengecekan suara terlebih dahulu
+    // Agar saat pause, fungsi ini bisa menangkap status pause dan mematikan suaranya
+    HandleFootstepSound();
+
+    // 2. BARU PASANG PENGAMAN PAUSE DI SINI
+    if (GameManager.Instance != null && !GameManager.Instance.IsPlaying)
     {
-        if (controller == null) return;
-
-        // 1. Hitung Kalkulasi Logika Dasar (Tanpa memanggil controller.Move dulu)
-        CalculateGravity();
-        CalculateMovementInput();
-        
-        // 2. Kalkulasi Raycast Mouse (Cukup 1x di sini untuk posisi bidik & indikator)
-        CalculateMouseWorldPosition();
-
-        HandleRotation();
-
-        // 3. FIX DOUBLE MOVE: Gabungkan kecepatan horizontal dan vertikal lalu gerakkan SEKALI SAJA
-        Vector3 finalVelocity = (moveDirection * moveSpeed) + verticalVelocity;
-        controller.Move(finalVelocity * Time.deltaTime);
-
-        HandleFootstepSound();
+        if (aimIndicator != null && aimIndicator.gameObject.activeSelf)
+        {
+            aimIndicator.gameObject.SetActive(false);
+        }
+        return; // Semua gerakan & kalkulasi di bawah akan berhenti
     }
+
+    if (aimIndicator != null && !aimIndicator.gameObject.activeSelf)
+    {
+        aimIndicator.gameObject.SetActive(true);
+    }
+
+    // 3. Logika gerakan dan raycast tetap di bawah pengaman pause
+    CalculateGravity();
+    CalculateMovementInput();
+    CalculateMouseWorldPosition();
+    HandleRotation();
+
+    Vector3 finalVelocity = (moveDirection * moveSpeed) + verticalVelocity;
+    controller.Move(finalVelocity * Time.deltaTime);
+}
 
     private void CalculateMouseWorldPosition()
     {

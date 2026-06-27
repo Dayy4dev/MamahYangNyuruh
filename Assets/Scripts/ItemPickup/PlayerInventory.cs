@@ -58,8 +58,14 @@ public class PlayerInventory : MonoBehaviour
     }
 
     void Update()
+{
+    // 1. FIX PAUSE & MENU: Jika game sedang tidak berjalan normal, kunci seluruh fitur inventory
+    if (GameManager.Instance != null && !GameManager.Instance.IsPlaying)
     {
-         // FIX: Jika player mati, kunci semua interaksi inventory (tidak bisa pickup, drop, dll.)
+        return;
+    }
+
+    // FIX: Jika player mati, kunci semua interaksi inventory
     if (playerHealth != null && playerHealth.IsDead)
     {
         // Sembunyikan prompt UI senjata terdekat jika ada agar tidak menggantung di layar
@@ -71,11 +77,11 @@ public class PlayerInventory : MonoBehaviour
         return;
     }
 
-        HandlePickupDetection();
-        HandlePickupInput();
-        HandleDropInput();
-        HandleSlotSwitch();
-    }
+    HandlePickupDetection();
+    HandlePickupInput();
+    HandleDropInput();
+    HandleSlotSwitch();
+}
 
     public void TryPickup(WeaponPickup pickup)
     {
