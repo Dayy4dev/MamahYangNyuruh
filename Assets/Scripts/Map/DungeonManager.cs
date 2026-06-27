@@ -149,9 +149,20 @@ public class DungeonManager : MonoBehaviour
         if (!roomMap.TryGetValue(type, out RoomController room)) { Debug.LogWarning($"[DungeonManager] Room {type} tidak ditemukan!"); return; }
 
         Transform spawnPoint = FindSpawnPoint(room.transform);
-        playerTransform.position = spawnPoint != null
+        Vector3 targetPosition = spawnPoint != null
             ? spawnPoint.position
             : room.transform.position + fallbackOffset;
+
+        // FIX: Ambil komponen CharacterController jika player memakainya
+        CharacterController cc = playerTransform.GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false; // Matikan sementara agar tidak mengunci posisi
+
+        playerTransform.position = targetPosition;
+
+        // Paksa Unity sinkronisasi posisi transform dengan physics engine
+        Physics.SyncTransforms();
+
+        if (cc != null) cc.enabled = true; // Nyalakan kembali setelah posisi berubah
 
         currentRoom = room;
         currentRoomType = type;
@@ -169,7 +180,6 @@ public class DungeonManager : MonoBehaviour
         }
         return null;
     }
-
     IEnumerator LoadNextMap()
     {
         Debug.Log("[DungeonManager] Memuat map berikutnya...");
