@@ -46,6 +46,7 @@ public class PlayerAttack : MonoBehaviour
     private float cooldownTimer;
     private bool isAttacking;
     private bool isArmed;
+    private PlayerHealth playerHealth;
 
     // -------------------------------------------------------------------------
     // Unity Lifecycle
@@ -64,6 +65,11 @@ public class PlayerAttack : MonoBehaviour
             maxSize: 50
         );
     }
+    void Start()
+{
+  
+    playerHealth = GetComponent<PlayerHealth>();
+}
 
     // Fungsi Callback untuk Pool
     private Bullet CreateBullet()
@@ -99,6 +105,18 @@ public class PlayerAttack : MonoBehaviour
         TickCooldown();
         HandleInput();
         UpdateCooldownUI();
+
+        if (playerHealth != null && playerHealth.IsDead) 
+    {
+        // Pastikan hitbox langsung mati jika player mendadak mati saat mengayunkan senjata
+        if (isAttacking) EndAttack(); 
+        return; 
+    }
+
+    TickAttack();
+    TickCooldown();
+    HandleInput();
+    UpdateCooldownUI();
     }
 
 

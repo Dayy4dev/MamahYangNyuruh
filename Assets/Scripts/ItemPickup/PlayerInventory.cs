@@ -21,6 +21,8 @@ public class PlayerInventory : MonoBehaviour
     private int currentSlot = SLOT_UNARMED;
     private WeaponPickup nearestPickup;
 
+    private PlayerHealth playerHealth;
+
     // Cache untuk optimasi performa visual senjata
     private Transform[] allChildrenCache;
 
@@ -36,7 +38,15 @@ public class PlayerInventory : MonoBehaviour
     {
         if (playerAttack == null)
             playerAttack = GetComponent<PlayerAttack>();
+
+         if (playerAttack == null)
+        playerAttack = GetComponent<PlayerAttack>();
+        
+    // FIX: Ambil referensi PlayerHealth di sini
+    playerHealth = GetComponent<PlayerHealth>();
     }
+ 
+
 
     void Start()
     {
@@ -49,6 +59,18 @@ public class PlayerInventory : MonoBehaviour
 
     void Update()
     {
+         // FIX: Jika player mati, kunci semua interaksi inventory (tidak bisa pickup, drop, dll.)
+    if (playerHealth != null && playerHealth.IsDead)
+    {
+        // Sembunyikan prompt UI senjata terdekat jika ada agar tidak menggantung di layar
+        if (nearestPickup != null)
+        {
+            nearestPickup = null;
+            onNearestPickupChanged?.Invoke(null);
+        }
+        return;
+    }
+
         HandlePickupDetection();
         HandlePickupInput();
         HandleDropInput();
