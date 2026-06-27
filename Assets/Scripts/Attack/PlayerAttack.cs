@@ -48,7 +48,7 @@ public class PlayerAttack : MonoBehaviour
     private bool isAttacking;
     private bool isArmed;
     private PlayerHealth playerHealth;
-    
+
 
     // -------------------------------------------------------------------------
     // Unity Lifecycle
@@ -68,10 +68,10 @@ public class PlayerAttack : MonoBehaviour
         );
     }
     void Start()
-{
-  
-    playerHealth = GetComponent<PlayerHealth>();
-}
+    {
+
+        playerHealth = GetComponent<PlayerHealth>();
+    }
 
     // Fungsi Callback untuk Pool
     private Bullet CreateBullet()
@@ -102,25 +102,25 @@ public class PlayerAttack : MonoBehaviour
     }
 
     void Update()
-{
-    // 1. FIX PAUSE & MENU: Jangan izinkan menyerang/menembak jika game sedang di-pause atau membuka UI
-    if (GameManager.Instance != null && !GameManager.Instance.IsPlaying)
     {
-        return;
-    }
+        // 1. FIX PAUSE & MENU: Jangan izinkan menyerang/menembak jika game sedang di-pause atau membuka UI
+        if (GameManager.Instance != null && !GameManager.Instance.IsPlaying)
+        {
+            return;
+        }
 
-    if (playerHealth != null && playerHealth.IsDead)
-    {
-        // Pastikan hitbox langsung mati jika player mendadak mati saat mengayunkan senjata
-        if (isAttacking) EndAttack();
-        return;
-    }
+        if (playerHealth != null && playerHealth.IsDead)
+        {
+            // Pastikan hitbox langsung mati jika player mendadak mati saat mengayunkan senjata
+            if (isAttacking) EndAttack();
+            return;
+        }
 
-    TickAttack();
-    TickCooldown();
-    HandleInput();
-    UpdateCooldownUI();
-}
+        TickAttack();
+        TickCooldown();
+        HandleInput();
+        UpdateCooldownUI();
+    }
 
 
     public void EquipWeapon(WeaponData data, Weapon weaponComponent)
@@ -176,13 +176,25 @@ public class PlayerAttack : MonoBehaviour
 
     private void HandleInput()
     {
+        // Jika klik kiri ditekan, kita cek statusnya di console
+        if (Input.GetMouseButtonDown(0))
+        {
+            Debug.Log($"[Input Cek] Klik kiri ditekan! Status -> isArmed: {isArmed}, Klik Kanan Ditahan: {Input.GetMouseButton(1)}, IsAttacking: {isAttacking}, CooldownTimer: {cooldownTimer:F2}");
+        }
+
         if (!isArmed) return;
 
-        // Tahan klik kanan untuk aim, klik kiri untuk attack
+        // Sesuai logika Anda: Harus tahan klik kanan (Aim) BARU klik kiri (Serang)
         if (Input.GetMouseButton(1) && Input.GetMouseButtonDown(0))
         {
             if (!isAttacking && cooldownTimer <= 0f)
+            {
                 StartAttack();
+            }
+            else
+            {
+                Debug.Log($"[Input Cek] Gagal StartAttack karena -> IsAttacking: {isAttacking} ATAU CooldownTimer masih: {cooldownTimer:F2}");
+            }
         }
     }
 
@@ -201,62 +213,80 @@ public class PlayerAttack : MonoBehaviour
             cooldownTimer -= Time.deltaTime;
     }
 
-   private void StartAttack()
-{
-    if (currentWeaponData == null) return;
-
-    // FIX TAMBAHAN: Jika player mati, batalkan paksa serangan di sini sebelum masuk ke logika HandCannon
-    if (playerHealth != null && playerHealth.IsDead)
+    private void StartAttack()
     {
-        isAttacking = false;
-        return;
+        Debug.Log($"[Cek 1] Tombol klik dideteksi. Senjata aktif: {(currentWeaponData != null ? currentWeaponData.weaponName : "Kosong")}");
+        if (currentWeaponData == null) return;
+
+        // FIX TAMBAHAN: Jika player mati, batalkan paksa serangan di sini sebelum masuk ke logika HandCannon
+        if (playerHealth != null && playerHealth.IsDead)
+        {
+            isAttacking = false;
+            return;
+        }
+
+        // 1. CEK REHAT/RELOAD UTAMA
+        if (activeWeapon != null && !activeWeapon.CanAttack())
+        {
+            Debug.Log($"[PlayerAttack] Serangan dibatalkan karena {currentWeaponData.weaponName} sedang rehat/reload/cooldown.");
+            isAttacking = false;
+            return;
+        }
+
+        // 2. JIKA LOLOS CEK, SET TIMER DEFAULT
+        isAttacking = true;
+        attackTimer = attackDuration;
+        cooldownTimer = attackCooldown;
+
+        Debug.Log($"[Cek 2] Masuk ke penentuan tipe senjata. Nama: {currentWeaponData.weaponName}");
+
+        // 3. LOGIKA KHUSUS HANDCANNON
+        if (currentWeaponData.weaponName == "Hand_Cannon" || currentWeaponData.weaponName == "HandCannon")
+        {
+            if (audioSource != null && handCannonSound != null)
+                audioSource.PlayOneShot(handCannonSound);
+
+            FireRangedWeapon();
+
+            HandCannon handCannon = activeWeapon as HandCannon;
+            if (handCannon != null)
+                handCannon.ConsumeBullet();
+
+            cooldownTimer = currentWeaponData.fireRate;
+        }
+        // 4. LOGIKA UNTUK TOY HAMMER
+        else if (currentWeaponData.weaponName == "SqueekHammer" || currentWeaponData.weaponName == "ToyHammer")
+        {
+            if (audioSource != null && squeekHammerSound != null)
+                audioSource.PlayOneShot(squeekHammerSound);
+
+            if (activeWeapon != null) activeWeapon.Attack();
+            else TriggerMeleeHitbox();
+        }
+        // == PERBAIKAN DI SINI: LOGIKA UNTUK UNARMED ==
+        else if (currentWeaponData.weaponName == "Unarmed" || currentWeaponData.weaponName == "TanganKosong")
+        {
+            Debug.Log("[Cek 3] Berhasil masuk ke blok khusus Unarmed!");
+            if (activeWeapon != null)
+            {
+                Debug.Log("[Cek 4] activeWeapon ditemukan, memanggil activeWeapon.Attack()...");
+                activeWeapon.Attack();
+            }
+            else
+            {
+                Debug.Log("[Cek 4] activeWeapon NULL! Memanggil TriggerMeleeHitbox() player...");
+                TriggerMeleeHitbox();
+            }
+        }
+        // 5. LOGIKA DEFAULT (BALLOON SWORD / SENJATA PEDANG LAINNYA)
+        else
+        {
+            Debug.Log("[Cek 3] Masuk ke blok Default (Sword)");
+            PlaySwordComboSound();
+            if (activeWeapon != null) activeWeapon.Attack();
+            else TriggerMeleeHitbox();
+        }
     }
-
-    // 1. CEK REHAT/RELOAD UTAMA
-    if (activeWeapon != null && !activeWeapon.CanAttack())
-    {
-        Debug.Log($"[PlayerAttack] Serangan dibatalkan karena {currentWeaponData.weaponName} sedang rehat/reload/cooldown.");
-        isAttacking = false;
-        return;
-    }
-
-    // 2. JIKA LOLOS CEK, SET TIMER DEFAULT
-    isAttacking = true;
-    attackTimer = attackDuration;
-    cooldownTimer = attackCooldown;
-
-    // 3. LOGIKA KHUSUS HANDCANNON
-    if (currentWeaponData.weaponName == "Hand_Cannon" || currentWeaponData.weaponName == "HandCannon")
-    {
-        if (audioSource != null && handCannonSound != null)
-            audioSource.PlayOneShot(handCannonSound);
-
-        FireRangedWeapon(); // <--- Fungsi ini yang menembakkan peluru
-
-        HandCannon handCannon = activeWeapon as HandCannon;
-        if (handCannon != null)
-            handCannon.ConsumeBullet();
-
-        cooldownTimer = currentWeaponData.fireRate;
-    }
-    // 4. LOGIKA UNTUK TOY HAMMER
-    else if (currentWeaponData.weaponName == "SqueekHammer" || currentWeaponData.weaponName == "ToyHammer")
-    {
-        if (audioSource != null && squeekHammerSound != null)
-            audioSource.PlayOneShot(squeekHammerSound);
-
-        if (activeWeapon != null) activeWeapon.Attack();
-        else TriggerMeleeHitbox();
-    }
-    // 5. LOGIKA UNTUK BALLOON SWORD
-    else
-    {
-        PlaySwordComboSound();
-
-        if (activeWeapon != null) activeWeapon.Attack();
-        else TriggerMeleeHitbox();
-    }
-}
 
     private void PlaySwordComboSound()
     {
@@ -280,32 +310,32 @@ public class PlayerAttack : MonoBehaviour
         weaponHitbox.Activate(attackDamage);
     }
 
-   private void FireRangedWeapon()
-{
-    // FIX TAMBAHAN: Peluru tidak akan di-spawn sama sekali jika player mati
-    if (playerHealth != null && playerHealth.IsDead) return;
-
-    if (bulletPrefab == null)
+    private void FireRangedWeapon()
     {
-        Debug.LogError("[PlayerAttack] Bullet Prefab belum dimasukkan di Inspector!");
-        return;
+        // FIX TAMBAHAN: Peluru tidak akan di-spawn sama sekali jika player mati
+        if (playerHealth != null && playerHealth.IsDead) return;
+
+        if (bulletPrefab == null)
+        {
+            Debug.LogError("[PlayerAttack] Bullet Prefab belum dimasukkan di Inspector!");
+            return;
+        }
+
+        Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + transform.forward * 1f;
+        Quaternion spawnRot = transform.rotation;
+
+        Bullet bullet = bulletPool.Get();
+        bullet.transform.SetPositionAndRotation(spawnPos, spawnRot);
+        bullet.SetPool(bulletPool);
+        bullet.Setup(currentWeaponData.speed, currentWeaponData.damage);
+
+        if (bullet.TryGetComponent<Rigidbody>(out Rigidbody rb))
+        {
+            rb.linearVelocity = Vector3.zero;
+        }
+
+        Debug.Log($"[PlayerAttack] Menembakkan {currentWeaponData.weaponName}!");
     }
-
-    Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position + transform.forward * 1f;
-    Quaternion spawnRot = transform.rotation;
-
-    Bullet bullet = bulletPool.Get();
-    bullet.transform.SetPositionAndRotation(spawnPos, spawnRot);
-    bullet.SetPool(bulletPool);
-    bullet.Setup(currentWeaponData.speed, currentWeaponData.damage);
-
-    if (bullet.TryGetComponent<Rigidbody>(out Rigidbody rb))
-    {
-        rb.linearVelocity = Vector3.zero;
-    }
-
-    Debug.Log($"[PlayerAttack] Menembakkan {currentWeaponData.weaponName}!");
-}
 
     private void EndAttack()
     {

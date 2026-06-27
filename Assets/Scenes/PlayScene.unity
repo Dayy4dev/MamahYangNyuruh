@@ -2573,6 +2573,10 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8247803356734006736, guid: 7af46b5cd3264aa4a8090f2900b5ef8a, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8482846541267236793, guid: 7af46b5cd3264aa4a8090f2900b5ef8a, type: 3}
       propertyPath: m_Name
       value: SqueekHammerHand
@@ -2847,6 +2851,9 @@ MonoBehaviour:
   pickupLayer:
     serializedVersion: 2
     m_Bits: 1024
+  playerMovement: {fileID: 385315479}
+  normalSpeed: 2
+  unarmedSpeed: 5
   onSlotChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -3190,16 +3197,20 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6864331386911765057, guid: de45e512b42786b469d7377b69f9f224, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 2.8
+      propertyPath: m_LocalScale.x
+      value: 1.7893
       objectReference: {fileID: 0}
     - target: {fileID: 6864331386911765057, guid: de45e512b42786b469d7377b69f9f224, type: 3}
-      propertyPath: m_LocalPosition.y
+      propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6864331386911765057, guid: de45e512b42786b469d7377b69f9f224, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.958
+      objectReference: {fileID: 0}
+    - target: {fileID: 6864331386911765057, guid: de45e512b42786b469d7377b69f9f224, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.201
+      value: 0.553
       objectReference: {fileID: 0}
     - target: {fileID: 6864331386911765057, guid: de45e512b42786b469d7377b69f9f224, type: 3}
       propertyPath: m_LocalRotation.w
@@ -3231,16 +3242,32 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7875694381065908073, guid: de45e512b42786b469d7377b69f9f224, type: 3}
       propertyPath: m_Name
-      value: Unarmed
+      value: unarmedhand
       objectReference: {fileID: 0}
     - target: {fileID: 7875694381065908073, guid: de45e512b42786b469d7377b69f9f224, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2018492580118845120, guid: de45e512b42786b469d7377b69f9f224, type: 3}
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 6864331386911765057, guid: de45e512b42786b469d7377b69f9f224, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1337130157}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7875694381065908073, guid: de45e512b42786b469d7377b69f9f224, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 860246251}
+    - targetCorrespondingSourceObject: {fileID: 7875694381065908073, guid: de45e512b42786b469d7377b69f9f224, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 860246250}
+    - targetCorrespondingSourceObject: {fileID: 7875694381065908073, guid: de45e512b42786b469d7377b69f9f224, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 860246249}
+    - targetCorrespondingSourceObject: {fileID: 7875694381065908073, guid: de45e512b42786b469d7377b69f9f224, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 860246248}
   m_SourcePrefab: {fileID: 100100000, guid: de45e512b42786b469d7377b69f9f224, type: 3}
 --- !u!4 &483865473 stripped
 Transform:
@@ -4601,6 +4628,89 @@ Transform:
   - {fileID: 1339686920}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!1 &860246247 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7875694381065908073, guid: de45e512b42786b469d7377b69f9f224, type: 3}
+  m_PrefabInstance: {fileID: 483865472}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &860246248
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 860246247}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 728f6da764678c244aad1cee851bc948, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Unarmed
+  weaponRig: {fileID: 0}
+  damage: 15
+  weaponData: {fileID: 11400000, guid: 06c09bed0d481a443b34aefa1fe76022, type: 2}
+--- !u!114 &860246249
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 860246247}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e9cba6ddebad4d47b0218f571539083, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAttack
+  weaponHitbox: {fileID: 860246250}
+  audioSource: {fileID: 0}
+  swordAttackCycles: []
+  handCannonSound: {fileID: 0}
+  squeekHammerSound: {fileID: 0}
+  genericMeleeEquipSound: {fileID: 0}
+  handCannonEquipSound: {fileID: 0}
+  bulletPrefab: {fileID: 0}
+  firePoint: {fileID: 0}
+  cooldownUiImage: {fileID: 0}
+--- !u!114 &860246250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 860246247}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4372b96f71d3a94458c5609380e774d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponHitbox
+  weaponRig: {fileID: 0}
+  hitCollider: {fileID: 860246251}
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 128
+  audioSource: {fileID: 0}
+  hitWallSound: {fileID: 0}
+  hitEnemySound: {fileID: 0}
+--- !u!65 &860246251
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 860246247}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.9999997, y: 1, z: 1.9609625}
+  m_Center: {x: 0.000000011183756, y: -0.000000043405926, z: 0.48048204}
 --- !u!1 &870320145
 GameObject:
   m_ObjectHideFlags: 0
@@ -7035,6 +7145,59 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2109265131}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1337130156
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1337130157}
+  - component: {fileID: 1337130158}
+  m_Layer: 6
+  m_Name: WeaponHitBox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1337130157
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1337130156}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 483865473}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &1337130158
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1337130156}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.9999997, y: 1, z: 1.960963}
+  m_Center: {x: 0.00000001118376, y: -0.00000004340593, z: 0.480482}
 --- !u!1 &1339686919
 GameObject:
   m_ObjectHideFlags: 0
