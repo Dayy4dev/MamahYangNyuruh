@@ -8,10 +8,6 @@ public class HandCannon : Weapon
     [SerializeField] private Bullet bulletPrefab;
     [SerializeField] private Transform firePoint;
 
-    [Header("Laser Indicator")]
-    [SerializeField] private LineRenderer laserLineRenderer;
-    [SerializeField] private float laserDistance = 30f;
-
     [Header("References")]
     [SerializeField] private WeaponData weaponData;
     [SerializeField] private PlayerMovement playerMovement;
@@ -51,36 +47,12 @@ public class HandCannon : Weapon
         }
 
         currentBullet = magazineSize;
-
-        if (laserLineRenderer != null)
-        {
-            laserLineRenderer.enabled = false;
-        }
     }
 
     private void Update()
     {
         if (fireRateTimer > 0f)
             fireRateTimer -= Time.deltaTime;
-
-        if (laserLineRenderer == null || firePoint == null || playerMovement == null) return;
-
-        if (Input.GetMouseButton(1))
-        {
-            if (!laserLineRenderer.enabled) laserLineRenderer.enabled = true;
-
-            laserLineRenderer.SetPosition(0, firePoint.position);
-
-            Vector3 targetPos = playerMovement.GetMouseTargetPosition;
-
-            targetPos.y = firePoint.position.y;
-
-            laserLineRenderer.SetPosition(1, targetPos);
-        }
-        else
-        {
-            if (laserLineRenderer.enabled) laserLineRenderer.enabled = false;
-        }
     }
 
     public bool CanFire()
@@ -113,8 +85,9 @@ public class HandCannon : Weapon
         bullet.transform.position = firePoint.position;
 
         Vector3 targetPos = playerMovement.GetMouseTargetPosition;
-        targetPos.y = firePoint.position.y;
+        targetPos.y = firePoint.position.y; // Menyamakan tinggi agar peluru tidak menukik/menanjak
 
+        // Menggunakan targetPos yang sudah dideklarasikan di atas
         Vector3 shootDirection = (targetPos - firePoint.position).normalized;
 
         bullet.transform.rotation = Quaternion.LookRotation(shootDirection);
@@ -130,9 +103,6 @@ public class HandCannon : Weapon
             StopCoroutine(reloadCoroutine);
             reloadCoroutine = null;
         }
-
-        // Matikan laser agar tidak gantung di layar
-        if (laserLineRenderer != null) laserLineRenderer.enabled = false;
 
         // RESET UTAMA: Jika dibuang, paksa senjata dalam kondisi siap pakai saat diambil lagi
         isReloading = false;
@@ -159,8 +129,6 @@ public class HandCannon : Weapon
             reloadCoroutine = null;
             Debug.Log($"Reload dipause. Sisa waktu: {remainingReloadTime:F1}s");
         }
-
-        if (laserLineRenderer != null) laserLineRenderer.enabled = false;
     }
 
     public override void OnWeaponActivate()
