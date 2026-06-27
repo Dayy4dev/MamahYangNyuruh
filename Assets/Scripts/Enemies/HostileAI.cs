@@ -169,6 +169,10 @@ public class HostileAI : MonoBehaviour, IDamageable
         Projectile proj = bullet.GetComponent<Projectile>();
         if (proj != null) proj.damage = projectileDamage;
 
+        // EnemyBullet prefab uses Bullet.cs — configure speed & damage
+        Bullet enemyBullet = bullet.GetComponent<Bullet>();
+        if (enemyBullet != null) enemyBullet.Setup(projectileSpeed, projectileDamage);
+
         Rigidbody rb = bullet.GetComponent<Rigidbody>();
         if (rb == null) return;
 
