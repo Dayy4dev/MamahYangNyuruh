@@ -89,33 +89,44 @@ public class DungeonManager : MonoBehaviour
 
         if (shouldPartnerSpawn && partnerPrefab != null)
         {
-            Debug.Log("[Wildcard Event] Partner muncul! Pintu keluar diblokir sampai permen dipilih.");
+            Debug.Log("[Wildcard Event] Partner muncul! Pintu ditahan sampai permen dipilih.");
             
-            // 1. CARI OBJEK SPAWNPOINT DI DALAM RUANGAN YANG SEDANG AKTIF SAAT INI
             Vector3 spawnPos = Vector3.zero;
+            Transform targetSpawnpointTransform = null; // Variabel baru untuk menyimpan referensi transform spawnpoint
             bool spawnPointFound = false;
 
-            // Mencari objek dengan Tag "PartnerSpawnpoint" yang merupakan anak dari ruangan ini
             Transform[] childTransforms = room.GetComponentsInChildren<Transform>();
             foreach (Transform child in childTransforms)
             {
                 if (child.CompareTag("PartnerSpawnpoint"))
                 {
                     spawnPos = child.position;
+                    targetSpawnpointTransform = child; // Ambil transform dari spawnpoint ini
                     spawnPointFound = true;
-                    break; // Keluar dari perulangan jika sudah ketemu
+                    break;
                 }
             }
 
-            // 2. FALLBACK (PENGAMAN): Jika lupa pasang objek Spawnpoint di Unity, gunakan posisi tengah ruangan
             if (!spawnPointFound)
             {
-                Debug.LogWarning($"[DungeonManager] Objek dengan Tag 'PartnerSpawnpoint' TIDAK DITEMUKAN di {room.gameObject.name}! Menggunakan koordinat tengah ruangan sebagai gantinya.");
                 spawnPos = room.transform.position; 
             }
 
-            // 3. SPAWN PARTNER DI TITIK AMAN TERSEBUT
+            // 1. Spawn partner seperti biasa
             GameObject partnerObj = Instantiate(partnerPrefab, spawnPos, Quaternion.identity);
+
+            // 2. JADIKAN PARTNER SEBAGAI CHILD NYA SPAWNPOINT
+            if (spawnPointFound && targetSpawnpointTransform != null)
+            {
+                partnerObj.transform.parent = targetSpawnpointTransform;
+                Debug.Log($"[DungeonManager] Partner berhasil dimasukkan ke dalam child {targetSpawnpointTransform.name}");
+            }
+            else
+            {
+                // Fallback: jika spawnpoint tidak ketemu, masukkan langsung ke parent ruangan agar tetap ke-delete
+                partnerObj.transform.parent = room.transform;
+            }
+
             PartnerSystem partnerSys = partnerObj.GetComponent<PartnerSystem>();
 
             if (partnerSys != null)

@@ -1,63 +1,144 @@
 using UnityEngine;
+using System.Collections;
+using TMPro;
 
 public class CandyBox : MonoBehaviour
 {
-    private string myCandyEffect;
-    private PartnerSystem mainPartnerSystem;
-    private bool hasBeenOpened = false;
-    
-    // Variabel baru untuk mengecek apakah player sedang berada di dekat kotak
-    private bool isPlayerNearby = false;
+    private string myEffect;
+    private PartnerSystem partnerSystem;
+    private bool isSelected = false;
+    private bool isPlayerNearby = false; // Deteksi jarak player
 
-    public void InitializeBox(string effect, PartnerSystem partner)
+    [Header("UI / Visual Components")]
+    [SerializeField] private TextMeshPro textMesh; 
+
+    [Header("Candy Models Setup")]
+    [SerializeField] private GameObject healCandyPrefab;
+    [SerializeField] private GameObject maxHpCandyPrefab;
+    [SerializeField] private GameObject buffCandyPrefab;
+    [SerializeField] private GameObject damageCandyPrefab;
+
+    private GameObject activeCandyModel;
+
+    public void InitializeBox(string effect, PartnerSystem system)
     {
-        myCandyEffect = effect;
-        mainPartnerSystem = partner;
-        hasBeenOpened = false;
+        myEffect = effect;
+        partnerSystem = system;
+        isSelected = false;
         isPlayerNearby = false;
+
+        if (textMesh != null)
+        {
+            textMesh.text = "???"; 
+        }
+
+        SpawnCorrespondingCandy();
     }
 
-    // Setiap frame, Unity akan mengecek apakah player menekan tombol interaksi
+    private void SpawnCorrespondingCandy()
+    {
+        GameObject prefabToSpawn = null;
+        switch (myEffect)
+        {
+            case "Heal": prefabToSpawn = healCandyPrefab; break;
+            case "MaxHP": prefabToSpawn = maxHpCandyPrefab; break;
+            case "BuffDamage": prefabToSpawn = buffCandyPrefab; break;
+            case "InstantDamage": prefabToSpawn = damageCandyPrefab; break;
+        }
+
+        if (prefabToSpawn != null)
+        {
+            activeCandyModel = Instantiate(prefabToSpawn, transform.position, Quaternion.identity);
+            activeCandyModel.transform.parent = transform; 
+            activeCandyModel.SetActive(false); 
+        }
+    }
+
+    // CEK INPUT TOMBOL E SETIAP FRAME
     void Update()
     {
-        if (isPlayerNearby && !hasBeenOpened)
+        if (isPlayerNearby && !isSelected && partnerSystem != null)
         {
-            // Kamu bisa mengganti KeyCode.E dengan tombol lain sesuai sistem inputmu
-            if (Input.GetKeyDown(KeyCode.F))
+            if (Input.GetKeyDown(KeyCode.Q))
             {
-                OpenBox();
+                isSelected = true;
+                // Panggil fungsi pemilihan ke PartnerSystem
+                partnerSystem.ProcessBoxSelection(myEffect, this);
             }
         }
     }
 
-    public void OpenBox()
+    public void RevealAndCleanUp(bool chosenByPlayer)
     {
-        if (hasBeenOpened) return;
-        hasBeenOpened = true;
+        if (textMesh != null)
+        {
+            switch (myEffect)
+            {
+                case "Heal": textMesh.text = "Full Heal permen"; textMesh.color = Color.green; break;
+                case "MaxHP": textMesh.text = "Max HP +30"; textMesh.color = Color.cyan; break;
+                case "BuffDamage": textMesh.text = "Buff ATK Permanen"; textMesh.color = Color.red; break;
+                case "InstantDamage": textMesh.text = "Kutukan -50% HP"; textMesh.color = Color.black; break;
+            }
+        }
 
-        Debug.Log($"[Box Interaction] Player memilih kotak ini! Isi permen: {myCandyEffect}");
-        mainPartnerSystem.ProcessBoxSelection(myCandyEffect);
+        if (activeCandyModel != null)
+        {
+            activeCandyModel.SetActive(true);
+        }
+
+        if (chosenByPlayer)
+        {
+            StartCoroutine(FlyUpRoutine());
+        }
+        else
+        {
+            StartCoroutine(FadeAndDestroyRoutine());
+        }
     }
 
-    public void RevealAndCleanUp()
+    private IEnumerator FlyUpRoutine()
     {
-        hasBeenOpened = true;
-        Debug.Log($"[Box Reveal] Kotak sisa terbuka otomatis: {myCandyEffect}");
-        Destroy(mainPartnerSystem.gameObject, 2.5f);
+        Vector3 startPos = transform.position;
+        Vector3 targetPos = startPos + new Vector3(0, 1f, 0); 
+        float duration = 1f; 
+        float elapsed = 0f;
+
+        if (activeCandyModel != null) activeCandyModel.transform.parent = null;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float percent = elapsed / duration;
+
+            if (activeCandyModel != null)
+            {
+                activeCandyModel.transform.position = Vector3.Lerp(startPos, targetPos, percent);
+                activeCandyModel.transform.Rotate(Vector3.up, 360f * Time.deltaTime);
+            }
+            yield return null;
+        }
+
+        if (activeCandyModel != null) Destroy(activeCandyModel);
+        Destroy(gameObject);
     }
 
-    // Deteksi saat Player masuk ke area kotak
+    private IEnumerator FadeAndDestroyRoutine()
+    {
+        yield return new WaitForSeconds(1.5f);
+        if (activeCandyModel != null) Destroy(activeCandyModel);
+        Destroy(gameObject);
+    }
+
+    // DETEKSI PLAYER MENDEKAT
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
             isPlayerNearby = true;
-            // OPSIONAL: Kamu bisa memunculkan UI text "Tekan E untuk memilih" di sini jika ada
-            Debug.Log("Dekat kotak permen. Tekan 'E' untuk memilih!");
+            Debug.Log($"Dekat kotak permen ({myEffect}). Tekan 'Q' untuk memilih!");
         }
     }
 
-    // Deteksi saat Player pergi menjauh dari area kotak
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))

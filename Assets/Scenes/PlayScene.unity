@@ -4029,7 +4029,7 @@ MonoBehaviour:
   transitionDelay: 0.5
   roomUIBar: {fileID: 668540482}
   partnerPrefab: {fileID: 7360468702918942952, guid: 30458b9d246a82d428162ecc8050dea8, type: 3}
-  partnerSpawnChance: 100
+  partnerSpawnChance: 75
 --- !u!114 &634518726
 MonoBehaviour:
   m_ObjectHideFlags: 0

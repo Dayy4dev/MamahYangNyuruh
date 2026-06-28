@@ -37,7 +37,7 @@ public class PartnerSystem : MonoBehaviour
         }
     }
 
-    public void ProcessBoxSelection(string chosenEffect)
+    public void ProcessBoxSelection(string chosenEffect, CandyBox chosenBox)
     {
         GameObject player = GameObject.FindWithTag("Player");
         if (player == null) return;
@@ -45,61 +45,47 @@ public class PartnerSystem : MonoBehaviour
         PlayerHealth healthComponent = player.GetComponent<PlayerHealth>();
         PlayerAttack attackComponent = player.GetComponent<PlayerAttack>();
 
+        // --- LOGIKA EFEK PERMEN (Tetap sama seperti sistem sebelumnya) ---
         switch (chosenEffect)
         {
             case "Heal":
-                if (healthComponent != null)
-                {
-                    // Heal sebesar 100% dari Max HP
-                    int maxHp = healthComponent.GetMaxHealth();
-                    healthComponent.Heal(maxHp);
-                }
+                if (healthComponent != null) healthComponent.Heal(healthComponent.GetMaxHealth());
                 break;
-
             case "MaxHP":
-                if (healthComponent != null)
-                {
-                    // Tambah max HP sebesar 30 (Heal 10% dari New Max HP diproses di dalam PlayerHealth)
-                    healthComponent.IncreaseMaxHealth(maxHpIncreaseAmount);
-                }
+                if (healthComponent != null) healthComponent.IncreaseMaxHealth(maxHpIncreaseAmount);
                 break;
-
             case "BuffDamage":
-                if (attackComponent != null)
-                {
-                    // Berikan buff damage permanen (Infinity)
-                    attackComponent.ApplyPermanentDamageBuff(buffDamageAmount);
-                }
+                if (attackComponent != null) attackComponent.ApplyPermanentDamageBuff(buffDamageAmount);
                 break;
-
             case "InstantDamage":
                 if (healthComponent != null)
                 {
                     int currentHp = healthComponent.GetCurrentHealth();
                     int maxHp = healthComponent.GetMaxHealth();
-                    
-                    // Cek batas proteksi: jika HP di bawah 10% dari Max HP, player tidak kena damage
-                    float healthThreshold = maxHp * 0.10f;
-
-                    if (currentHp < healthThreshold)
-                    {
-                        Debug.Log("[Partner Effect] HP Player di bawah 10% dari Max HP! Efek Instant Damage dibatalkan (Proteksi Aktif).");
-                    }
-                    else
-                    {
-                        // Berikan damage sebesar 50% dari Current HP saat ini
-                        int damageToTake = Mathf.RoundToInt(currentHp * 0.50f);
-                        healthComponent.TakeDamage(damageToTake);
-                        Debug.Log($"[Partner Effect] Player terkena Instant Damage sebesar 50% dari Current HP (-{damageToTake} HP).");
+                    if (currentHp < (maxHp * 0.10f)) {
+                        Debug.Log("[Partner Effect] Proteksi Aktif.");
+                    } else {
+                        healthComponent.TakeDamage(Mathf.RoundToInt(currentHp * 0.50f));
                     }
                 }
                 break;
         }
+        // -----------------------------------------------------------------
 
+        // MODIFIKASI: Mengatur loop reveal untuk semua box permen yang ada di room
         foreach (CandyBox box in candyBoxes)
         {
-            if (box != null) box.RevealAndCleanUp();
+            if (box != null)
+            {
+                // Jika box ini adalah objek yang diklik player, kirim nilai true (terbang)
+                // Jika bukan, kirim nilai false (cuma keliatan isinya lalu hancur)
+                bool isThisTheChosenOne = (box == chosenBox);
+                box.RevealAndCleanUp(isThisTheChosenOne);
+            }
         }
+
+        // Hancurkan objek Partner utamanya juga setelah berinteraksi jika diperlukan
+        // Destroy(gameObject, 1.6f); 
 
         OnCandySelected?.Invoke();
     }
