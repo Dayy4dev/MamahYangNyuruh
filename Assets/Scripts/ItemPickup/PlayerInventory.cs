@@ -180,13 +180,20 @@ public class PlayerInventory : MonoBehaviour
     }
 
     public void TryDrop()
-    {
-        if (currentSlot == SLOT_UNARMED) return;
-        if (slots[currentSlot] == null) return;
+{
+    if (currentSlot == SLOT_UNARMED) return;
+    if (slots[currentSlot] == null) return;
 
-        DropFromSlot(currentSlot);
-        SwitchToSlot(SLOT_UNARMED);
+    DropFromSlot(currentSlot);
+    SwitchToSlot(SLOT_UNARMED);
+
+    // ---- TAMBAHKAN KODE INI ----
+    if (TutorialManager.Instance != null)
+    {
+        TutorialManager.Instance.sudahBuangSenjata = true;
     }
+    // ----------------------------
+}
 
     private void SetSlot(int index, WeaponData data)
     {

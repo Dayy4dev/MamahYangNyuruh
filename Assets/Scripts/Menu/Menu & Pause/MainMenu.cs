@@ -42,14 +42,17 @@ public class MainMenu : MonoBehaviour
     }
 
     public void Play()
-    {
-        MusicManager.Instance.StopLobbyPlaylist();
-        LevelManager.Instance.LoadScene("PlayScene", "CircleWipe");
-        MusicManager.Instance.PlayMusic("Game");
+{
+    MusicManager.Instance.StopLobbyPlaylist();
+    
+    // UBAH DI SINI: Arahkan ke scene tutorial terlebih dahulu, bukan "PlayScene"
+    LevelManager.Instance.LoadScene("Tutorial", "CircleWipe"); 
+    
+    MusicManager.Instance.PlayMusic("Game");
 
-        Time.timeScale = 1f;
-        currentState = MenuState.Playing;
-    }
+    Time.timeScale = 1f;
+    currentState = MenuState.Playing;
+}
 
     public void PauseGame()
     {
