@@ -5,15 +5,26 @@ using UnityEngine.SceneManagement;
 [AddComponentMenu("Player/Player Health")]
 public class PlayerHealth : MonoBehaviour, IDamageable
 {
-    [Header("Health")]
-    public int maxHealth = 100;
-    public int currentHealth;
+    [Header("Health Variables")]
+    [SerializeField] private int maxHealth = 100;    // Batas maksimal HP awal player
+    private int currentHealth;                       // Darah player saat ini
 
     [Header("Death Settings")]
     [SerializeField] private float deathSceneReloadDelay = 2f;
 
     // Properti untuk melacak status kematian player (dicek oleh PlayerAttack dan PlayerInventory)
     public bool IsDead { get; private set; }
+
+    // Fungsi publik agar script lain (seperti HPBar & Partner) bisa mengambil angka darah saat ini
+    public int GetMaxHealth()
+    {
+        return maxHealth; 
+    }
+
+    public int GetCurrentHealth()
+    {
+        return currentHealth;
+    }
 
     void Awake()
     {
@@ -42,6 +53,21 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         Debug.Log($"[PlayerHealth] Healed {currentHealth - before} HP. HP: {currentHealth}/{maxHealth}");
     }
 
+    public void IncreaseMaxHealth(int amount)
+    {
+        if (IsDead) return;
+
+        maxHealth += amount; // Ditambah 30 dari luar
+        
+        // Hitung bonus heal 10% dari New Max HP
+        int bonusHeal = Mathf.RoundToInt(maxHealth * 0.10f);
+        
+        // Terapkan heal, batasi agar tidak melebihi maxHealth baru
+        currentHealth = Mathf.Min(currentHealth + bonusHeal, maxHealth);
+
+        Debug.Log($"[Partner Effect] Max HP bertambah {amount}! Bonus Heal 10% dari Max HP baru (+{bonusHeal}). HP Sekarang: {currentHealth}/{maxHealth}");
+    }
+
     private void Die()
     {
         if (IsDead) return; // Mencegah fungsi Die terpanggil berkali-kali
@@ -49,16 +75,13 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         Debug.Log("[PlayerHealth] Player died. Freezing game and auto-reloading scene.");
 
-        // ─────────────────────────────────────────────────────────────────────────
-        // TAMBAHAN: Sembunyikan UI Room Bar saat player mati
-        // ─────────────────────────────────────────────────────────────────────────
+        // Sembunyikan UI Room Bar saat player mati
         if (DungeonManager.Instance != null && DungeonManager.Instance.roomUIBar != null)
         {
             DungeonManager.Instance.roomUIBar.ShowBar(false);
         }
-        // ─────────────────────────────────────────────────────────────────────────
 
-        // 1. FIX SUARA JALAN: Cari AudioSource di anak/komponen Player dan matikan suaranya seketika
+        // FIX SUARA JALAN: Cari AudioSource di anak/komponen Player dan matikan suaranya seketika
         AudioSource[] allAudioSources = GetComponentsInChildren<AudioSource>();
         foreach (AudioSource audio in allAudioSources)
         {
@@ -68,34 +91,33 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             }
         }
 
-        // 2. Matikan komponen pergerakan dan fisik agar player kaku di tempat
+        // Matikan komponen pergerakan dan fisik agar player kaku di tempat
         if (TryGetComponent<PlayerMovement>(out var movement)) movement.enabled = false;
         if (TryGetComponent<CharacterController>(out var cc)) cc.enabled = false;
         if (TryGetComponent<Collider>(out var col)) col.enabled = false;
 
-        // 3. Paksa Animator membeku total di pose terakhirnya (Tanpa memicu animasi death)
+        // Paksa Animator membeku total di pose terakhirnya
         Animator animator = GetComponentInChildren<Animator>();
         if (animator != null)
         {
             animator.speed = 0f;
         }
 
-        // 4. BEKUKAN WAKTU GAME TOTAL (Hand Cannon, proyektil, dan musuh langsung mogok)
+        // BEKUKAN WAKTU GAME TOTAL
         Time.timeScale = 0f;
 
-        // 5. Panggil sistem transisi GAME OVER di GameManager (untuk memicu canvas jika ada)
+        // Panggil sistem transisi GAME OVER di GameManager
         if (GameManager.Instance != null)
         {
             GameManager.Instance.GameOver();
         }
 
-        // 6. Jalankan hitung mundur otomatis tanpa tombol restart
+        // Jalankan hitung mundur otomatis
         StartCoroutine(AutoReloadSceneRoutine());
     }
 
     private IEnumerator AutoReloadSceneRoutine()
     {
-        // WAJIB: Gunakan Realtime karena Time.timeScale sedang di posisi 0f
         yield return new WaitForSecondsRealtime(deathSceneReloadDelay);
 
         // KEMBALIKAN WAKTU KE NORMAL SEBELUM SCENE BARU DIMULAI

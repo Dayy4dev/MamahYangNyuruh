@@ -25,6 +25,10 @@ public class DungeonManager : MonoBehaviour
     private int maxEnemiesInRoom = 0;
     private int currentEnemiesInRoom = 0;
 
+    [Header("Partner Wildcard Setup")]
+    public GameObject partnerPrefab; // Seret Prefab Partner ke sini di Inspector
+    [Range(0, 100)] public float partnerSpawnChance = 40f; // Peluang muncul (40%)
+
     // Internal state
     private RoomController currentRoom;
     private Dictionary<RoomType, RoomController> roomMap = new Dictionary<RoomType, RoomController>();
@@ -80,6 +84,54 @@ public class DungeonManager : MonoBehaviour
     {
         Debug.Log($"[DungeonManager] {room.roomType} cleared!");
 
+        float diceRoll = UnityEngine.Random.Range(0f, 100f);
+        bool shouldPartnerSpawn = diceRoll <= partnerSpawnChance;
+
+        if (shouldPartnerSpawn && partnerPrefab != null)
+        {
+            Debug.Log("[Wildcard Event] Partner muncul! Pintu keluar diblokir sampai permen dipilih.");
+            
+            // 1. CARI OBJEK SPAWNPOINT DI DALAM RUANGAN YANG SEDANG AKTIF SAAT INI
+            Vector3 spawnPos = Vector3.zero;
+            bool spawnPointFound = false;
+
+            // Mencari objek dengan Tag "PartnerSpawnpoint" yang merupakan anak dari ruangan ini
+            Transform[] childTransforms = room.GetComponentsInChildren<Transform>();
+            foreach (Transform child in childTransforms)
+            {
+                if (child.CompareTag("PartnerSpawnpoint"))
+                {
+                    spawnPos = child.position;
+                    spawnPointFound = true;
+                    break; // Keluar dari perulangan jika sudah ketemu
+                }
+            }
+
+            // 2. FALLBACK (PENGAMAN): Jika lupa pasang objek Spawnpoint di Unity, gunakan posisi tengah ruangan
+            if (!spawnPointFound)
+            {
+                Debug.LogWarning($"[DungeonManager] Objek dengan Tag 'PartnerSpawnpoint' TIDAK DITEMUKAN di {room.gameObject.name}! Menggunakan koordinat tengah ruangan sebagai gantinya.");
+                spawnPos = room.transform.position; 
+            }
+
+            // 3. SPAWN PARTNER DI TITIK AMAN TERSEBUT
+            GameObject partnerObj = Instantiate(partnerPrefab, spawnPos, Quaternion.identity);
+            PartnerSystem partnerSys = partnerObj.GetComponent<PartnerSystem>();
+
+            if (partnerSys != null)
+            {
+                partnerSys.OnCandySelected += () => { ExecuteRoomClearLogic(room); };
+            }
+        }
+        else
+        {
+            ExecuteRoomClearLogic(room);
+        }
+    }
+
+    // 2. Buat fungsi bantuan baru ini untuk menampung logika switch-case asli milikmu
+    private void ExecuteRoomClearLogic(RoomController room)
+    {
         switch (room.roomType)
         {
             case RoomType.Bottom:
@@ -89,7 +141,6 @@ public class DungeonManager : MonoBehaviour
             case RoomType.Center:
                 centerCleared = true;
                 OpenExitDoorsOfRoom(RoomType.Center);
-                Debug.Log("[DungeonManager] 3 pilihan room terbuka!");
                 break;
 
             case RoomType.Left:
