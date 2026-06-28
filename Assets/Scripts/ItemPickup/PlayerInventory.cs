@@ -186,6 +186,11 @@ public class PlayerInventory : MonoBehaviour
         int droppedSlot = currentSlot;
         DropFromSlot(droppedSlot);
 
+        if (TutorialManager.Instance != null)
+        {
+            TutorialManager.Instance.sudahBuangSenjata = true;
+        }
+
         if (droppedSlot == SLOT_WEAPON_1 && slots[SLOT_WEAPON_2] != null)
         {
             WeaponData promoted = slots[SLOT_WEAPON_2];
