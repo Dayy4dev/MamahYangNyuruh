@@ -340,7 +340,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CombatRoom
   enemies: []
-  doorBlocker: {fileID: 0}
+  doorBlocker: {fileID: 5967011127444030652}
 --- !u!114 &4687872038923998156
 MonoBehaviour:
   m_ObjectHideFlags: 0
