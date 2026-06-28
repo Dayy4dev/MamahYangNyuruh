@@ -33,6 +33,12 @@ public class WeaponHitbox : Weapon
         if (hitCollider == null)
             hitCollider = GetComponent<Collider>();
 
+        if (hitCollider == null)
+        {
+            Debug.LogError("[WeaponHitbox] No Collider found on this object!");
+            return;
+        }
+
         hitCollider.isTrigger = true;
         hitCollider.enabled = false;
 
@@ -55,6 +61,8 @@ public class WeaponHitbox : Weapon
 
     public void Activate(int dmg)
     {
+        if (hitCollider == null) return;
+        
         damage = dmg;
         isActive = true;
         hasHitSomething = false; // Reset status setiap kali ayunan baru dimulai
@@ -64,6 +72,7 @@ public class WeaponHitbox : Weapon
 
     public void Deactivate()
     {
+        if (hitCollider == null) return;
         
         isActive = false;
         hitCollider.enabled = false;

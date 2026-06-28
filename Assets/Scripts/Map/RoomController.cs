@@ -37,6 +37,18 @@ public class RoomController : MonoBehaviour
             LockRoom();
     }
 
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player") && roomState == RoomState.Locked)
+            ActivateRoom();
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player") && roomState == RoomState.Locked)
+            ActivateRoom();
+    }
+
     void Update()
     {
         if (roomState == RoomState.Active && !hasCleared)
@@ -94,7 +106,12 @@ public void ActivateRoom()
     {
         roomState = RoomState.Locked;
         foreach (var door in exitDoors)
-            if (door != null) door.LockDoor();
+        {
+            if (door != null)
+            {
+                door.LockDoor();
+            }
+        }
     }
 
     void OnRoomCleared()

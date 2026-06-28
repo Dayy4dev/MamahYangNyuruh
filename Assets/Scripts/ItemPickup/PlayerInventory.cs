@@ -321,9 +321,10 @@ public class PlayerInventory : MonoBehaviour
 
         if (playerAttack != null)
         {
-            if (playerAttack.GetActiveWeapon() != null)
+            Weapon activeWeapon = playerAttack.GetActiveWeapon();
+            if (activeWeapon != null)
             {
-                playerAttack.GetActiveWeapon().OnWeaponDeactivate();
+                activeWeapon.OnWeaponDeactivate();
             }
 
             playerAttack.SetWeaponHitbox(foundHitbox);

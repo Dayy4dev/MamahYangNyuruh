@@ -198,9 +198,11 @@ public class HostileAI : MonoBehaviour, IDamageable
         }
 
         Vector3 dir = (targetPos - firePoint.position).normalized;
-        float tEst = Vector3.Distance(firePoint.position, targetPos) / projectileSpeed;
+        float distance = Vector3.Distance(firePoint.position, targetPos);
+        float tEst = distance / projectileSpeed;
         float gravOff = 0.5f * Mathf.Abs(Physics.gravity.y) * tEst * tEst;
-        dir = (dir + Vector3.up * (gravOff / Vector3.Distance(firePoint.position, targetPos))).normalized;
+        if (distance > 0.001f)
+            dir = (dir + Vector3.up * (gravOff / distance)).normalized;
 
         if (accuracyError > 0f)
         {

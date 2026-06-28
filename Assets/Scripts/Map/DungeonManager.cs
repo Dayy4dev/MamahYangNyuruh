@@ -105,33 +105,51 @@ public class DungeonManager : MonoBehaviour
     // ─────────────────────────────────────────
 
     public void OnPlayerEnterDoor(RoomType destination, GameObject player)
-{
-    if (!roomMap.ContainsKey(destination))
     {
-        Debug.LogWarning($"[DungeonManager] Room {destination} tidak ditemukan!");
-        return;
-    }
-
-    currentRoomType = destination;
-    currentRoom = roomMap[destination];
-    currentRoom.ActivateRoom();
-
-    // ─── PERBAIKAN BUG DI SINI ──────────────────────────────────────────
-    // Kunci kembali semua pintu yang ada di room baru (destination room)
-    if (currentRoom.exitDoors != null)
-    {
-        foreach (var door in currentRoom.exitDoors)
+        if (!roomMap.ContainsKey(destination))
         {
-            if (door != null)
-            {
-                door.LockDoor(); // Memaksa pintu di room baru aktif/mengunci kembali
-            }
+            Debug.LogWarning($"[DungeonManager] Room {destination} tidak ditemukan!");
+            return;
         }
-    }
-    // ───────────────────────────────────────────────────────────────────
 
-    TeleportPlayerToRoom(destination);
-}
+        currentRoomType = destination;
+        currentRoom = roomMap[destination];
+        currentRoom.ActivateRoom();
+
+        // ─────────────────────────────────────────
+        // LOCK PARENT ROOM DOORS BASED ON DESTINATION
+        // ─────────────────────────────────────────
+        switch (destination)
+        {
+            case RoomType.Center:
+                // Jika masuk Center, lock Bottom room doors
+                if (roomMap.TryGetValue(RoomType.Bottom, out RoomController bottomRoom))
+                {
+                    foreach (var door in bottomRoom.exitDoors)
+                    {
+                        if (door != null) door.LockDoor();
+                    }
+                    Debug.Log("[DungeonManager] Bottom room doors locked (player masuk Center)");
+                }
+                break;
+
+            case RoomType.Left:
+            case RoomType.Right:
+            case RoomType.Top:
+                // Jika masuk Left/Right/Top, lock Center room doors
+                if (roomMap.TryGetValue(RoomType.Center, out RoomController centerRoom))
+                {
+                    foreach (var door in centerRoom.exitDoors)
+                    {
+                        if (door != null) door.LockDoor();
+                    }
+                    Debug.Log($"[DungeonManager] Center room doors locked (player masuk {destination})");
+                }
+                break;
+        }
+        
+        TeleportPlayerToRoom(destination);
+    }
 
     // ─────────────────────────────────────────
     // CALLBACK DARI NextMapPortal
@@ -198,37 +216,34 @@ public class DungeonManager : MonoBehaviour
     RefreshRoomEnemyCounter(type, room.gameObject);
 
     // 3. TENTUKAN STATUS PINTU BERDASARKAN ADA/TIDAKNYA MUSUH
+    // NOTE: Door lock state sudah di-set oleh ActivateRoom(). DoorBlocker di-manage oleh DoorController.RefreshVisual()
+    // Jangan override di sini, cukup pastikan room state konsisten.
     bool harusMengunci = (maxEnemiesInRoom > 0);
 
-    // Atur status kunci pada komponen pintu
-    if (room.exitDoors != null)
+    // Atur status kunci pada komponen pintu HANYA jika belum ter-set (cegah duplikat lock/unlock)
+    if (room.roomState == RoomState.Active && harusMengunci)
     {
-        foreach (var door in room.exitDoors)
+        // Ensure doors are locked dan DoorBlocker active jika ada musuh
+        if (room.exitDoors != null)
         {
-            if (door != null)
+            foreach (var door in room.exitDoors)
             {
-                if (harusMengunci) door.LockDoor();
-                else door.UnlockDoor();
+                if (door != null && !door.isLocked)
+                {
+                    door.LockDoor();
+                }
             }
         }
     }
 
-    // 4. ATUR AKTIF/MATI BLOCKER DI RUNTIME SESUAI KEBUTUHAN RUANGAN
+    // 4. ATUR POSISI/SKALA BLOCKER JIKA DIPERLUKAN (tapi jangan disable berdasarkan harusMengunci)
+    // Karena DoorBlocker state sudah di-manage oleh LockDoor()/UnlockDoor()
     foreach (Transform child in room.GetComponentsInChildren<Transform>(true))
     {
         if (child.name.Contains("Block") || child.name.Contains("Blocker"))
         {
-            // Abaikan objek induk kosong 'DoorBlocker' agar tidak mengacaukan posisi anak-anaknya
-            if (child.name == "DoorBlocker" && child.GetComponent<BoxCollider>() == null)
-            {
-                child.gameObject.SetActive(harusMengunci);
-                continue;
-            }
-
-            // Blocker HANYA AKTIF jika ruangan tersebut memiliki musuh!
-            child.gameObject.SetActive(harusMengunci);
-
-            if (harusMengunci)
+            // Hanya atur posisi/skala jika blockernya sedang aktif (tidak disable/enable di sini)
+            if (child.gameObject.activeSelf)
             {
                 // Menyesuaikan posisi Y agar pas menapak di lantai dasar prefab
                 Vector3 currentPos = child.transform.localPosition;

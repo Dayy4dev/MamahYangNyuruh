@@ -127,6 +127,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DoorController
   destinationRoomType: 2
   isLocked: 1
+  doorBlocker: {fileID: 4641882232390557586}
   lockedVisual: {fileID: 0}
   unlockedVisual: {fileID: 0}
   playerTag: Player
@@ -658,6 +659,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DoorController
   destinationRoomType: 3
   isLocked: 1
+  doorBlocker: {fileID: 4641882232390557586}
   lockedVisual: {fileID: 0}
   unlockedVisual: {fileID: 0}
   playerTag: Player
@@ -934,6 +936,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DoorController
   destinationRoomType: 4
   isLocked: 1
+  doorBlocker: {fileID: 4641882232390557586}
   lockedVisual: {fileID: 0}
   unlockedVisual: {fileID: 0}
   playerTag: Player

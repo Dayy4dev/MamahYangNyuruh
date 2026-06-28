@@ -11442,7 +11442,7 @@ GameObject:
   - component: {fileID: 1929026395}
   - component: {fileID: 1929026394}
   m_Layer: 6
-  m_Name: Player (1)
+  m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11489,8 +11489,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1024
   playerMovement: {fileID: 1929026397}
-  normalSpeed: 2
-  unarmedSpeed: 4
+  normalSpeed: 5
+  unarmedSpeed: 8
   onSlotChanged:
     m_PersistentCalls:
       m_Calls: []

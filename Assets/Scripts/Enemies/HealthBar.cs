@@ -19,6 +19,8 @@ public class HealthBar : MonoBehaviour
 
     void LateUpdate()
     {
+        if (cam == null) return;
+        
         // Selalu menghadap kamera (billboard)
         transform.LookAt(transform.position + cam.transform.rotation * Vector3.forward,
                          cam.transform.rotation * Vector3.up);
