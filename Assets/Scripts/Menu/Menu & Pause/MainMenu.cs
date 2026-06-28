@@ -12,17 +12,38 @@ public class MainMenu : MonoBehaviour
     public Slider musicSlider;
     public GameObject pauseMenu;
 
+    [Header("UI Tambahan")]
+    // Tarik GameObject 'PlaySelectionMenu' ke slot ini di Inspector
+    public GameObject playSelectionMenu; 
+    public GameObject mainMenuPanel;
+
     private void Start()
     {
+        // Paksa menyala di awal agar tidak ter-hide otomatis
+        if (mainMenuPanel != null)
+        {
+            mainMenuPanel.SetActive(true);
+        }
+        
+        // Paksa mati di awal untuk pilihan tutorialnya
+        if (playSelectionMenu != null)
+        {
+            playSelectionMenu.SetActive(false); 
+        }
+
         LoadVolume();
-        // MusicManager.Instance.PlayMusic("Lobby Sound 1");;
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (currentState == MenuState.Playing)
+            // Jika menu pilihan sedang terbuka, tekan Esc akan menutupnya
+            if (playSelectionMenu != null && playSelectionMenu.activeSelf)
+            {
+                ClosePlaySelection();
+            }
+            else if (currentState == MenuState.Playing)
             {
                 PauseGame();
             }
@@ -41,23 +62,59 @@ public class MainMenu : MonoBehaviour
         Cursor.visible = true;
     }
 
+    // MODIFIKASI: Sekarang fungsi Play hanya membuka UI pilihan
     public void Play()
-{
-    MusicManager.Instance.StopLobbyPlaylist();
+    {
+      
+        if (playSelectionMenu != null)
+        {
+            playSelectionMenu.SetActive(true);
+        }
+        if (mainMenuPanel != null)
+        {
+            mainMenuPanel.SetActive(false); // <--- Mematikan menu utama
+        }
+    }
     
-    // UBAH DI SINI: Arahkan ke scene tutorial terlebih dahulu, bukan "PlayScene"
-    LevelManager.Instance.LoadScene("Tutorial", "CircleWipe"); 
-    
-    MusicManager.Instance.PlayMusic("Game");
 
-    Time.timeScale = 1f;
-    currentState = MenuState.Playing;
-}
+    // Fungsi untuk menutup UI pilihan jika klik tombol 'Back'
+    public void ClosePlaySelection()
+    {
+        if (playSelectionMenu != null)
+        {
+            playSelectionMenu.SetActive(false);
+        }
+        if (mainMenuPanel != null)
+        {
+            mainMenuPanel.SetActive(true); // <--- Menyalakan kembali menu utama
+        }
+    }
+
+    // PILIHAN 1: Mulai dari Tutorial Scene
+    public void StartTutorial()
+    {
+        MusicManager.Instance.StopLobbyPlaylist();
+        LevelManager.Instance.LoadScene("Tutorial", "CircleWipe"); 
+        MusicManager.Instance.PlayMusic("Game");
+
+        Time.timeScale = 1f;
+        currentState = MenuState.Playing;
+    }
+
+    // PILIHAN 2: Langsung Main (Ganti "PlayScene" dengan nama scene gameplay utama Anda)
+    public void StartDirectGame()
+    {
+        MusicManager.Instance.StopLobbyPlaylist();
+        LevelManager.Instance.LoadScene("PlayScene", "CircleWipe"); 
+        MusicManager.Instance.PlayMusic("Game");
+
+        Time.timeScale = 1f;
+        currentState = MenuState.Playing;
+    }
 
     public void PauseGame()
     {
         currentState = MenuState.Paused;
-        // Time.timeScale = 0f;
         if (pauseMenu != null)
         {
             pauseMenu.SetActive(true);
@@ -73,7 +130,6 @@ public class MainMenu : MonoBehaviour
     public void ResumeGame()
     {
         currentState = MenuState.Playing;
-        // Time.timeScale = 1f;
         if (pauseMenu != null)
         {
             pauseMenu.SetActive(false);
@@ -104,7 +160,7 @@ public class MainMenu : MonoBehaviour
 
     public void ShowCursorSettings()
     {
-        Cursor.lockState = CursorLockMode.None; // Lepas kunci kursor
-        Cursor.visible = true;                  // Tampilkan visual panah kursor
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;                  
     }
 }
