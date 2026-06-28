@@ -1922,7 +1922,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.17980957, y: -0.101257324}
+  m_AnchoredPosition: {x: 0.17993164, y: -0.10131836}
   m_SizeDelta: {x: -1119.6404, y: -630.2025}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &293972759
@@ -4329,6 +4329,8 @@ MonoBehaviour:
   fallbackOffset: {x: 0, y: 1, z: 0}
   transitionDelay: 0.5
   roomUIBar: {fileID: 668540482}
+  partnerPrefab: {fileID: 7360468702918942952, guid: 30458b9d246a82d428162ecc8050dea8, type: 3}
+  partnerSpawnChance: 75
 --- !u!114 &634518726
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11870,7 +11872,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 200
-  currentHealth: 0
   deathSceneReloadDelay: 2
 --- !u!114 &1929026397
 MonoBehaviour:

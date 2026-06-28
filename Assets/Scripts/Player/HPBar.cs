@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // Needed to control the TextMeshPro component
+using TMPro;
 
 public class HPBar : MonoBehaviour
 {
@@ -27,8 +27,9 @@ public class HPBar : MonoBehaviour
 
         if (playerHealth != null)
         {
-            currentHP = playerHealth.currentHealth;
-            maxHP     = playerHealth.maxHealth;
+            // DIUBAH: Menggunakan fungsi Getter agar sinkron dengan variabel private di PlayerHealth
+            currentHP = playerHealth.GetCurrentHealth();
+            maxHP     = playerHealth.GetMaxHealth();
         }
         else if (healthData != null)
         {

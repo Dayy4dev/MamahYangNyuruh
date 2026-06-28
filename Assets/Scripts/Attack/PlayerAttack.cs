@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Pool;
+using System.Collections;
 
 public class PlayerAttack : MonoBehaviour
 {
@@ -48,7 +49,7 @@ public class PlayerAttack : MonoBehaviour
     private bool isAttacking;
     private bool isArmed;
     private PlayerHealth playerHealth;
-
+    private int bonusBuffDamage = 0;
 
     // -------------------------------------------------------------------------
     // Unity Lifecycle
@@ -307,7 +308,7 @@ public class PlayerAttack : MonoBehaviour
             Debug.LogWarning("[PlayerAttack] WeaponHitbox belum terpasang untuk senjata Melee!");
             return;
         }
-        weaponHitbox.Activate(attackDamage);
+        weaponHitbox.Activate(attackDamage + bonusBuffDamage);
     }
 
     private void FireRangedWeapon()
@@ -374,5 +375,22 @@ public class PlayerAttack : MonoBehaviour
             // Sembunyikan UI jika senjata siap digunakan kembali
             cooldownUiImage.gameObject.SetActive(false);
         }
+    }
+
+    public void ApplyPermanentDamageBuff(int additionalDamage)
+    {
+        bonusBuffDamage += additionalDamage;
+        Debug.Log($"[Partner Effect] Buff Damage Permanen Aktif! +{additionalDamage} Damage untuk selamanya di floor ini. Total bonus: {bonusBuffDamage}");
+    }
+
+    private IEnumerator DamageBuffRoutine(int additionalDamage, float duration)
+    {
+        bonusBuffDamage += additionalDamage;
+        Debug.Log($"[Partner Effect] Damage Buff Aktif! +{additionalDamage} Damage selama {duration} detik.");
+
+        yield return new WaitForSeconds(duration);
+
+        bonusBuffDamage -= additionalDamage;
+        Debug.Log("[Partner Effect] Durasi permen buff telah habis. Damage kembali normal.");
     }
 }
