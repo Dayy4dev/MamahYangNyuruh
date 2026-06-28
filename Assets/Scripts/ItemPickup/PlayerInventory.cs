@@ -8,6 +8,10 @@ public class PlayerInventory : MonoBehaviour
     public const int SLOT_WEAPON_2 = 2;
     public const int TOTAL_SLOTS = 3;
 
+    [Header("Unarmed Weapon Data")]
+    [Tooltip("Assign the Unarmed WeaponData ScriptableObject here (ScriptableObject/Weapon/Unarmed)")]
+    [SerializeField] private WeaponData unarmedData;
+
     [Header("References")]
     [SerializeField] private PlayerAttack playerAttack;
     [Tooltip("Posisi di mana senjata yang dibuang di-spawn (kosongkan = pakai posisi player)")]
@@ -21,8 +25,8 @@ public class PlayerInventory : MonoBehaviour
     [Header("Movement Speed Setup")]
     [Tooltip("Tarik komponen PlayerMovement dari GameObject Player ke sini")]
     [SerializeField] private PlayerMovement playerMovement; 
-    [SerializeField] private float normalSpeed = 2f;    // Menyesuaikan default dari script PlayerMovement Anda
-    [SerializeField] private float unarmedSpeed = 4f;   // Speed saat bertangan kosong (lebih cepat)
+    [SerializeField] private float normalSpeed = 2f;  
+    [SerializeField] private float unarmedSpeed = 4f;  
 
     private WeaponData[] slots = new WeaponData[TOTAL_SLOTS];
     private int currentSlot = SLOT_UNARMED;
@@ -53,6 +57,12 @@ public class PlayerInventory : MonoBehaviour
     void Start()
     {
         allChildrenCache = GetComponentsInChildren<Transform>(true);
+
+        if (unarmedData != null)
+        {
+            slots[SLOT_UNARMED] = unarmedData;
+        }
+
         EquipSlot(SLOT_UNARMED);
     }
 
@@ -75,16 +85,12 @@ public class PlayerInventory : MonoBehaviour
         HandleSlotSwitch();
     }
 
-    // =========================================================================
-    // HELPER UNTUK MENENTUKAN KATEGORI SENJATA (ANTI-DUPLIKAT)
-    // =========================================================================
     private string GetWeaponCategory(WeaponData data)
     {
         if (data == null || string.IsNullOrEmpty(data.weaponName)) return "Unknown";
 
         string nameLower = data.weaponName.ToLower();
 
-        // Mengelompokkan semua varian pedang balon ke kategori "Sword"
         if (nameLower.Contains("sword") || nameLower.Contains("blade") || nameLower.Contains("calibur"))
             return "Sword";
 
@@ -97,22 +103,16 @@ public class PlayerInventory : MonoBehaviour
         return "Unknown";
     }
 
-    // =========================================================================
-    // HELPER UNTUK MENENTUKAN TAMPILAN VISUAL UTAMA (SHARED VISUALS)
-    // =========================================================================
     private string GetVisualWeaponName(string originalWeaponName)
     {
         string nameLower = originalWeaponName.ToLower();
 
-        // 1. Semua varian Pedang Balon diarahkan ke model visual: balloonsword
         if (nameLower.Contains("balloonsword") || nameLower.Contains("baloonsword"))
             return "balloonsword";
 
-        // 2. Semua varian Hand Cannon diarahkan ke model visual: handcannon
         if (nameLower.Contains("handcannon") || nameLower.Contains("handcannpn"))
             return "handcannon";
 
-        // 3. Semua varian Palu diarahkan ke model visual: squeekhammer
         if (nameLower.Contains("toyhammer") || nameLower.Contains("squeekhammer"))
             return "squeekhammer";
 
@@ -123,7 +123,6 @@ public class PlayerInventory : MonoBehaviour
     {
         WeaponData data = pickup.Data;
         
-        // --- VALIDASI ANTI DUPLIKAT KATEGORI ---
         string newCategory = GetWeaponCategory(data);
         if (newCategory != "Unknown")
         {
@@ -132,7 +131,7 @@ public class PlayerInventory : MonoBehaviour
                 if (slots[i] != null && GetWeaponCategory(slots[i]) == newCategory)
                 {
                     Debug.LogWarning($"[Inventory] Gagal! Kamu sudah memiliki senjata tipe {newCategory} ({slots[i].weaponName}) di inventory.");
-                    return; // Mengunci pickup agar tidak mengeksekusi kode di bawahnya
+                    return; 
                 }
             }
         }
@@ -184,7 +183,24 @@ public class PlayerInventory : MonoBehaviour
         if (currentSlot == SLOT_UNARMED) return;
         if (slots[currentSlot] == null) return;
 
-        DropFromSlot(currentSlot);
+        int droppedSlot = currentSlot;
+        DropFromSlot(droppedSlot);
+
+        if (droppedSlot == SLOT_WEAPON_1 && slots[SLOT_WEAPON_2] != null)
+        {
+            WeaponData promoted = slots[SLOT_WEAPON_2];
+            SetSlot(SLOT_WEAPON_1, promoted);
+            SetSlot(SLOT_WEAPON_2, null);
+            SwitchToSlot(SLOT_WEAPON_1);
+            return;
+        }
+
+        if (droppedSlot == SLOT_WEAPON_2 && slots[SLOT_WEAPON_1] != null)
+        {
+            SwitchToSlot(SLOT_WEAPON_1);
+            return;
+        }
+
         SwitchToSlot(SLOT_UNARMED);
     }
 
@@ -196,6 +212,8 @@ public class PlayerInventory : MonoBehaviour
 
     private void DropFromSlot(int index)
     {
+        if (index == SLOT_UNARMED) return;
+
         WeaponData data = slots[index];
         if (data == null) return;
 
@@ -223,6 +241,12 @@ public class PlayerInventory : MonoBehaviour
     private void SwitchToSlot(int index)
     {
         if (index < 0 || index >= TOTAL_SLOTS) return;
+
+        if (index != SLOT_UNARMED && slots[index] == null)
+        {
+            index = SLOT_UNARMED;
+        }
+
         currentSlot = index;
         EquipSlot(currentSlot);
         onActiveSlotChanged?.Invoke(currentSlot);
@@ -234,23 +258,20 @@ public class PlayerInventory : MonoBehaviour
         string activeWeaponName = "";
         bool isUnarmedActive = false; 
 
-        if (index == SLOT_UNARMED && activeData == null)
+        if (index == SLOT_UNARMED)
         {
             activeWeaponName = "unarmed";
             isUnarmedActive = true;
         }
         else if (activeData != null)
         {
-            // Mengubah ke huruf kecil dan membersihkan karakter spasi/underscore
             string rawName = activeData.weaponName.Replace("_", " ").Replace("  ", " ").ToLower();
             
-            // DIALIKAN LEWAT HELPER: Mengarahkan nama varian ke nama visual induknya
             activeWeaponName = GetVisualWeaponName(rawName);
             
             if (activeWeaponName == "unarmed") isUnarmedActive = true;
         }
 
-        // --- MANAJEMEN SPEED DINAMIS ---
         if (playerMovement != null)
         {
             playerMovement.moveSpeed = isUnarmedActive ? unarmedSpeed : normalSpeed; 
@@ -306,7 +327,6 @@ public class PlayerInventory : MonoBehaviour
             {
                 string weaponName = childName.Substring(0, childName.Length - 4).Trim();
                 
-                // Pengecekan kepemilikan di punggung juga diarahkan ke pencocokan nama visual dasar
                 bool isOwnedInSlot1 = slots[SLOT_WEAPON_1] != null && GetVisualWeaponName(slots[SLOT_WEAPON_1].weaponName) == weaponName;
                 bool isOwnedInSlot2 = slots[SLOT_WEAPON_2] != null && GetVisualWeaponName(slots[SLOT_WEAPON_2].weaponName) == weaponName;
                 
@@ -329,15 +349,9 @@ public class PlayerInventory : MonoBehaviour
 
             playerAttack.SetWeaponHitbox(foundHitbox);
 
-            if (index == SLOT_UNARMED && activeData == null)
+            if (index == SLOT_UNARMED)
             {
-                WeaponData fakeUnarmedData = ScriptableObject.CreateInstance<WeaponData>();
-                fakeUnarmedData.weaponName = "Unarmed";
-                fakeUnarmedData.damage = 15;             
-                fakeUnarmedData.attackDuration = 0.2f;    
-                fakeUnarmedData.attackCooldown = 0.25f;   
-                
-                playerAttack.EquipWeapon(fakeUnarmedData, foundWeaponComponent);
+                playerAttack.EquipWeapon(slots[SLOT_UNARMED], foundWeaponComponent);
             }
             else
             {
@@ -350,7 +364,7 @@ public class PlayerInventory : MonoBehaviour
             }
         }
 
-        if (index == SLOT_UNARMED && activeData == null)
+        if (index == SLOT_UNARMED)
     {
         Debug.Log("<color=white>[Weapon Check] Slot saat ini: Bertangan Kosong (Unarmed)</color>");
     }
@@ -362,13 +376,34 @@ public class PlayerInventory : MonoBehaviour
 
     private void HandleSlotSwitch()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) SwitchToSlot(0);
-        if (Input.GetKeyDown(KeyCode.Alpha2)) SwitchToSlot(1);
-        if (Input.GetKeyDown(KeyCode.Alpha3)) SwitchToSlot(2);
+        if (Input.GetKeyDown(KeyCode.Alpha1)) SwitchToSlot(SLOT_UNARMED);
+        if (Input.GetKeyDown(KeyCode.Alpha2)) SwitchToSlot(SLOT_WEAPON_1);
+        if (Input.GetKeyDown(KeyCode.Alpha3)) SwitchToSlot(SLOT_WEAPON_2);
 
         float scroll = Input.GetAxis("Mouse ScrollWheel");
-        if (scroll > 0f)  SwitchToSlot((currentSlot + 1) % TOTAL_SLOTS);
-        else if (scroll < 0f) SwitchToSlot((currentSlot - 1 + TOTAL_SLOTS) % TOTAL_SLOTS);
+        if (scroll > 0f)
+            ScrollToNextWeapon(+1);
+        else if (scroll < 0f)
+            ScrollToNextWeapon(-1);
+    }
+
+    private void ScrollToNextWeapon(int direction)
+    {
+        int startIndex = currentSlot;
+        int next = currentSlot;
+
+        for (int i = 0; i < TOTAL_SLOTS; i++)
+        {
+            next = (next + direction + TOTAL_SLOTS) % TOTAL_SLOTS;
+
+            if (next == SLOT_UNARMED || slots[next] != null)
+            {
+                SwitchToSlot(next);
+                return;
+            }
+        }
+
+        SwitchToSlot(SLOT_UNARMED);
     }
 
     private void HandleDropInput()
