@@ -623,7 +623,7 @@ GameObject:
   - component: {fileID: 4666201444385552240}
   m_Layer: 7
   m_Name: EnemyMeleeJumbo
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -727,6 +727,7 @@ MonoBehaviour:
   navAgent: {fileID: 6673012987000734344}
   animator: {fileID: 581826018700804940}
   maxHealth: 100
+  healthBar: {fileID: 0}
   terrainLayer:
     serializedVersion: 2
     m_Bits: 64
@@ -738,6 +739,8 @@ MonoBehaviour:
   attackCooldown: 17.52
   visionRange: 30.57
   engagementRange: 2.43
+  enemyAudioSource: {fileID: 0}
+  meleeAttackSound: {fileID: 0}
 --- !u!136 &503557058892814127
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -777,6 +780,8 @@ MonoBehaviour:
   hitFlashDuration: 0.1
   hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
   healthBar: {fileID: 5917868247675733612}
+  audioSource: {fileID: 0}
+  enemyHurtSound: {fileID: 0}
 --- !u!1 &3156698293219667692
 GameObject:
   m_ObjectHideFlags: 0
@@ -3404,3 +3409,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponHitbox
   weaponRig: {fileID: 1129651426722297786}
   hitCollider: {fileID: 941929474895423464}
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  audioSource: {fileID: 0}
+  hitWallSound: {fileID: 0}
+  hitEnemySound: {fileID: 0}

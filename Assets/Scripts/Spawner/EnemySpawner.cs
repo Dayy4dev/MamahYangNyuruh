@@ -5,14 +5,21 @@ public class EnemySpawner : MonoBehaviour
     [Header("Spawn Settings")]
     public GameObject enemyPrefab;
     public int spawnCount = 3;
-    public float spawnRadius = 5f; // Radius area spawn acak
+    public float spawnRadius = 5f; 
 
     [Header("Layer Mask Setup")]
-    public LayerMask groundLayer;  // Set ke layer lantai/ground di Inspector
+    public LayerMask groundLayer;  
 
-    // Fungsi utama untuk men-spawn musuh tanpa collider
+    // ─── TAMBAHKAN VARIABEL INI UTK PENGAMAN ────────────────────────
+    private bool hasSpawned = false;
+    public bool HasSpawned => hasSpawned; // Properti agar bisa dibaca script lain
+    // ────────────────────────────────────────────────────────────────
+
     public void SpawnEnemies()
     {
+        // JIKA SUDAH PERNAH SPAWN, JANGAN JALANKAN LAGI!
+        if (hasSpawned) return; 
+
         if (enemyPrefab == null)
         {
             Debug.LogWarning($"[EnemySpawner] Enemy Prefab belum di-assign di {gameObject.name}!");
@@ -21,7 +28,6 @@ public class EnemySpawner : MonoBehaviour
 
         for (int i = 0; i < spawnCount; i++)
         {
-            // 1. Ambil koordinat acak di dalam radius lingkaran (X dan Z)
             Vector2 randomCircle = Random.insideUnitCircle * spawnRadius;
             Vector3 spawnPos = new Vector3(
                 transform.position.x + randomCircle.x,
@@ -29,37 +35,28 @@ public class EnemySpawner : MonoBehaviour
                 transform.position.z + randomCircle.y
             );
 
-            // 2. Gunakan Raycast ke bawah untuk memastikan musuh menapak di atas tanah/lantai
             if (Physics.Raycast(spawnPos + Vector3.up * 5f, Vector3.down, out RaycastHit hit, 10f, groundLayer))
             {
                 spawnPos = hit.point;
             }
 
-            // 3. Spawn musuh dan masukkan sebagai child dari Room agar terdeteksi
             GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity, transform.parent);
-
-            // Set tag musuh agar sesuai dengan deteksi RoomController
             enemy.tag = "Enemy";
         }
 
+        hasSpawned = true; // Tandai bahwa spawner ini sudah memunculkan musuh!
         Debug.Log($"[EnemySpawner] Berhasil spawn {spawnCount} musuh di {transform.parent.name}");
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // FIX TAMBAHAN: Fungsi Callback saat musuh mati/hancur
-    // ─────────────────────────────────────────────────────────────────────────
     public void NotifyEnemyDestroyed(GameObject enemy)
     {
         Debug.Log($"[EnemySpawner] Musuh {enemy.name} melaporkan kematian.");
-
-        // Hubungkan ke DungeonManager agar Bar berkurang
         if (DungeonManager.Instance != null)
         {
             DungeonManager.Instance.OnEnemyKilled();
         }
     }
 
-    // Menggambar area jangkauan spawn di Unity Editor (tidak muncul di game)
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;

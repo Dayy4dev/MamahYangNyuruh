@@ -1338,7 +1338,7 @@ GameObject:
   - component: {fileID: -99885767059885274}
   m_Layer: 7
   m_Name: EnemyMelee
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

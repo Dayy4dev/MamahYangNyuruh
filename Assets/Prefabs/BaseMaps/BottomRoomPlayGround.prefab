@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 3354861588791424273}
   - component: {fileID: 4161656688236272520}
   m_Layer: 0
-  m_Name: DoorBlocker
+  m_Name: Block
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -59,8 +59,8 @@ Transform:
   m_GameObject: {fileID: 2544773902218577040}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 34.5, z: 19.05}
-  m_LocalScale: {x: 40, y: 69.83516, z: 1.8990711}
+  m_LocalPosition: {x: 0, y: 0, z: 19.05}
+  m_LocalScale: {x: 40, y: 40, z: 1.8990711}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3100037743097643082}
@@ -318,7 +318,7 @@ Transform:
   m_GameObject: {fileID: 4306456461071997505}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 2, z: 19.5}
+  m_LocalPosition: {x: 0, y: 2.314, z: 19.35}
   m_LocalScale: {x: 3, y: 5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -416,6 +416,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DoorController
   destinationRoomType: 1
   isLocked: 1
+  doorBlocker: {fileID: 2544773902218577040}
   lockedVisual: {fileID: 0}
   unlockedVisual: {fileID: 0}
   playerTag: Player
@@ -494,7 +495,10 @@ MonoBehaviour:
   - {fileID: 8688686589555482618}
   autoDetectEnemies: 1
   enemyTag: Enemy
-  enemies: []
+  enemies:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1001 &3053576133668397122
 PrefabInstance:
   m_ObjectHideFlags: 0

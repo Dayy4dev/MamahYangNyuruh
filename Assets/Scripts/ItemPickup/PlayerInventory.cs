@@ -75,9 +75,68 @@ public class PlayerInventory : MonoBehaviour
         HandleSlotSwitch();
     }
 
+    // =========================================================================
+    // HELPER UNTUK MENENTUKAN KATEGORI SENJATA (ANTI-DUPLIKAT)
+    // =========================================================================
+    private string GetWeaponCategory(WeaponData data)
+    {
+        if (data == null || string.IsNullOrEmpty(data.weaponName)) return "Unknown";
+
+        string nameLower = data.weaponName.ToLower();
+
+        // Mengelompokkan semua varian pedang balon ke kategori "Sword"
+        if (nameLower.Contains("sword") || nameLower.Contains("blade") || nameLower.Contains("calibur"))
+            return "Sword";
+
+        if (nameLower.Contains("cannon") || nameLower.Contains("blaster") || nameLower.Contains("artillery"))
+            return "Cannon";
+
+        if (nameLower.Contains("hammer") || nameLower.Contains("mallet"))
+            return "Hammer";
+
+        return "Unknown";
+    }
+
+    // =========================================================================
+    // HELPER UNTUK MENENTUKAN TAMPILAN VISUAL UTAMA (SHARED VISUALS)
+    // =========================================================================
+    private string GetVisualWeaponName(string originalWeaponName)
+    {
+        string nameLower = originalWeaponName.ToLower();
+
+        // 1. Semua varian Pedang Balon diarahkan ke model visual: balloonsword
+        if (nameLower.Contains("balloonsword") || nameLower.Contains("baloonsword"))
+            return "balloonsword";
+
+        // 2. Semua varian Hand Cannon diarahkan ke model visual: handcannon
+        if (nameLower.Contains("handcannon") || nameLower.Contains("handcannpn"))
+            return "handcannon";
+
+        // 3. Semua varian Palu diarahkan ke model visual: squeekhammer
+        if (nameLower.Contains("toyhammer") || nameLower.Contains("squeekhammer"))
+            return "squeekhammer";
+
+        return nameLower;
+    }
+
     public void TryPickup(WeaponPickup pickup)
     {
         WeaponData data = pickup.Data;
+        
+        // --- VALIDASI ANTI DUPLIKAT KATEGORI ---
+        string newCategory = GetWeaponCategory(data);
+        if (newCategory != "Unknown")
+        {
+            for (int i = SLOT_WEAPON_1; i <= SLOT_WEAPON_2; i++)
+            {
+                if (slots[i] != null && GetWeaponCategory(slots[i]) == newCategory)
+                {
+                    Debug.LogWarning($"[Inventory] Gagal! Kamu sudah memiliki senjata tipe {newCategory} ({slots[i].weaponName}) di inventory.");
+                    return; // Mengunci pickup agar tidak mengeksekusi kode di bawahnya
+                }
+            }
+        }
+
         int emptySlot = FindEmptyWeaponSlot();
 
         if (emptySlot != -1)
@@ -182,7 +241,12 @@ public class PlayerInventory : MonoBehaviour
         }
         else if (activeData != null)
         {
-            activeWeaponName = activeData.weaponName.Replace("_", " ").Replace("  ", " ").ToLower();
+            // Mengubah ke huruf kecil dan membersihkan karakter spasi/underscore
+            string rawName = activeData.weaponName.Replace("_", " ").Replace("  ", " ").ToLower();
+            
+            // DIALIKAN LEWAT HELPER: Mengarahkan nama varian ke nama visual induknya
+            activeWeaponName = GetVisualWeaponName(rawName);
+            
             if (activeWeaponName == "unarmed") isUnarmedActive = true;
         }
 
@@ -241,8 +305,11 @@ public class PlayerInventory : MonoBehaviour
             if (childName.EndsWith("back"))
             {
                 string weaponName = childName.Substring(0, childName.Length - 4).Trim();
-                bool isOwnedInSlot1 = slots[SLOT_WEAPON_1] != null && slots[SLOT_WEAPON_1].weaponName.Replace("_", " ").Replace("  ", " ").ToLower() == weaponName;
-                bool isOwnedInSlot2 = slots[SLOT_WEAPON_2] != null && slots[SLOT_WEAPON_2].weaponName.Replace("_", " ").Replace("  ", " ").ToLower() == weaponName;
+                
+                // Pengecekan kepemilikan di punggung juga diarahkan ke pencocokan nama visual dasar
+                bool isOwnedInSlot1 = slots[SLOT_WEAPON_1] != null && GetVisualWeaponName(slots[SLOT_WEAPON_1].weaponName) == weaponName;
+                bool isOwnedInSlot2 = slots[SLOT_WEAPON_2] != null && GetVisualWeaponName(slots[SLOT_WEAPON_2].weaponName) == weaponName;
+                
                 bool isWeaponOwned = isOwnedInSlot1 || isOwnedInSlot2;
                 bool isWeaponActive = !string.IsNullOrEmpty(activeWeaponName) && activeWeaponName == weaponName;
                 bool shouldShowOnBack = isWeaponOwned && !isWeaponActive;
@@ -281,6 +348,15 @@ public class PlayerInventory : MonoBehaviour
                 foundWeaponComponent.OnWeaponActivate();
             }
         }
+
+        if (index == SLOT_UNARMED && activeData == null)
+    {
+        Debug.Log("<color=white>[Weapon Check] Slot saat ini: Bertangan Kosong (Unarmed)</color>");
+    }
+    else if (activeData != null)
+    {
+        Debug.Log($"<color=yellow>[Weapon Check] Slot saat ini: {activeData.weaponName} | Damage: {activeData.damage} | Cooldown: {activeData.attackCooldown}</color>");
+    }
     }
 
     private void HandleSlotSwitch()
