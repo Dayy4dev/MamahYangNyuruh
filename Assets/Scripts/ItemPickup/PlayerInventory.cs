@@ -179,9 +179,9 @@ public class PlayerInventory : MonoBehaviour
     }
 
     public void TryDrop()
-    {
-        if (currentSlot == SLOT_UNARMED) return;
-        if (slots[currentSlot] == null) return;
+{
+    if (currentSlot == SLOT_UNARMED) return;
+    if (slots[currentSlot] == null) return;
 
         int droppedSlot = currentSlot;
         DropFromSlot(droppedSlot);

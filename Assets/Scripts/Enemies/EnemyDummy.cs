@@ -137,14 +137,20 @@ public class EnemyDummy : MonoBehaviour, IDamageable
     }
 
     void Die()
+{
+    Debug.Log($"{gameObject.name} mati!");
+
+    if (spawner != null)
+        spawner.NotifyEnemyDestroyed(gameObject);
+
+    // 🔴 PASTIKAN BARIS INI ADA DI SINI SEBELUM DESTROY!
+    if (TutorialManager.Instance != null)
     {
-        Debug.Log($"{gameObject.name} mati!");
-
-        if (spawner != null)
-            spawner.NotifyEnemyDestroyed(gameObject);
-
-        Destroy(gameObject, 0.1f);
+        TutorialManager.Instance.enemiesDefeated++;
     }
+
+    Destroy(gameObject, 0.1f);
+}
 
     void OnCollisionEnter(Collision collision)
     {

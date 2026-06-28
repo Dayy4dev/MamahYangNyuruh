@@ -77,11 +77,27 @@ public class WeaponPickup : MonoBehaviour
     }
 
     /// <summary>Dipanggil PlayerInventory setelah senjata berhasil diambil.</summary>
-    public void OnPickedUp()
+   public void OnPickedUp()
+{
+    TogglePrompt(false);
+
+    // ---- TAMBAHKAN KODE INI ----
+    if (TutorialManager.Instance != null && weaponData != null)
     {
-        TogglePrompt(false);
-        Destroy(gameObject);
+        // Mengecek ID atau nama dari WeaponData Anda
+        if (weaponData.name.Contains("Sword")) 
+        {
+            TutorialManager.Instance.sudahAmbilPedang = true;
+        }
+        else if (weaponData.name.Contains("Cannon")) 
+        {
+            TutorialManager.Instance.sudahAmbilMeriam = true;
+        }
     }
+    // ----------------------------
+
+    Destroy(gameObject);
+}
 
     /// <summary>Tandai sebagai senjata yang dijatuhkan player (dihapus saat pindah scene).</summary>
     public void MarkAsDropped()
