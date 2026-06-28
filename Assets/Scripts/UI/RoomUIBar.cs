@@ -1,41 +1,64 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+
 public class RoomUIBar : MonoBehaviour
 {
     [Header("UI Components")]
-    [SerializeField] private GameObject uiContainer; // Objek utama UI (Canvas/Panel) agar bisa di-hide/show
-    [SerializeField] private Slider barSlider;         // Slider untuk Bossbar merah
-    [SerializeField] private TextMeshProUGUI roomText; // Teks untuk nama room
+    [SerializeField] private GameObject uiContainer; 
+    [SerializeField] private Slider barSlider;         
+    [SerializeField] private TextMeshProUGUI roomText; 
 
-    void Awake()
+    private int localCurrentEnemies = 0;
+    private int localMaxEnemies = 0;
+
+    private void OnEnable()
     {
-        // Sembunyikan bar di awal game
-        ShowBar(false);
+        GameManager.OnStateChanged += HandleGameStateChanged;
     }
 
-    // Fungsi untuk memunculkan atau menyembunyikan UI Bar
+    private void OnDisable()
+    {
+        GameManager.OnStateChanged -= HandleGameStateChanged;
+    }
+
+    private void HandleGameStateChanged(GameState oldState, GameState newState)
+    {
+        // Fungsi ini hanya menangani penyembunyian saat PAUSE/INVENTORY/GAMEOVER
+        if (newState != GameState.Playing)
+        {
+            ShowBar(false);
+        }
+    }
+
+    // FUNGSI BARU: Dipanggil langsung oleh GameManager saat unpause / tutup inventory
+    public void RefreshBarVisibilityOnResume()
+    {
+        if (localMaxEnemies > 0)
+        {
+            ShowBar(true);
+        }
+    }
+
     public void ShowBar(bool state)
     {
         if (uiContainer != null)
             uiContainer.SetActive(state);
     }
 
-    // Fungsi untuk memperbarui teks room saat ini
     public void UpdateRoomText(string roomType)
     {
-        if (roomText != null)
-        {
+        if (roomText != null) 
             roomText.text = $"Room right now: {roomType}";
-        }
     }
 
-    // Fungsi untuk memperbarui nilai bar (berkurang seiring musuh mati)
     public void UpdateBarValue(int currentEnemies, int maxEnemies)
     {
+        localCurrentEnemies = currentEnemies;
+        localMaxEnemies = maxEnemies;
+
         if (barSlider != null && maxEnemies > 0)
         {
-            // Menghitung persentase dari penuh ke kosong
             float progress = (float)currentEnemies / maxEnemies;
             barSlider.value = progress;
         }

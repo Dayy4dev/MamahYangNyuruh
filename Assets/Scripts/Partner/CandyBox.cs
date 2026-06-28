@@ -9,8 +9,10 @@ public class CandyBox : MonoBehaviour
     private bool isSelected = false;
     private bool isPlayerNearby = false; // Deteksi jarak player
 
+    [SerializeField] private GameObject interactionCanvasUI;
+
     [Header("UI / Visual Components")]
-    [SerializeField] private TextMeshPro textMesh; 
+    [SerializeField] private TextMeshPro textMesh;
 
     [Header("Candy Models Setup")]
     [SerializeField] private GameObject healCandyPrefab;
@@ -29,7 +31,7 @@ public class CandyBox : MonoBehaviour
 
         if (textMesh != null)
         {
-            textMesh.text = "???"; 
+            textMesh.text = "???";
         }
 
         SpawnCorrespondingCandy();
@@ -49,8 +51,8 @@ public class CandyBox : MonoBehaviour
         if (prefabToSpawn != null)
         {
             activeCandyModel = Instantiate(prefabToSpawn, transform.position, Quaternion.identity);
-            activeCandyModel.transform.parent = transform; 
-            activeCandyModel.SetActive(false); 
+            activeCandyModel.transform.parent = transform;
+            activeCandyModel.SetActive(false);
         }
     }
 
@@ -59,10 +61,10 @@ public class CandyBox : MonoBehaviour
     {
         if (isPlayerNearby && !isSelected && partnerSystem != null)
         {
-            if (Input.GetKeyDown(KeyCode.Q))
+            if (Input.GetKeyDown(KeyCode.F))
             {
                 isSelected = true;
-                // Panggil fungsi pemilihan ke PartnerSystem
+                if (interactionCanvasUI != null) interactionCanvasUI.SetActive(false); // Matikan UI
                 partnerSystem.ProcessBoxSelection(myEffect, this);
             }
         }
@@ -81,28 +83,25 @@ public class CandyBox : MonoBehaviour
             }
         }
 
+        // Ketiga permen memunculkan modelnya masing-masing secara bersamaan
         if (activeCandyModel != null)
         {
             activeCandyModel.SetActive(true);
         }
 
-        if (chosenByPlayer)
-        {
-            StartCoroutine(FlyUpRoutine());
-        }
-        else
-        {
-            StartCoroutine(FadeAndDestroyRoutine());
-        }
+        // Baik dipilih maupun tidak, semuanya sekarang menjalankan FlyUpRoutine 
+        // agar memicu animasi terbang ke atas dan hancur secara bersamaan
+        StartCoroutine(FlyUpRoutine());
     }
 
     private IEnumerator FlyUpRoutine()
     {
         Vector3 startPos = transform.position;
-        Vector3 targetPos = startPos + new Vector3(0, 1f, 0); 
-        float duration = 1f; 
+        Vector3 targetPos = startPos + new Vector3(0, 1f, 0);
+        float duration = 1f;
         float elapsed = 0f;
 
+        // Lepas dari parent agar posisinya stabil saat bergerak
         if (activeCandyModel != null) activeCandyModel.transform.parent = null;
 
         while (elapsed < duration)
@@ -112,13 +111,30 @@ public class CandyBox : MonoBehaviour
 
             if (activeCandyModel != null)
             {
+                // Menggerakkan model permen ke atas sambil berputar
                 activeCandyModel.transform.position = Vector3.Lerp(startPos, targetPos, percent);
                 activeCandyModel.transform.Rotate(Vector3.up, 360f * Time.deltaTime);
             }
             yield return null;
         }
 
+        // Hancurkan model permen dan game object kotak secara bersamaan setelah animasi selesai
         if (activeCandyModel != null) Destroy(activeCandyModel);
+        Destroy(gameObject);
+    }
+
+    private IEnumerator LeaveCandyModelRoutine()
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        if (activeCandyModel != null)
+        {
+            // Putus hubungan parent agar saat CandyBox dihancurkan, 
+            // model permennya tidak ikut hancur dan tetap tertinggal di map
+            activeCandyModel.transform.parent = null;
+        }
+
+        // Hancurkan box / teks penanda saja
         Destroy(gameObject);
     }
 
@@ -132,10 +148,10 @@ public class CandyBox : MonoBehaviour
     // DETEKSI PLAYER MENDEKAT
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && !isSelected)
         {
             isPlayerNearby = true;
-            Debug.Log($"Dekat kotak permen ({myEffect}). Tekan 'Q' untuk memilih!");
+            if (interactionCanvasUI != null) interactionCanvasUI.SetActive(true);
         }
     }
 
@@ -144,6 +160,7 @@ public class CandyBox : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             isPlayerNearby = false;
+            if (interactionCanvasUI != null) interactionCanvasUI.SetActive(false);
         }
     }
 }

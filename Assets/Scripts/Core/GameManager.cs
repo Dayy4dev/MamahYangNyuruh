@@ -125,6 +125,16 @@ public class GameManager : MonoBehaviour
             // Sembunyikan kursor putih saat kembali bermain
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
+
+            // ─────────────────────────────────────────────────────────────────────────
+            // KUNCI PERBAIKAN: Paksa RoomUIBar untuk muncul kembali saat lepas dari Pause/Inventory
+            // ─────────────────────────────────────────────────────────────────────────
+            if (DungeonManager.Instance != null && DungeonManager.Instance.roomUIBar != null)
+            {
+                // Panggil fungsi refresh khusus agar bar tahu dia harus menyala lagi
+                DungeonManager.Instance.roomUIBar.RefreshBarVisibilityOnResume();
+            }
+            // ─────────────────────────────────────────────────────────────────────────
         }
         else
         {

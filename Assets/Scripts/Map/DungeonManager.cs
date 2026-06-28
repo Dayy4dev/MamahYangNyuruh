@@ -61,7 +61,7 @@ public class DungeonManager : MonoBehaviour
         Debug.Log($"[DungeonManager] Floor {floor} dimulai.");
     }
 
-    
+
 
     void RegisterAllRooms()
     {
@@ -90,7 +90,7 @@ public class DungeonManager : MonoBehaviour
         if (shouldPartnerSpawn && partnerPrefab != null)
         {
             Debug.Log("[Wildcard Event] Partner muncul! Pintu ditahan sampai permen dipilih.");
-            
+
             Vector3 spawnPos = Vector3.zero;
             Transform targetSpawnpointTransform = null; // Variabel baru untuk menyimpan referensi transform spawnpoint
             bool spawnPointFound = false;
@@ -109,7 +109,7 @@ public class DungeonManager : MonoBehaviour
 
             if (!spawnPointFound)
             {
-                spawnPos = room.transform.position; 
+                spawnPos = room.transform.position;
             }
 
             // 1. Spawn partner seperti biasa
@@ -209,7 +209,7 @@ public class DungeonManager : MonoBehaviour
                 }
                 break;
         }
-        
+
         TeleportPlayerToRoom(destination);
     }
 
@@ -246,85 +246,85 @@ public class DungeonManager : MonoBehaviour
     }
 
     void TeleportPlayerToRoom(RoomType type)
-{
-    if (playerTransform == null) { Debug.LogWarning("[DungeonManager] playerTransform belum di-assign!"); return; }
-    if (!roomMap.TryGetValue(type, out RoomController room)) { Debug.LogWarning($"[DungeonManager] Room {type} tidak ditemukan!"); return; }
-
-    Transform spawnPoint = FindSpawnPoint(room.transform);
-    Vector3 targetPosition = spawnPoint != null
-        ? spawnPoint.position
-        : room.transform.position + fallbackOffset;
-
-    CharacterController cc = playerTransform.GetComponent<CharacterController>();
-    if (cc != null) cc.enabled = false; 
-
-    playerTransform.position = targetPosition;
-    Physics.SyncTransforms();
-
-    if (cc != null) cc.enabled = true; 
-
-    currentRoom = room;
-    currentRoomType = type;
-    Debug.Log($"[DungeonManager] Player diteleport ke {type}.");
-
-    // 1. Jalankan Spawner musuh terlebih dahulu
-    EnemySpawner spawner = room.GetComponentInChildren<EnemySpawner>();
-    if (spawner != null)
     {
-        spawner.SpawnEnemies(); 
-    }
+        if (playerTransform == null) { Debug.LogWarning("[DungeonManager] playerTransform belum di-assign!"); return; }
+        if (!roomMap.TryGetValue(type, out RoomController room)) { Debug.LogWarning($"[DungeonManager] Room {type} tidak ditemukan!"); return; }
 
-    // 2. Hitung jumlah musuh di ruangan ini
-    RefreshRoomEnemyCounter(type, room.gameObject);
+        Transform spawnPoint = FindSpawnPoint(room.transform);
+        Vector3 targetPosition = spawnPoint != null
+            ? spawnPoint.position
+            : room.transform.position + fallbackOffset;
 
-    // 3. TENTUKAN STATUS PINTU BERDASARKAN ADA/TIDAKNYA MUSUH
-    // NOTE: Door lock state sudah di-set oleh ActivateRoom(). DoorBlocker di-manage oleh DoorController.RefreshVisual()
-    // Jangan override di sini, cukup pastikan room state konsisten.
-    bool harusMengunci = (maxEnemiesInRoom > 0);
+        CharacterController cc = playerTransform.GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
 
-    // Atur status kunci pada komponen pintu HANYA jika belum ter-set (cegah duplikat lock/unlock)
-    if (room.roomState == RoomState.Active && harusMengunci)
-    {
-        // Ensure doors are locked dan DoorBlocker active jika ada musuh
-        if (room.exitDoors != null)
+        playerTransform.position = targetPosition;
+        Physics.SyncTransforms();
+
+        if (cc != null) cc.enabled = true;
+
+        currentRoom = room;
+        currentRoomType = type;
+        Debug.Log($"[DungeonManager] Player diteleport ke {type}.");
+
+        // 1. Jalankan Spawner musuh terlebih dahulu
+        EnemySpawner spawner = room.GetComponentInChildren<EnemySpawner>();
+        if (spawner != null)
         {
-            foreach (var door in room.exitDoors)
+            spawner.SpawnEnemies();
+        }
+
+        // 2. Hitung jumlah musuh di ruangan ini
+        RefreshRoomEnemyCounter(type, room.gameObject);
+
+        // 3. TENTUKAN STATUS PINTU BERDASARKAN ADA/TIDAKNYA MUSUH
+        // NOTE: Door lock state sudah di-set oleh ActivateRoom(). DoorBlocker di-manage oleh DoorController.RefreshVisual()
+        // Jangan override di sini, cukup pastikan room state konsisten.
+        bool harusMengunci = (maxEnemiesInRoom > 0);
+
+        // Atur status kunci pada komponen pintu HANYA jika belum ter-set (cegah duplikat lock/unlock)
+        if (room.roomState == RoomState.Active && harusMengunci)
+        {
+            // Ensure doors are locked dan DoorBlocker active jika ada musuh
+            if (room.exitDoors != null)
             {
-                if (door != null && !door.isLocked)
+                foreach (var door in room.exitDoors)
                 {
-                    door.LockDoor();
+                    if (door != null && !door.isLocked)
+                    {
+                        door.LockDoor();
+                    }
+                }
+            }
+        }
+
+        // 4. ATUR POSISI/SKALA BLOCKER JIKA DIPERLUKAN (tapi jangan disable berdasarkan harusMengunci)
+        // Karena DoorBlocker state sudah di-manage oleh LockDoor()/UnlockDoor()
+        foreach (Transform child in room.GetComponentsInChildren<Transform>(true))
+        {
+            if (child.name.Contains("Block") || child.name.Contains("Blocker"))
+            {
+                // Hanya atur posisi/skala jika blockernya sedang aktif (tidak disable/enable di sini)
+                if (child.gameObject.activeSelf)
+                {
+                    // Menyesuaikan posisi Y agar pas menapak di lantai dasar prefab
+                    Vector3 currentPos = child.transform.localPosition;
+                    child.transform.localPosition = new Vector3(currentPos.x, 0f, currentPos.z);
+
+                    // Mengatur tinggi tembok pelindung agar pas (tidak terlalu ekstrem raksasa)
+                    Vector3 currentScale = child.transform.localScale;
+                    child.transform.localScale = new Vector3(currentScale.x, 40f, currentScale.z);
+
+                    // Pastikan collider keras dan tidak tembus
+                    BoxCollider boxCol = child.GetComponent<BoxCollider>();
+                    if (boxCol != null)
+                    {
+                        boxCol.isTrigger = false;
+                    }
                 }
             }
         }
     }
-
-    // 4. ATUR POSISI/SKALA BLOCKER JIKA DIPERLUKAN (tapi jangan disable berdasarkan harusMengunci)
-    // Karena DoorBlocker state sudah di-manage oleh LockDoor()/UnlockDoor()
-    foreach (Transform child in room.GetComponentsInChildren<Transform>(true))
-    {
-        if (child.name.Contains("Block") || child.name.Contains("Blocker"))
-        {
-            // Hanya atur posisi/skala jika blockernya sedang aktif (tidak disable/enable di sini)
-            if (child.gameObject.activeSelf)
-            {
-                // Menyesuaikan posisi Y agar pas menapak di lantai dasar prefab
-                Vector3 currentPos = child.transform.localPosition;
-                child.transform.localPosition = new Vector3(currentPos.x, 0f, currentPos.z);
-
-                // Mengatur tinggi tembok pelindung agar pas (tidak terlalu ekstrem raksasa)
-                Vector3 currentScale = child.transform.localScale;
-                child.transform.localScale = new Vector3(currentScale.x, 40f, currentScale.z);
-                
-                // Pastikan collider keras dan tidak tembus
-                BoxCollider boxCol = child.GetComponent<BoxCollider>();
-                if (boxCol != null)
-                {
-                    boxCol.isTrigger = false;
-                }
-            }
-        }
-    }
-}
 
     Transform FindSpawnPoint(Transform parent)
     {
@@ -394,55 +394,55 @@ public class DungeonManager : MonoBehaviour
     }
 
     // Fungsi yang dipanggil setiap kali player masuk room baru untuk menghitung musuh
-public void RefreshRoomEnemyCounter(RoomType type, GameObject roomObject)
-{
-    // 1. Ambil komponen EnemySpawner langsung dari ruangan ini
-    EnemySpawner spawner = roomObject.GetComponentInChildren<EnemySpawner>();
-
-    // 2. Jika spawner ditemukan, gunakan nilai spawnCount aslinya agar akurat tanpa delay frame
-    if (spawner != null)
+    public void RefreshRoomEnemyCounter(RoomType type, GameObject roomObject)
     {
-        maxEnemiesInRoom = spawner.spawnCount;
-    }
-    else
-    {
-        maxEnemiesInRoom = 0;
-    }
+        // 1. Ambil komponen EnemySpawner langsung dari ruangan ini
+        EnemySpawner spawner = roomObject.GetComponentInChildren<EnemySpawner>();
 
-    currentEnemiesInRoom = maxEnemiesInRoom;
-
-    Debug.Log($"[DungeonManager] Room {type} sukses disinkronkan. Total musuh: {maxEnemiesInRoom}");
-
-    // 3. Jika ada musuh yang harus dilawan (> 0)
-    if (maxEnemiesInRoom > 0)
-    {
-        if (roomUIBar != null)
+        // 2. Jika spawner ditemukan, gunakan nilai spawnCount aslinya agar akurat tanpa delay frame
+        if (spawner != null)
         {
-            roomUIBar.ShowBar(true);
-            roomUIBar.UpdateRoomText(type.ToString());
-            roomUIBar.UpdateBarValue(currentEnemiesInRoom, maxEnemiesInRoom);
+            maxEnemiesInRoom = spawner.spawnCount;
+        }
+        else
+        {
+            maxEnemiesInRoom = 0;
         }
 
-        // FORCE LOCK: Paksa semua pintu di ruangan aktif saat ini untuk memunculkan Block!
-        if (currentRoom != null && currentRoom.exitDoors != null)
+        currentEnemiesInRoom = maxEnemiesInRoom;
+
+        Debug.Log($"[DungeonManager] Room {type} sukses disinkronkan. Total musuh: {maxEnemiesInRoom}");
+
+        // 3. Jika ada musuh yang harus dilawan (> 0)
+        if (maxEnemiesInRoom > 0)
         {
-            foreach (var door in currentRoom.exitDoors)
+            if (roomUIBar != null)
             {
-                if (door != null)
+                roomUIBar.ShowBar(true);
+                roomUIBar.UpdateRoomText(type.ToString());
+                roomUIBar.UpdateBarValue(currentEnemiesInRoom, maxEnemiesInRoom);
+            }
+
+            // FORCE LOCK: Paksa semua pintu di ruangan aktif saat ini untuk memunculkan Block!
+            if (currentRoom != null && currentRoom.exitDoors != null)
+            {
+                foreach (var door in currentRoom.exitDoors)
                 {
-                    door.LockDoor(); // Ini akan memanggil SetActive(true) pada objek 'Block'
-                    Debug.Log($"[DungeonManager] Kunci pengaman dipaksa AKTIF pada: {door.name}");
+                    if (door != null)
+                    {
+                        door.LockDoor(); // Ini akan memanggil SetActive(true) pada objek 'Block'
+                        Debug.Log($"[DungeonManager] Kunci pengaman dipaksa AKTIF pada: {door.name}");
+                    }
                 }
             }
         }
+        else
+        {
+            // Jika memang ruangan kosong (seperti Room awal/Bottom), buka pintunya
+            if (roomUIBar != null) roomUIBar.ShowBar(false);
+            OpenExitDoorsOfRoom(type);
+        }
     }
-    else
-    {
-        // Jika memang ruangan kosong (seperti Room awal/Bottom), buka pintunya
-        if (roomUIBar != null) roomUIBar.ShowBar(false);
-        OpenExitDoorsOfRoom(type);
-    }
-}
     // Fungsi yang akan dipanggil oleh EnemySpawner saat musuh mati
     public void OnEnemyKilled()
     {
@@ -454,6 +454,4 @@ public void RefreshRoomEnemyCounter(RoomType type, GameObject roomObject)
             roomUIBar.UpdateBarValue(currentEnemiesInRoom, maxEnemiesInRoom);
         }
     }
-
-    
 }
