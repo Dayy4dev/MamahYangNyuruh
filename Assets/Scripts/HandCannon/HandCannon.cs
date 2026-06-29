@@ -77,23 +77,26 @@ public class HandCannon : Weapon
         }
     }
 
-    public override void Attack()
-    {
-        if (!CanFire() || playerMovement == null) return;
+ public override void Attack()
+{
+    if (!CanFire() || playerMovement == null) return;
 
-        Bullet bullet = bulletPool.Get();
-        bullet.transform.position = firePoint.position;
+    Bullet bullet = bulletPool.Get();
+    bullet.transform.position = firePoint.position;
 
-        Vector3 targetPos = playerMovement.GetMouseTargetPosition;
-        targetPos.y = firePoint.position.y; // Menyamakan tinggi agar peluru tidak menukik/menanjak
+    Vector3 targetPos = playerMovement.GetMouseTargetPosition;
+    targetPos.y = firePoint.position.y; // Menyamakan tinggi agar peluru tidak menukik/menanjak
 
-        // Menggunakan targetPos yang sudah dideklarasikan di atas
-        Vector3 shootDirection = (targetPos - firePoint.position).normalized;
+    Vector3 shootDirection = (targetPos - firePoint.position).normalized;
+    bullet.transform.rotation = Quaternion.LookRotation(shootDirection);
 
-        bullet.transform.rotation = Quaternion.LookRotation(shootDirection);
+    // --- TAMBAHKAN BARIS INI (PENTING) ---
+    // Mengatur speed peluru (misal: 20f) dan mengambil damage dari weaponData
+    int damageLuar = (weaponData != null) ? weaponData.damage : 10;
+    bullet.Setup(20f, damageLuar); 
 
-        ConsumeBullet();
-    }
+    ConsumeBullet();
+}
 
     private void OnDisable()
     {

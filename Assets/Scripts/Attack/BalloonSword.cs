@@ -13,6 +13,7 @@ public class BalloonSword : Weapon
     private int currentComboLeft;
     private bool isReheating;
     private float remainingReheatTime;
+    
     private Coroutine reheatCoroutine;
 
     private void Awake()
@@ -49,6 +50,7 @@ public class BalloonSword : Weapon
     {
         return !isReheating && currentComboLeft > 0;
     }
+    
 
     public override void Attack()
     {
@@ -82,21 +84,29 @@ public class BalloonSword : Weapon
         }
     }
 
-    public override void OnWeaponActivate()
+  public override void OnWeaponActivate() //[cite: 4]
     {
-        if (currentComboLeft <= 0 && !isReheating)
+        // 1. Cari komponen PlayerAttack di parent (Player utama)
+        PlayerAttack playerAttack = GetComponentInParent<PlayerAttack>();
+        
+        if (playerAttack != null)
         {
-            reheatCoroutine = StartCoroutine(ReheatCoroutine());
-            return;
-        }
-
-        if (isReheating && reheatCoroutine == null && remainingReheatTime > 0)
-        {
-            reheatCoroutine = StartCoroutine(ReheatWithRemainingTime(remainingReheatTime));
-            Debug.Log($"[BalloonSword] Rehat dilanjutkan. Sisa: {remainingReheatTime:F1}s");
+            // 2. Ambil data senjata yang saat ini aktif di PlayerAttack
+            // Catatan: Pastikan kamu sudah membuat fungsi GetCurrentWeaponData() di PlayerAttack jika belum ada
+            WeaponData dataAktif = playerAttack.GetCurrentWeaponData(); 
+            
+            if (dataAktif != null)
+            {
+                weaponData = dataAktif;
+                damage = dataAktif.damage; // Mengisi damage sesuai Scriptable Object senjata yang di-pickup
+                Debug.Log($"[BalloonSword] Berhasil sinkronisasi data! Senjata: {weaponData.weaponName} | Damage: {damage}");
+            }
         }
     }
-
+    public int GetDamageValue()
+    {
+        return damage;
+    }
     private IEnumerator ReheatCoroutine()
     {
         isReheating = true;
@@ -143,4 +153,6 @@ public class BalloonSword : Weapon
         }
         return 0f;
     }
+    // Fungsi baru untuk memberikan data damage asli ke Hitbox
+
 }

@@ -201,15 +201,20 @@ public class PlayerInventory : MonoBehaviour
         return -1;
     }
 
-    private void SwitchToSlot(int index)
-    {
-        if (index < 0 || index >= TOTAL_SLOTS) return;
-        if (index != SLOT_UNARMED && slots[index] == null) index = SLOT_UNARMED;
+   private void SwitchToSlot(int slotIndex)
+{
+    if (slotIndex < 0 || slotIndex >= TOTAL_SLOTS) return;
 
-        currentSlot = index;
-        EquipSlot(currentSlot);
-        onActiveSlotChanged?.Invoke(currentSlot);
-    }
+    // 1. Simpan slot yang sedang aktif saat ini
+    currentSlot = slotIndex; 
+
+    // 2. Serahkan seluruh tugas pencarian visual & hitbox ke EquipSlot yang sudah terbukti bisa membaca mendalam (allChildrenCache)
+    EquipSlot(slotIndex);
+
+    // 3. Jalankan event bawaan Unity Inventory kamu
+    onActiveSlotChanged?.Invoke(currentSlot); 
+    onSlotChanged?.Invoke(currentSlot, slots[currentSlot]); 
+}
 
     private void EquipSlot(int index)
     {

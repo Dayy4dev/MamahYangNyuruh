@@ -6,13 +6,13 @@ public class PlayerAttack : MonoBehaviour
     [Header("Combo Settings")]
     [Tooltip("Jeda waktu maksimal (detik) antar hit agar combo tidak ter-reset")]
     [SerializeField] private float comboResetDuration = 1.0f;
-    
+
     [Header("References")]
     [SerializeField] private PlayerHealth playerHealth;
 
-    private int currentComboHit = 0;   
-    private float lastAttackTime = 0f; 
-    
+    private int currentComboHit = 0;
+    private float lastAttackTime = 0f;
+
     private WeaponData currentWeaponData;
     private Weapon activeWeaponComponent;
     private WeaponHitbox weaponHitbox;
@@ -51,47 +51,57 @@ public class PlayerAttack : MonoBehaviour
         currentComboHit = 0;
     }
 
-    public void ExecuteAttack()
+    // Tambahkan fungsi Update ini di dalam PlayerAttack.cs
+    void Update()
     {
-        if (playerHealth != null && playerHealth.IsDead) return;
-        if (currentWeaponData == null) return;
+        // Jika game sedang dipause, jangan panggil serangan
+        if (GameManager.Instance != null && !GameManager.Instance.IsPlaying) return;
 
-        string weaponCategory = GetWeaponCategory(currentWeaponData);
-
-        // --- JALUR KHUSUS SENJATA JARAK JAUH (CANNON) ---
-        if (weaponCategory == "Cannon")
+        // Jika klik kiri (Tombol 0) ditekan, jalankan serangan
+        if (Input.GetMouseButtonDown(0))
         {
-            ResetCombo(); // Cannon tidak punya combo
-            if (activeWeaponComponent != null)
-            {
-                // Panggil fungsi Attack bawaan HandCannon kamu agar peluru keluar
-                activeWeaponComponent.Attack(); 
-            }
-            return;
-        }
-
-        // --- JALUR KHUSUS SENJATA JARAK DEKAT (SWORD / HAMMER / UNARMED) ---
-        if (Time.time - lastAttackTime > comboResetDuration)
-        {
-            ResetCombo();
-        }
-
-        currentComboHit++; 
-
-        if (weaponCategory == "Sword" && currentComboHit > 3) currentComboHit = 1;
-        if (weaponCategory == "Hammer" && currentComboHit > 2) currentComboHit = 1;
-        if (weaponCategory == "Unknown") currentComboHit = 1; 
-
-        lastAttackTime = Time.time;
-
-        Debug.Log($"[Attack Melee] Mengayunkan {currentWeaponData.weaponName} | Combo Hit: {currentComboHit}");
-
-        // Aktifkan komponen penyerang melee bawaan jika ada
-        if (activeWeaponComponent != null)
-        {
-            activeWeaponComponent.Attack();
+            ExecuteAttack();
         }
     }
+
+  private void ExecuteAttack()
+{
+    if (playerHealth != null && playerHealth.IsDead) return;
+
+    // 1. Cek apakah senjata siap dipakai (tidak sedang reload/rehat)
+    if (activeWeaponComponent != null && !activeWeaponComponent.CanAttack()) return;
+
+    // 2. ATUR COMBO TERLEBIH DAHULU SEBELUM HITBOX SENJATA AKTIF
+    float timeSinceLastAttack = Time.time - lastAttackTime;
+    if (timeSinceLastAttack > comboResetDuration)
+    {
+        currentComboHit = 1; // Mulai combo baru (Hit pertama)
+    }
+    else
+    {
+        // Naikkan combo, jika melebihi batas maksimal kembali ke hit 1
+        int maxCombo = (currentWeaponData != null) ? currentWeaponData.maxComboCount : 3;
+        currentComboHit = (currentComboHit % maxCombo) + 1;
+    }
+
+    lastAttackTime = Time.time;
+
+    // Debug log sekarang dijamin menampilkan nama senjata dengan benar karena combo sudah dihitung
+    string weaponName = (currentWeaponData != null) ? currentWeaponData.weaponName : "Tangan Kosong";
+    Debug.Log($"[Attack Melee] Mengayunkan {weaponName} | Combo Hit: {currentComboHit}");
+
+    // 3. JALANKAN LOGIKA SERANGAN SENJATA
+    if (activeWeaponComponent != null)
+    {
+        activeWeaponComponent.Attack(); 
+    }
+
+    // 4. AKTIFKAN HITBOX SENJATA PALING TERAKHIR AGAR MEMBACA COMBO YANG SUDAH UP-TO-DATE
+    if (weaponHitbox != null)
+    {
+        weaponHitbox.ActivateHitbox();
+    }
+}
 
     public void CalculateHitEffects(out int finalDamage, out float stunDuration)
     {
@@ -102,21 +112,28 @@ public class PlayerAttack : MonoBehaviour
             return;
         }
 
-        // AMBIL AMAN: Selalu ambil data damage asli dari scriptable object senjata aktif!
+        string category = GetWeaponCategory(currentWeaponData);
+
+        // --- TAMBAHKAN PENGAMAN INI ---
+        if (category == "Cannon")
+        {
+            finalDamage = currentWeaponData.damage;
+            stunDuration = 0f; // Cannon biasa tidak nge-stun per hit melee
+            return;
+        }
+
         int baseTotal = currentWeaponData.damage + permanentDamageBuff;
         finalDamage = baseTotal;
-        stunDuration = 0.3f; 
-
-        string category = GetWeaponCategory(currentWeaponData);
+        stunDuration = 0.3f;
 
         if (category == "Sword" && currentComboHit == 3)
         {
-            finalDamage = Mathf.RoundToInt(baseTotal * 1.20f); // +20% Damage Finisher
+            finalDamage = Mathf.RoundToInt(baseTotal * 1.20f);
         }
         else if (category == "Hammer" && currentComboHit == 2)
         {
-            finalDamage = Mathf.RoundToInt(baseTotal * 1.25f); // +25% Damage Finisher
-            stunDuration = 0.8f; 
+            finalDamage = Mathf.RoundToInt(baseTotal * 1.25f);
+            stunDuration = 0.8f;
         }
     }
 
@@ -134,6 +151,11 @@ public class PlayerAttack : MonoBehaviour
 
         return "Unknown";
     }
+    // Tambahkan fungsi ini di dalam PlayerAttack.cs agar datanya bisa diintip oleh BalloonSword
+public WeaponData GetCurrentWeaponData()
+{
+    return currentWeaponData; // Mengembalikan data Scriptable Object yang sedang aktif saat ini[cite: 2]
+}
     public void ApplyKnockback(GameObject target)
     {
         if (target == null || currentWeaponData == null) return;
@@ -147,8 +169,8 @@ public class PlayerAttack : MonoBehaviour
             knockbackDirection.y = 0; // Biar musuh tidak mental ke atas langit
 
             // Tentukan kekuatan dorongan (misal: default 5f, atau jika ada data khusus di WeaponData bisa dipakai)
-            float force = 5f; 
-            
+            float force = 5f;
+
             // Contoh pengondisian jika tipe senjata menentukan kekuatan knockback
             string category = GetWeaponCategory(currentWeaponData);
             if (category == "Hammer") force = 8f; // Palu mendorong lebih kuat

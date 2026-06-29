@@ -11,12 +11,11 @@ public class Bullet : MonoBehaviour
     private IObjectPool<Bullet> originPool;
     private bool hasHit = false;
 
-    public void Setup(float speed, int damageAmount)
-    {
-        this.speed = speed;
-        this.damageAmount = damageAmount;
-    }
-
+    public void Setup(float bulletSpeed, int damage)
+{
+    this.speed = bulletSpeed;
+    this.damageAmount = damage; // Menggunakan damage asli dari Cannon
+}
     public void SetPool(IObjectPool<Bullet> pool)
     {
         originPool = pool;
