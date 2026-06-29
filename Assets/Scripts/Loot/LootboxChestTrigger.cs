@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class LootboxChestTrigger : MonoBehaviour
 {
-    [Header("Referensi Otak Gacha (Akan dicari otomatis saat Start)")]
+    [Header("Referensi Otak Gacha")]
     public LootboxManager lootboxManager;
 
     [Header("Rarity Hasil Gacha")]
-   public LootboxManager.Rarity weaponRarity;
+    public LootboxManager.Rarity weaponRarity; 
 
     [Header("Titik Muncul Senjata")]
     public Transform mySpawnPoint; 
@@ -14,10 +14,11 @@ public class LootboxChestTrigger : MonoBehaviour
     [Header("Identitas Senjata Box Ini")]
     public string weaponName; 
 
-    [Header("Varian Model 3D Box Ini")]
-    public GameObject legendaryPrefab;
-    public GameObject biasaPrefab;
-    public GameObject rustyPrefab;
+    // SEKARANG MENGGUNAKAN ARRAY AGAR BISA RANDOMIZE ISI SENJATANYA
+    [Header("Pool Varian Model 3D (Isi Banyak Lebih Seru!)")]
+    public GameObject[] legendaryPrefabs;
+    public GameObject[] biasaPrefabs;
+    public GameObject[] rustyPrefabs;
 
     [Header("Visual Animation Settings")]
     public float rotationSpeed = 70f;
@@ -34,13 +35,11 @@ public class LootboxChestTrigger : MonoBehaviour
 
     private void Start()
     {
-        // KUNCI MANDIRI: Cari otomatis LootboxManager di scene biar tidak error saat diclone
         if (lootboxManager == null)
         {
             lootboxManager = LootboxManager.Instance;
         }
 
-        // Pengaman jika kamu lupa membuat objek kosong anak sebagai titik spawn
         if (mySpawnPoint == null)
         {
             mySpawnPoint = transform.Find("SpawnPoint"); 
@@ -70,7 +69,12 @@ public class LootboxChestTrigger : MonoBehaviour
             isOpened = true; 
             startSpawnPos = mySpawnPoint.position;
 
-            LootboxManager.GachaOutput result = lootboxManager.OpenWeaponBox(legendaryPrefab, biasaPrefab, rustyPrefab, weaponName, mySpawnPoint.position);
+            Transform currentRoomParent = this.transform.parent;
+
+            // Mengirimkan array pool senjata ke manager untuk diacak isinya
+            LootboxManager.GachaOutput result = lootboxManager.OpenWeaponBox(
+                legendaryPrefabs, biasaPrefabs, rustyPrefabs, weaponName, mySpawnPoint.position, currentRoomParent
+            );
             
             mySpawnedWeapon = result.spawnedObject;
             weaponRarity = result.finalRarity; 

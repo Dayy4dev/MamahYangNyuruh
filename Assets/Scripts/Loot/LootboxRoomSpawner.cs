@@ -2,32 +2,40 @@ using UnityEngine;
 
 public class LootboxRoomSpawner : MonoBehaviour
 {
-    [Header("Pilihan Peti yang Bisa Muncul")]
+    [Header("Pilihan Peti yang Bisa Muncul (Isi dengan 3 Prefab Peti)")]
     public GameObject[] chestPrefabs; // Masukkan prefab PetiSword, PetiHandCannon, PetiSqueekHammer ke array ini
 
-    [Header("Titik Muncul Peti (Kosongkan jika ingin di tengah ruangan)")]
+    [Header("Titik Muncul Peti (Kosongkan jika ingin tepat di tengah ruangan)")]
     public Transform chestSpawnPoint;
 
-    // Fungsi yang akan dipanggil oleh DungeonManager saat room clear
+    // Fungsi ini dipanggil oleh DungeonManager saat ruangan clear
     public void SpawnRandomChest()
-{
-    if (chestPrefabs == null || chestPrefabs.Length == 0) return;
-
-    // Jarak pergeseran antar peti agar tidak saling bertumpukan di satu titik
-    float spacing = 3.5f; 
-
-    // Loop sebanyak jumlah prefab peti yang ada di array (yaitu 3 peti)
-    for (int i = 0; i < chestPrefabs.Length; i++)
     {
-        if (chestPrefabs[i] == null) continue;
+        if (chestPrefabs == null || chestPrefabs.Length == 0)
+        {
+            Debug.LogWarning($"[LootboxRoomSpawner] Array peti kosong di {gameObject.name}!");
+            return;
+        }
 
-        // Beri offset posisi X atau Z agar ketiga peti berjejer rapi
+        // 1. ACAK INDEKS: Memilih 1 nomor acak dari total prefab yang terdaftar (0 sampai 2)
+        int randomIndex = Random.Range(0, chestPrefabs.Length);
+        GameObject selectedChestPrefab = chestPrefabs[randomIndex];
+
+        // 2. TENTUKAN POSISI: Menggunakan titik khusus atau koordinat pusat ruangan
         Vector3 spawnPosition = chestSpawnPoint != null ? chestSpawnPoint.position : transform.position;
-        spawnPosition.x += (i - 1) * spacing; // Mengatur posisi kiri, tengah, dan kanan
-        spawnPosition.y += 0.2f;
+        
+        // Kasih sedikit jarak ke atas lantai agar tidak ambles ke bawah map isometric
+        spawnPosition.y += 0.2f; 
 
-        GameObject spawnedChest = Instantiate(chestPrefabs[i], spawnPosition, Quaternion.identity);
-        spawnedChest.transform.parent = this.transform;
+        // 3. SPAWN PETI: Memunculkan 1 peti hasil acakan ke dalam game
+        if (selectedChestPrefab != null)
+        {
+            GameObject spawnedChest = Instantiate(selectedChestPrefab, spawnPosition, Quaternion.identity);
+            
+            // Masukkan peti sebagai anak (child) dari ruangan ini agar ikut terhapus saat ganti floor level
+            spawnedChest.transform.parent = this.transform;
+
+            Debug.Log($"<color=orange>🎁 [Lootbox Spawn]</color> Ruangan Clear! Memunculkan 1 peti acak: <b>{spawnedChest.name}</b>");
+        }
     }
-}
 }

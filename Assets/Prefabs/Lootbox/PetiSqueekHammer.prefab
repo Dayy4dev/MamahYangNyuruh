@@ -161,9 +161,12 @@ MonoBehaviour:
   weaponRarity: 0
   mySpawnPoint: {fileID: 8288118787143397999}
   weaponName: SqueekHammer
-  legendaryPrefab: {fileID: 9062965573063651071, guid: a16af6212ad7ac240b0eb432b16a9db4, type: 3}
-  biasaPrefab: {fileID: 8489721802318889066, guid: cd036784138778441b23a5c82198b119, type: 3}
-  rustyPrefab: {fileID: 7191896599336899810, guid: f7e11fe53ca7bfb43b3efa58d85ae20a, type: 3}
+  legendaryPrefabs:
+  - {fileID: 9062965573063651071, guid: a16af6212ad7ac240b0eb432b16a9db4, type: 3}
+  biasaPrefabs:
+  - {fileID: 8489721802318889066, guid: cd036784138778441b23a5c82198b119, type: 3}
+  rustyPrefabs:
+  - {fileID: 7191896599336899810, guid: f7e11fe53ca7bfb43b3efa58d85ae20a, type: 3}
   rotationSpeed: 70
   hoverSpeed: 3
   hoverAmount: 0.15

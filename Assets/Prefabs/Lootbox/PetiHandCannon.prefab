@@ -130,9 +130,12 @@ MonoBehaviour:
   weaponRarity: 0
   mySpawnPoint: {fileID: 8868736644605946876}
   weaponName: HandCannon
-  legendaryPrefab: {fileID: 9113066625481402298, guid: 1baafbb269ed1404eb70c45971a0c591, type: 3}
-  biasaPrefab: {fileID: 4041648436681506966, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
-  rustyPrefab: {fileID: 827723065627645319, guid: a44dda729bad9b9499a9230aec3a5670, type: 3}
+  legendaryPrefabs:
+  - {fileID: 9113066625481402298, guid: 1baafbb269ed1404eb70c45971a0c591, type: 3}
+  biasaPrefabs:
+  - {fileID: 4041648436681506966, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
+  rustyPrefabs:
+  - {fileID: 827723065627645319, guid: a44dda729bad9b9499a9230aec3a5670, type: 3}
   rotationSpeed: 70
   hoverSpeed: 3
   hoverAmount: 0.15
