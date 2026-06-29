@@ -54,6 +54,21 @@ public class PlayerAttack : MonoBehaviour
     // Tambahkan fungsi Update ini di dalam PlayerAttack.cs
     void Update()
     {
+        if (Input.GetMouseButtonDown(0)) 
+    {
+        // 1. Ambil komponen senjata yang sedang aktif saat ini
+        Weapon activeWeapon = GetActiveWeapon(); // Fungsi bawaan PlayerAttack kamu
+
+        // 2. Cek apakah senjata itu adalah HandCannon
+        if (activeWeapon is HandCannon handCannon)
+        {
+            // 3. Panggil fungsi pengaman CanShoot() yang kita buat di Langkah 1
+            if (!handCannon.CanShoot())
+            {
+                Debug.Log("[PlayerAttack] Serangan dibatalkan karena player tidak menahan klik kanan!");
+                return; // KODE DIHENTIKAN DI SINI (Klik kiri langsung jadi tidak berfungsi)
+            }
+        }
         // Jika game sedang dipause, jangan panggil serangan
         if (GameManager.Instance != null && !GameManager.Instance.IsPlaying) return;
 
@@ -62,6 +77,7 @@ public class PlayerAttack : MonoBehaviour
         {
             ExecuteAttack();
         }
+    }
     }
 
   private void ExecuteAttack()

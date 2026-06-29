@@ -3108,7 +3108,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ToyHammer
   weaponRig: {fileID: 0}
   damage: 35
-  weaponData: {fileID: 0}
+  weaponData: {fileID: 11400000, guid: 3d94d0f8252b44747b7432e4970a5222, type: 2}
 --- !u!1 &431704400
 GameObject:
   m_ObjectHideFlags: 0

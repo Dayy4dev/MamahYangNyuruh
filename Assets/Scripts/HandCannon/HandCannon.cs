@@ -53,7 +53,42 @@ public class HandCannon : Weapon
     {
         if (fireRateTimer > 0f)
             fireRateTimer -= Time.deltaTime;
+
+            if (Input.GetMouseButtonDown(0))
+    {
+        // Panggil fungsi pembatas kita
+        if (CanShoot())
+        {
+            FireBullet(); // Ganti dengan fungsi asli menembak peluru kamu
+        }
+        else
+        {
+            Debug.Log("[HandCannon] Gagal menembak! Kamu harus menahan KLIK KANAN.");
+        }
     }
+    }
+    public bool CanShoot()
+{
+    // Input.GetMouseButton(1) artinya klik kanan SEDANG DITAHAN
+    bool isAiming = Input.GetMouseButton(1); 
+
+    // Senjata HANYA boleh menembak jika sedang Aiming
+    return isAiming;
+}
+
+// Contoh pembungkus fungsi menembak bawaan kamu
+private void FireBullet()
+{
+    if (currentBullet > 0 && !isReloading && fireRateTimer <= 0f)
+    {
+        // ... Jalankan logika Pooling Bullet bawaan kamu yang sudah ada ...
+        // Bullet bulletInstance = bulletPool.Get();
+        
+        currentBullet--;
+        fireRateTimer = 1f / fireRate;
+        Debug.Log("BOOM! Berhasil menembak karena klik kanan ditahan.");
+    }
+}
 
     public bool CanFire()
     {
