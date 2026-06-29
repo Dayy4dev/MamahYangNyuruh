@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class DungeonManager : MonoBehaviour
 {
@@ -22,6 +23,7 @@ public class DungeonManager : MonoBehaviour
 
     [Header("Room UI Bar Setup")]
     public RoomUIBar roomUIBar; // Tarik script UI Bar ke sini di Inspector
+    public TextMeshProUGUI floorUIText;
     private int maxEnemiesInRoom = 0;
     private int currentEnemiesInRoom = 0;
 
@@ -57,6 +59,8 @@ public class DungeonManager : MonoBehaviour
         RegisterAllRooms();
         TeleportPlayerToRoom(RoomType.Bottom);
 
+        UpdateFloorUI();
+
         int floor = FloorManager.Instance != null ? FloorManager.Instance.CurrentFloor : 1;
         Debug.Log($"[DungeonManager] Floor {floor} dimulai.");
     }
@@ -90,7 +94,7 @@ public class DungeonManager : MonoBehaviour
             Debug.Log("[Wildcard Event] Partner muncul! Pintu ditahan sampai permen dipilih.");
 
             Vector3 spawnPos = Vector3.zero;
-            Transform targetSpawnpointTransform = null; 
+            Transform targetSpawnpointTransform = null;
             bool spawnPointFound = false;
 
             Transform[] childTransforms = room.GetComponentsInChildren<Transform>();
@@ -99,7 +103,7 @@ public class DungeonManager : MonoBehaviour
                 if (child.CompareTag("PartnerSpawnpoint"))
                 {
                     spawnPos = child.position;
-                    targetSpawnpointTransform = child; 
+                    targetSpawnpointTransform = child;
                     spawnPointFound = true;
                     break;
                 }
@@ -366,8 +370,10 @@ public class DungeonManager : MonoBehaviour
 
         RegisterAllRooms();
         WaitForEndOfFrame wait = new WaitForEndOfFrame();
-        yield return wait; 
+        yield return wait;
         TeleportPlayerToRoom(RoomType.Bottom);
+
+        UpdateFloorUI();
 
         Debug.Log("[DungeonManager] Map baru loaded!");
     }
@@ -438,6 +444,15 @@ public class DungeonManager : MonoBehaviour
         if (roomUIBar != null)
         {
             roomUIBar.UpdateBarValue(currentEnemiesInRoom, maxEnemiesInRoom);
+        }
+    }
+
+    private void UpdateFloorUI()
+    {
+        if (floorUIText != null)
+        {
+            int floorSekarang = FloorManager.Instance != null ? FloorManager.Instance.CurrentFloor : 1;
+            floorUIText.text = "Floor = " + floorSekarang;
         }
     }
 }
