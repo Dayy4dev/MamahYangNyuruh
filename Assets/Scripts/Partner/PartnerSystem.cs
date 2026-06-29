@@ -39,6 +39,11 @@ public class PartnerSystem : MonoBehaviour
 
     public void ProcessBoxSelection(string chosenEffect, CandyBox chosenBox)
     {
+        if (LootboxManager.Instance != null)
+        {
+            LootboxManager.Instance.SetCandyEffectStatus(chosenEffect);
+        }
+        
         GameObject player = GameObject.FindWithTag("Player");
         if (player == null) return;
 

@@ -486,6 +486,7 @@ GameObject:
   m_Component:
   - component: {fileID: 518174038947261536}
   - component: {fileID: 6080701548279246665}
+  - component: {fileID: 9111798639538029275}
   m_Layer: 7
   m_Name: Slider
   m_TagString: Untagged
@@ -566,6 +567,18 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!225 &9111798639538029275
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1147014089118391916}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &1364076519852303658
 GameObject:
   m_ObjectHideFlags: 0
@@ -1926,14 +1939,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4372b96f71d3a94458c5609380e774d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponHitbox
-  weaponRig: {fileID: 6252515472805871302}
-  hitCollider: {fileID: 91784669619648216}
-  targetLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  audioSource: {fileID: 0}
-  hitWallSound: {fileID: 0}
-  hitEnemySound: {fileID: 0}
 --- !u!1 &5300056187150625924
 GameObject:
   m_ObjectHideFlags: 0
