@@ -143,6 +143,30 @@ public class DungeonManager : MonoBehaviour
     // 2. Buat fungsi bantuan baru ini untuk menampung logika switch-case asli milikmu
     private void ExecuteRoomClearLogic(RoomController room)
     {
+        LootboxRoomSpawner roomSpawner = room.GetComponentInChildren<LootboxRoomSpawner>();
+        if (roomSpawner != null)
+        {
+            roomSpawner.SpawnRandomChest();
+        }
+        // ───────────────────────────────────────────────────────────────────
+
+        switch (room.roomType)
+        {
+            case RoomType.Bottom:
+                OpenExitDoorsOfRoom(RoomType.Bottom);
+                break;
+
+            case RoomType.Center:
+                centerCleared = true;
+                OpenExitDoorsOfRoom(RoomType.Center);
+                break;
+
+            case RoomType.Left:
+            case RoomType.Right:
+            case RoomType.Top:
+                ActivatePortalInRoom(room);
+                break;
+        }
         switch (room.roomType)
         {
             case RoomType.Bottom:

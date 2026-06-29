@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2214662079004816713
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1218566274768800388}
+  m_Layer: 0
+  m_Name: SpawnLoot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1218566274768800388
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2214662079004816713}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -9.88, y: 0, z: 16.63}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 601741721061651302}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5967011127444030652
 GameObject:
   m_ObjectHideFlags: 0
@@ -211,7 +242,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9de4ee9eaa392124fa3a860e457f978b, type: 2}
+  - {fileID: 2100000, guid: 9b8356c39d71d0340931389ec32be6a6, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -300,6 +331,7 @@ GameObject:
   - component: {fileID: 601741721061651302}
   - component: {fileID: 1191429872272467010}
   - component: {fileID: 4687872038923998156}
+  - component: {fileID: 8562566672685442817}
   m_Layer: 0
   m_Name: LeftRoomPlayGround
   m_TagString: Untagged
@@ -325,6 +357,7 @@ Transform:
   - {fileID: 6173499315769541857}
   - {fileID: 8546307362153292844}
   - {fileID: 2750702838440592166}
+  - {fileID: 1218566274768800388}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1191429872272467010
@@ -359,6 +392,23 @@ MonoBehaviour:
   autoDetectEnemies: 1
   enemyTag: Enemy
   enemies: []
+--- !u!114 &8562566672685442817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7892813928807004251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d7d8f2ed2c656845abc87174bc531d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LootboxRoomSpawner
+  chestPrefabs:
+  - {fileID: 4781265823809132254, guid: 09973e51fdc665e48a2d2ad5cc548738, type: 3}
+  - {fileID: 354435207424024918, guid: ed12b2bcfb9e30f45b810b8b1135ccd2, type: 3}
+  - {fileID: 4352296326627496743, guid: 89755cff83f768e4ab4f79ae7635bb54, type: 3}
+  chestSpawnPoint: {fileID: 1218566274768800388}
 --- !u!1 &8422083832738913290
 GameObject:
   m_ObjectHideFlags: 0

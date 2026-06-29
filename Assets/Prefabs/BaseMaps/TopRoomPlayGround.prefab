@@ -68,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9de4ee9eaa392124fa3a860e457f978b, type: 2}
+  - {fileID: 2100000, guid: ccf85dcef12269946baec1e002a3fa25, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -416,6 +416,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NextMapPortal
   portalVisual: {fileID: 0}
   playerTag: Player
+--- !u!1 &5938848012402563672
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1124820319604195975}
+  m_Layer: 0
+  m_Name: SpawnLoot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1124820319604195975
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5938848012402563672}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4337717475408867967}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8681123837613130672
 GameObject:
   m_ObjectHideFlags: 0
@@ -427,6 +458,7 @@ GameObject:
   - component: {fileID: 4337717475408867967}
   - component: {fileID: 9048699182555051319}
   - component: {fileID: 5677930938237333430}
+  - component: {fileID: 1796590605792451003}
   m_Layer: 0
   m_Name: TopRoomPlayGround
   m_TagString: Untagged
@@ -452,6 +484,7 @@ Transform:
   - {fileID: 6031163554423376446}
   - {fileID: 2003185359772535786}
   - {fileID: 5140396290319462328}
+  - {fileID: 1124820319604195975}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &9048699182555051319
@@ -486,6 +519,23 @@ MonoBehaviour:
   autoDetectEnemies: 1
   enemyTag: Enemy
   enemies: []
+--- !u!114 &1796590605792451003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8681123837613130672}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d7d8f2ed2c656845abc87174bc531d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LootboxRoomSpawner
+  chestPrefabs:
+  - {fileID: 4781265823809132254, guid: 09973e51fdc665e48a2d2ad5cc548738, type: 3}
+  - {fileID: 354435207424024918, guid: ed12b2bcfb9e30f45b810b8b1135ccd2, type: 3}
+  - {fileID: 4352296326627496743, guid: 89755cff83f768e4ab4f79ae7635bb54, type: 3}
+  chestSpawnPoint: {fileID: 1124820319604195975}
 --- !u!1001 &9209235739280807734
 PrefabInstance:
   m_ObjectHideFlags: 0

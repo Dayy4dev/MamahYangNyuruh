@@ -2,70 +2,45 @@ using UnityEngine;
 
 public class LootboxManager : MonoBehaviour
 {
-    public enum WeaponTier { Legendary, Biasa, Rusty }
+    // Tambahkan baris Instance ini di paling atas kelas
+    public static LootboxManager Instance { get; private set; }
 
-    [Header("3D Spawn Settings")]
-    public Transform spawnPoint;
-    public float rotationSpeed = 70f;
-    public float hoverSpeed = 3f;
-    public float hoverAmount = 0.15f;
+    public enum Rarity { Legendary, Normal, Rusty }
 
-    private GameObject currentSpawnedWeapon;
-    private Vector3 startSpawnPos;
-
-    // Fungsi ini yang akan dipanggil oleh LootboxButton kamu
-    public void OpenWeaponBox(GameObject legendaryPrefab, GameObject biasaPrefab, GameObject rustyPrefab, string weaponName)
+    public struct GachaOutput
     {
-        // 1. Hapus senjata yang melayang sebelumnya jika ada
-        if (currentSpawnedWeapon != null) 
-            Destroy(currentSpawnedWeapon);
-
-        // 2. Roll Angka Acak 1 - 10 (Rate 2 : 3 : 5)
-        int roll = Random.Range(1, 11);
-        WeaponTier obtainedTier;
-        GameObject prefabToSpawn = null;
-
-        if (roll <= 2)
-        {
-            obtainedTier = WeaponTier.Legendary;
-            prefabToSpawn = legendaryPrefab;
-        }
-        else if (roll <= 5)
-        {
-            obtainedTier = WeaponTier.Biasa;
-            prefabToSpawn = biasaPrefab;
-        }
-        else
-        {
-            obtainedTier = WeaponTier.Rusty;
-            prefabToSpawn = rustyPrefab;
-        }
-
-        // 3. Spawn Model 3D di Game World
-        if (prefabToSpawn != null && spawnPoint != null)
-        {
-            currentSpawnedWeapon = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation);
-            startSpawnPos = spawnPoint.position;
-            
-            Debug.Log($"<color=green>🎉 BERHASIL GACHA!</color> Kamu mendapatkan <b>[{obtainedTier}] {weaponName}</b>!");
-        }
-        else
-        {
-            Debug.LogError("Prefab senjata kosong! Pastikan sudah memasukkan prefab di tombol UI.");
-        }
+        public GameObject spawnedObject;
+        public Rarity finalRarity;
     }
 
-    private void Update()
+    private void Awake()
     {
-        // Efek visual ala game Isometric: Senjata berputar dan melayang naik-turun
-        if (currentSpawnedWeapon != null)
+        // Setup singleton agar mudah diakses oleh peti hasil kloning/spawn
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+    }
+
+    public GachaOutput OpenWeaponBox(GameObject legendaryPrefab, GameObject biasaPrefab, GameObject rustyPrefab, string weaponName, Vector3 spawnPosition)
+    {
+        int roll = Random.Range(1, 11);
+        Rarity obtainedRarity;
+        GameObject prefabToSpawn = null;
+
+        if (roll <= 2) { obtainedRarity = Rarity.Legendary; prefabToSpawn = legendaryPrefab; }
+        else if (roll <= 5) { obtainedRarity = Rarity.Normal; prefabToSpawn = biasaPrefab; }
+        else { obtainedRarity = Rarity.Rusty; prefabToSpawn = rustyPrefab; }
+
+        if (prefabToSpawn != null)
         {
-            // Berputar otomatis
-            currentSpawnedWeapon.transform.Rotate(Vector3.up * rotationSpeed * Time.deltaTime, Space.World);
+            GameObject spawnedWeapon = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
             
-            // Melayang naik turun menggunakan sin (Trigonometri)
-            float newY = startSpawnPos.y + Mathf.Sin(Time.time * hoverSpeed) * hoverAmount;
-            currentSpawnedWeapon.transform.position = new Vector3(currentSpawnedWeapon.transform.position.x, newY, currentSpawnedWeapon.transform.position.z);
+            GachaOutput output = new GachaOutput();
+            output.spawnedObject = spawnedWeapon;
+            output.finalRarity = obtainedRarity;
+            return output;
         }
+        
+        Debug.LogError("Prefab senjata kosong!");
+        return default;
     }
 }

@@ -29,10 +29,11 @@ Transform:
   m_GameObject: {fileID: 4781265823809132254}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.20823, y: 0.38, z: 9.833}
+  m_LocalPosition: {x: -5.918919, y: 0.00000003659889, z: 16.172789}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 8868736644605946876}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8369884880727218312
@@ -68,7 +69,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: ccde66d120ea55e43bcc1cd100dcc767, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -126,7 +127,44 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LootboxChestTrigger
   lootboxManager: {fileID: 0}
+  weaponRarity: 0
+  mySpawnPoint: {fileID: 8868736644605946876}
   weaponName: HandCannon
   legendaryPrefab: {fileID: 9113066625481402298, guid: 1baafbb269ed1404eb70c45971a0c591, type: 3}
   biasaPrefab: {fileID: 4041648436681506966, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
   rustyPrefab: {fileID: 827723065627645319, guid: a44dda729bad9b9499a9230aec3a5670, type: 3}
+  rotationSpeed: 70
+  hoverSpeed: 3
+  hoverAmount: 0.15
+  interactionKey: 113
+--- !u!1 &6041747958999825726
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8868736644605946876}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8868736644605946876
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6041747958999825726}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.012, y: 0.82, z: -1.652}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4878371970599828398}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
