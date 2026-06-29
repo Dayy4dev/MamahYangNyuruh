@@ -54,7 +54,7 @@ public class BalloonSword : Weapon
     {
         if (!CanAttack() || hitbox == null) return;
 
-        hitbox.Activate(damage);
+        hitbox.ActivateHitbox();
         Invoke(nameof(DeactivateHitbox), 0.2f);
 
         // Kurangi jatah ayunan
@@ -69,7 +69,7 @@ public class BalloonSword : Weapon
     private void DeactivateHitbox()
     {
         if (hitbox != null)
-            hitbox.Deactivate();
+            hitbox.DeactivateHitbox();
     }
 
     public override void OnWeaponDeactivate()

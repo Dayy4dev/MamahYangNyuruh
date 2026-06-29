@@ -15,9 +15,9 @@ MonoBehaviour:
   weaponName: SqueekHammer
   icon: {fileID: 21300000, guid: 30ab8412c20019043b7dac3de75a76d8, type: 3}
   pickupPrefab: {fileID: 7191896599336899810, guid: f7e11fe53ca7bfb43b3efa58d85ae20a, type: 3}
-  damage: 15
+  damage: 50
   attackDuration: 0.8
-  attackCooldown: 1.5
+  attackCooldown: 0.5
   knockbackForce: 20
   knockbackDuration: 1
   maxComboCount: 1

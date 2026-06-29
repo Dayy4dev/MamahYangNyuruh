@@ -2360,6 +2360,7 @@ GameObject:
   - component: {fileID: 4433459829314455659}
   - component: {fileID: 442314521920604065}
   - component: {fileID: 4669038041546032923}
+  - component: {fileID: -4551204849783851648}
   m_Layer: 7
   m_Name: EnemyGun
   m_TagString: Enemy
@@ -2582,6 +2583,18 @@ MonoBehaviour:
   baseHP: 200
   baseDamage: 20
   baseSpeed: 8
+--- !u!114 &-4551204849783851648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6077987226358072364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b6f4740de998f745b9a9761acd6eed0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyStunHandler
 --- !u!1 &6263129299947193020
 GameObject:
   m_ObjectHideFlags: 0

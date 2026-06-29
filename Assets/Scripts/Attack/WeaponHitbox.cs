@@ -1,125 +1,73 @@
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 
-public class WeaponHitbox : Weapon
+public class WeaponHitbox : MonoBehaviour
 {
-    [Header("Hit Detection")]
-    [SerializeField] private Collider hitCollider;
-
-    [Tooltip("Layer yang bisa kena damage (centang Enemy saja, jangan Player)")]
-    [SerializeField] private LayerMask targetLayers;
-
-    // -------------------------------------------------------------------------
-    // TAMBAHAN: Audio Setup untuk Hitbox Senjata
-    // -------------------------------------------------------------------------
-    [Header("Audio Setup")]
-    [SerializeField] private AudioSource audioSource;   // Komponen AudioSource Player/Weapon
-    [SerializeField] private AudioClip hitWallSound;    // Suara keras benturan keras (Tag: Wall)
-    [SerializeField] private AudioClip hitEnemySound;   // Suara benturan mengenai daging (Tag: Enemy)
-
-
-    private int damage;
-    private bool isActive;
-    private bool hasHitSomething; // Melacak apakah ayunan ini mengenai sesuatu
-    private HashSet<Collider> hitThisSwing = new HashSet<Collider>();
-    private PlayerAttack playerAttack;
-
-    // -------------------------------------------------------------------------
-    // Unity Lifecycle
-    // -------------------------------------------------------------------------
+    private Collider hitboxCollider;
 
     void Awake()
     {
-        if (hitCollider == null)
-            hitCollider = GetComponent<Collider>();
-
-        if (hitCollider == null)
+        // Mengambil komponen collider yang ada di objek hitbox/pedang ini
+        hitboxCollider = GetComponent<Collider>();
+        if (hitboxCollider != null)
         {
-            Debug.LogError("[WeaponHitbox] No Collider found on this object!");
-            return;
-        }
-
-        hitCollider.isTrigger = true;
-        hitCollider.enabled = false;
-
-        playerAttack = GetComponentInParent<PlayerAttack>();
-        if (playerAttack == null)
-        {
-            playerAttack = GameObject.FindWithTag("Player")?.GetComponent<PlayerAttack>();
+            hitboxCollider.isTrigger = true;
+            hitboxCollider.enabled = false; // Nonaktifkan di awal agar tidak ngehit musuh tanpa sengaja
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Weapon Overrides
-    // -------------------------------------------------------------------------
-
-    public override void Attack() => Activate(damage);
-
-    // -------------------------------------------------------------------------
-    // Public API
-    // -------------------------------------------------------------------------
-
-    public void Activate(int dmg)
+    // Fungsi ini dipanggil dari PlayerAttack saat klik kiri dilakukan
+    public void ActivateHitbox()
     {
-        if (hitCollider == null) return;
-        
-        damage = dmg;
-        isActive = true;
-        hasHitSomething = false; // Reset status setiap kali ayunan baru dimulai
-        hitThisSwing.Clear();
-        hitCollider.enabled = true;
-    }
-
-    public void Deactivate()
-    {
-        if (hitCollider == null) return;
-        
-        isActive = false;
-        hitCollider.enabled = false;
-        hitThisSwing.Clear();
-    }
-
-    // -------------------------------------------------------------------------
-    // Trigger
-    // -------------------------------------------------------------------------
-
-    void OnTriggerEnter(Collider other)
-    {
-        if (!isActive) return;
-
-        // 1. CEK BENTURAN DENGAN WALL (Dinding)
-        // Dinding biasanya tidak punya IDamageable, jadi kita cek Tag-nya di paling atas
-        if (other.CompareTag("Wall"))
+        if (hitboxCollider != null)
         {
-            if (hitThisSwing.Contains(other)) return;
-            hitThisSwing.Add(other);
-            
-            hasHitSomething = true; // Tandai bahwa ayunan mengenai sesuatu
-
-            if (audioSource != null && hitWallSound != null)
-                audioSource.PlayOneShot(hitWallSound);
-
-            Debug.Log("[WeaponHitbox] Mengenai Dinding!");
-            return; // Keluar karena dinding tidak menerima damage/knockback
+            hitboxCollider.enabled = true;
         }
+    }
+    public void DeactivateHitbox()
+    {
+        if (hitboxCollider != null)
+        {
+            hitboxCollider.enabled = false;
+        }
+    }
 
-        // 2. CEK BENTURAN DENGAN LAYER TARGET (Misal: Enemy)
-        if (hitThisSwing.Contains(other)) return;
-        if ((targetLayers.value & (1 << other.gameObject.layer)) == 0) return;
-        if (!other.TryGetComponent<IDamageable>(out IDamageable target)) return;
+    private IEnumerator HitboxRoutine()
+    {
+        if (hitboxCollider != null) hitboxCollider.enabled = true; // Aktifkan collider untuk mendeteksi musuh
 
-        hitThisSwing.Add(other);
-        hasHitSomething = true; // Tandai bahwa ayunan mengenai sesuatu
+        // Biarkan hitbox aktif selama 0.2 detik (durasi tebasan pedang)
+        yield return new WaitForSeconds(0.2f);
 
-        // Putar suara benturan musuh
-        if (audioSource != null && hitEnemySound != null)
-            audioSource.PlayOneShot(hitEnemySound);
+        if (hitboxCollider != null) hitboxCollider.enabled = false; // Matikan kembali collider
+    }
 
-        target.TakeDamage(damage);
+    private void OnTriggerEnter(Collider other)
+    {
+        // 1. Deteksi musuh lewat komponen IDamageable
+        IDamageable enemyHealth = other.GetComponent<IDamageable>();
 
-        if (playerAttack != null)
-            playerAttack.ApplyKnockback(other.gameObject);
-            
-        Debug.Log($"[WeaponHitbox] Mengenai Target Valid: {other.name}");
+        if (enemyHealth != null)
+        {
+            PlayerAttack playerAttack = Object.FindFirstObjectByType<PlayerAttack>();
+
+            if (playerAttack != null)
+            {
+                // 2. Hitung damage combo + durasi stun dari PlayerAttack
+                playerAttack.CalculateHitEffects(out int finalDamage, out float stunDuration);
+
+                // 3. Berikan damage ke musuh
+                enemyHealth.TakeDamage(finalDamage);
+
+                // 4. Berikan efek knockback bawaan
+                playerAttack.ApplyKnockback(other.gameObject);
+
+                // 5. Berikan efek Stun jika musuh punya komponen EnemyStunHandler
+                if (other.TryGetComponent<EnemyStunHandler>(out var stunHandler))
+                {
+                    stunHandler.TriggerStun(stunDuration);
+                }
+            }
+        }
     }
 }

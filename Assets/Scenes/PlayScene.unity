@@ -1002,11 +1002,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4348956824809825455, guid: 79e59df9a49e54c4981b8d03109d3a93, type: 3}
   m_PrefabInstance: {fileID: 1358620938}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &186612519 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4947985785571846524, guid: 79e59df9a49e54c4981b8d03109d3a93, type: 3}
-  m_PrefabInstance: {fileID: 453944942}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &188582665
 GameObject:
   m_ObjectHideFlags: 0
@@ -3213,12 +3208,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 440130710}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.91, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -1.9100001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1929026399}
+  m_Father: {fileID: 1942983255}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &453944942
 PrefabInstance:
@@ -4991,14 +4986,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4372b96f71d3a94458c5609380e774d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponHitbox
-  weaponRig: {fileID: 0}
-  hitCollider: {fileID: 780686357}
-  targetLayers:
-    serializedVersion: 2
-    m_Bits: 128
-  audioSource: {fileID: 0}
-  hitWallSound: {fileID: 0}
-  hitEnemySound: {fileID: 0}
 --- !u!65 &780686357
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -11657,16 +11644,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e9cba6ddebad4d47b0218f571539083, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttack
-  weaponHitbox: {fileID: 0}
-  audioSource: {fileID: 0}
-  swordAttackCycles: []
-  handCannonSound: {fileID: 0}
-  squeekHammerSound: {fileID: 0}
-  genericMeleeEquipSound: {fileID: 0}
-  handCannonEquipSound: {fileID: 0}
-  bulletPrefab: {fileID: 4859117371281068152, guid: 3b1ffcdb23098ee48a2062b0b11a6352, type: 3}
-  firePoint: {fileID: 186612519}
-  cooldownUiImage: {fileID: 1716972787}
+  comboResetDuration: 1
+  playerHealth: {fileID: 0}
 --- !u!114 &1929026395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11773,7 +11752,6 @@ Transform:
   - {fileID: 1567930953}
   - {fileID: 1013096930}
   - {fileID: 582010108}
-  - {fileID: 440130711}
   - {fileID: 1942983255}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -11805,7 +11783,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 440130711}
   m_Father: {fileID: 1929026399}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1951923059

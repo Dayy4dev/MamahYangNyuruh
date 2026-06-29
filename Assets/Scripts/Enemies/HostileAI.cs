@@ -52,6 +52,7 @@ public class HostileAI : MonoBehaviour, IDamageable
     private Transform projectilePoolRoot;
     private EnemySpawner spawner;
     private bool isDead = false;
+    private EnemyStunHandler stunHandler;
 
     // ── Scaling API ───────────────────────────────────────────────────────────
 
@@ -59,6 +60,10 @@ public class HostileAI : MonoBehaviour, IDamageable
     public int GetBaseDamage() => projectileDamage;
     public float GetBaseSpeed() => navAgent != null ? navAgent.speed : 3.5f;
 
+    void Start()
+    {
+        stunHandler = GetComponent<EnemyStunHandler>();
+    }
     public void SetScaledStats(int hp, int dmg, float speed)
     {
         maxHealth = hp;
@@ -97,6 +102,8 @@ public class HostileAI : MonoBehaviour, IDamageable
 
         DetectPlayer();
         UpdateBehaviourState();
+
+        if (stunHandler != null && stunHandler.IsStunned) return;
     }
 
     private void OnDrawGizmosSelected()

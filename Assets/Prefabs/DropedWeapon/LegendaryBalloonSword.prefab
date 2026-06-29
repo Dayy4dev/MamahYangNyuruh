@@ -94,6 +94,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2458a839783b75b4ba6ab731e208403b, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2974445311211369286}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 2458a839783b75b4ba6ab731e208403b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9128709635875635223}
   m_SourcePrefab: {fileID: 100100000, guid: 2458a839783b75b4ba6ab731e208403b, type: 3}
 --- !u!1 &2594508773250980820 stripped
 GameObject:
@@ -139,3 +142,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.1, y: 0.1, z: 0.1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &9128709635875635223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2594508773250980820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b355c2e7d4650e74392ef7bb7b513b89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BalloonSword
+  weaponRig: {fileID: 0}
+  damage: 25
+  weaponData: {fileID: 11400000, guid: 538850df5fcc0734abe73cdf7c70b78d, type: 2}

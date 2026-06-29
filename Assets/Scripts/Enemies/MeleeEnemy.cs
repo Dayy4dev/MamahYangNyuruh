@@ -42,6 +42,7 @@ public class MeleeEnemy : MonoBehaviour, IDamageable
 
     private bool isPlayerVisible;
     private bool isPlayerInRange;
+    private EnemyStunHandler stunHandler;
 
     // ── Scaling API ───────────────────────────────────────────────────────────
 
@@ -49,6 +50,11 @@ public class MeleeEnemy : MonoBehaviour, IDamageable
     public int   GetBaseDamage() => damage;
     public float GetBaseSpeed()  => navAgent != null ? navAgent.speed : 3.5f;
 
+
+    void Start()
+    {
+        stunHandler = GetComponent<EnemyStunHandler>();
+    }
     public void SetScaledStats(int hp, int dmg, float speed)
     {
         maxHealth     = hp;
@@ -86,6 +92,7 @@ public class MeleeEnemy : MonoBehaviour, IDamageable
         DetectPlayer();
         UpdateBehaviourState();
         UpdateAnimation();
+        if (stunHandler != null && stunHandler.IsStunned) return;
     }
 
     private void OnDrawGizmosSelected()

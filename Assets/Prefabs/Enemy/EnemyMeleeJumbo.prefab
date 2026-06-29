@@ -621,6 +621,7 @@ GameObject:
   - component: {fileID: 7359090777798932338}
   - component: {fileID: 503557058892814127}
   - component: {fileID: 4666201444385552240}
+  - component: {fileID: -5479661546747017530}
   m_Layer: 7
   m_Name: EnemyMeleeJumbo
   m_TagString: Enemy
@@ -782,6 +783,18 @@ MonoBehaviour:
   healthBar: {fileID: 5917868247675733612}
   audioSource: {fileID: 0}
   enemyHurtSound: {fileID: 0}
+--- !u!114 &-5479661546747017530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2969935072401831654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b6f4740de998f745b9a9761acd6eed0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyStunHandler
 --- !u!1 &3156698293219667692
 GameObject:
   m_ObjectHideFlags: 0

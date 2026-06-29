@@ -53,7 +53,7 @@ public class Unarmed : Weapon
         // JIKA Unarmed punya hitbox sendiri, aktifkan.
         if (hitbox != null)
         {
-            hitbox.Activate(damage);
+            hitbox.ActivateHitbox();
             Invoke(nameof(DeactivateHitbox), 0.2f);
         }
         else
@@ -73,7 +73,7 @@ public class Unarmed : Weapon
 
     private void DeactivateHitbox()
     {
-        if (hitbox != null) hitbox.Deactivate();
+        if (hitbox != null) hitbox.DeactivateHitbox();
     }
 
     public override void OnWeaponDeactivate()

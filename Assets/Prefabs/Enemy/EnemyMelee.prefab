@@ -1336,6 +1336,7 @@ GameObject:
   - component: {fileID: 6926897763404924081}
   - component: {fileID: 3838396402797061184}
   - component: {fileID: -99885767059885274}
+  - component: {fileID: -3669917849920726644}
   m_Layer: 7
   m_Name: EnemyMelee
   m_TagString: Enemy
@@ -1551,6 +1552,18 @@ MonoBehaviour:
   baseHP: 300
   baseDamage: 25
   baseSpeed: 10
+--- !u!114 &-3669917849920726644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3807745660598645816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b6f4740de998f745b9a9761acd6eed0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyStunHandler
 --- !u!1 &3829775114430976104
 GameObject:
   m_ObjectHideFlags: 0
