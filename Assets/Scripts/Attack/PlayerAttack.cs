@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 [AddComponentMenu("Player/Player Attack")]
 public class PlayerAttack : MonoBehaviour
@@ -18,6 +19,10 @@ public class PlayerAttack : MonoBehaviour
     private WeaponHitbox weaponHitbox;
     private int permanentDamageBuff = 0;
 
+    public event Action<string> OnWeaponEquipped;
+
+    public event Action<int> OnAttackExecuted;
+
     void Awake()
     {
         if (playerHealth == null)
@@ -29,6 +34,9 @@ public class PlayerAttack : MonoBehaviour
         currentWeaponData = data;
         activeWeaponComponent = weaponComponent;
         ResetCombo();
+
+        string category = GetWeaponCategory(data);
+        OnWeaponEquipped?.Invoke(category);
     }
 
     public void SetWeaponHitbox(WeaponHitbox hitbox)
@@ -49,6 +57,11 @@ public class PlayerAttack : MonoBehaviour
     public void ResetCombo()
     {
         currentComboHit = 0;
+    }
+
+    public int GetCurrentComboHit()
+    {
+        return currentComboHit;
     }
 
     // Tambahkan fungsi Update ini di dalam PlayerAttack.cs
@@ -89,6 +102,9 @@ public class PlayerAttack : MonoBehaviour
     // Debug log sekarang dijamin menampilkan nama senjata dengan benar karena combo sudah dihitung
     string weaponName = (currentWeaponData != null) ? currentWeaponData.weaponName : "Tangan Kosong";
     Debug.Log($"[Attack Melee] Mengayunkan {weaponName} | Combo Hit: {currentComboHit}");
+
+    // Notify animation system — fires for EVERY click, even when combo value wraps
+    OnAttackExecuted?.Invoke(currentComboHit);
 
     // 3. JALANKAN LOGIKA SERANGAN SENJATA
     if (activeWeaponComponent != null)
@@ -139,7 +155,7 @@ public class PlayerAttack : MonoBehaviour
 
     private string GetWeaponCategory(WeaponData data)
     {
-        if (data == null || string.IsNullOrEmpty(data.weaponName)) return "Unknown";
+        if (data == null || string.IsNullOrEmpty(data.weaponName)) return "Unarmed";
         string nameLower = data.weaponName.ToLower();
 
         if (nameLower.Contains("sword") || nameLower.Contains("blade") || nameLower.Contains("calibur"))
@@ -148,8 +164,10 @@ public class PlayerAttack : MonoBehaviour
             return "Hammer";
         if (nameLower.Contains("cannon") || nameLower.Contains("blaster"))
             return "Cannon";
+        if (nameLower.Contains("unarmed") || nameLower.Contains("punch") || nameLower.Contains("fist"))
+            return "Unarmed";
 
-        return "Unknown";
+        return "Unarmed";
     }
     // Tambahkan fungsi ini di dalam PlayerAttack.cs agar datanya bisa diintip oleh BalloonSword
 public WeaponData GetCurrentWeaponData()

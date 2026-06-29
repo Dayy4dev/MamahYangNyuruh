@@ -59,6 +59,9 @@ public class BalloonSword : Weapon
         hitbox.ActivateHitbox();
         Invoke(nameof(DeactivateHitbox), 0.2f);
 
+        BalloonSwordVFX vfx = GetComponent<BalloonSwordVFX>();
+        if (vfx != null) vfx.PlayVFX();
+
         // Kurangi jatah ayunan
         currentComboLeft--;
 
@@ -72,6 +75,9 @@ public class BalloonSword : Weapon
     {
         if (hitbox != null)
             hitbox.DeactivateHitbox();
+
+        BalloonSwordVFX vfx = GetComponent<BalloonSwordVFX>();
+        if (vfx != null) vfx.StopVFX();
     }
 
     public override void OnWeaponDeactivate()
