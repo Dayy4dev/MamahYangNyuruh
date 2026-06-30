@@ -3,6 +3,12 @@ using UnityEngine;
 [AddComponentMenu("Player/Player Buff Manager")]
 public class PlayerBuffManager : MonoBehaviour
 {
+    /// <summary>
+    /// Dipanggil setiap kali stack buff (HP atau Damage) berubah,
+    /// supaya UI lain (mis. InventoryUI) bisa langsung refresh tanpa menunggu panel dibuka.
+    /// </summary>
+    public event System.Action OnBuffChanged;
+
     [Header("References")]
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private PlayerAttack playerAttack;
@@ -35,6 +41,9 @@ public class PlayerBuffManager : MonoBehaviour
         playerHealth.Heal(healAmount);
 
         Debug.Log($"[BUFF] Max HP Buff Stack #{hpBuffStackCount} diaplikasikan! +100 Max HP & Heal 30% (+{healAmount} HP)");
+        Debug.Log($"[InventoryUI-DEBUG] ApplyHpAndHealBuff jalan di instance {GetInstanceID()} pada GameObject '{gameObject.name}'");
+
+        OnBuffChanged?.Invoke();
     }
 
     /// <summary>
@@ -50,6 +59,9 @@ public class PlayerBuffManager : MonoBehaviour
         playerAttack.ApplyPermanentDamageBuff(50);
 
         Debug.Log($"[BUFF] Damage Buff Stack #{damageBuffStackCount} diaplikasikan! +50 Permanent Damage Buff.");
+        Debug.Log($"[InventoryUI-DEBUG] ApplyDamageBuff jalan di instance {GetInstanceID()} pada GameObject '{gameObject.name}'");
+
+        OnBuffChanged?.Invoke();
     }
 
     // =========================================================================

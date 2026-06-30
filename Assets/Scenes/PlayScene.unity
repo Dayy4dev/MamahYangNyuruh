@@ -1866,6 +1866,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+--- !u!1 &250125568
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 250125570}
+  - component: {fileID: 250125569}
+  m_Layer: 0
+  m_Name: PlayerBuffManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &250125569
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 250125568}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97658bcfeabc5ec4382e07676c6fbe94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerBuffManager
+  playerHealth: {fileID: 0}
+  playerAttack: {fileID: 0}
+--- !u!4 &250125570
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 250125568}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 8.05698, y: 0, z: 11.29803}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &252204211
 GameObject:
   m_ObjectHideFlags: 0
@@ -4278,8 +4324,6 @@ GameObject:
   - component: {fileID: 634518726}
   - component: {fileID: 634518725}
   - component: {fileID: 634518724}
-  - component: {fileID: 634518728}
-  - component: {fileID: 634518727}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -4388,33 +4432,6 @@ MonoBehaviour:
   topRoomVariants:
   - {fileID: 8681123837613130672, guid: da05eba03f4718e4080e1518e53f0644, type: 3}
   roomSize: 40
---- !u!114 &634518727
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 634518720}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 41167f63721b3504ba0327bebae236dd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BuffTester
-  buffManager: {fileID: 634518728}
---- !u!114 &634518728
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 634518720}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97658bcfeabc5ec4382e07676c6fbe94, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlayerBuffManager
-  playerHealth: {fileID: 1929026396}
-  playerAttack: {fileID: 1929026394}
 --- !u!1001 &635794299
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10775,7 +10792,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1703006490}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d8deb997dcf0eda4dbb64d72cf2cee4c, type: 3}
   m_Name: 
@@ -10785,7 +10802,7 @@ MonoBehaviour:
   atkBuffText: {fileID: 2044325410}
   maxHpBuffText: {fileID: 1899237022}
   playerObject: {fileID: 1929026393}
-  buffManager: {fileID: 634518728}
+  buffManager: {fileID: 1929026400}
 --- !u!114 &1703006494
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12003,8 +12020,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -12.5521, y: -146.8}
-  m_SizeDelta: {x: 139.6958, y: 50}
+  m_AnchoredPosition: {x: -12.5521, y: -128.90001}
+  m_SizeDelta: {x: 139.6958, y: 14.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1899237022
 MonoBehaviour:
@@ -12241,7 +12258,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b47c7c99f731d84e9ec64b56c2a6e65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHealth: 250
+  maxHealth: 673
   deathSceneReloadDelay: 2
 --- !u!114 &1929026397
 MonoBehaviour:
@@ -12884,7 +12901,7 @@ MonoBehaviour:
   atkBuffText: {fileID: 2044325410}
   maxHpBuffText: {fileID: 1899237022}
   playerObject: {fileID: 1929026393}
-  buffManager: {fileID: 634518728}
+  buffManager: {fileID: 0}
 --- !u!1 &2032856335
 GameObject:
   m_ObjectHideFlags: 0
@@ -13061,8 +13078,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -12.5521, y: -171}
-  m_SizeDelta: {x: 139.6958, y: 50}
+  m_AnchoredPosition: {x: -12.5521, y: -151.71292}
+  m_SizeDelta: {x: 139.6958, y: 11.4258}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2044325410
 MonoBehaviour:
@@ -14341,3 +14358,4 @@ SceneRoots:
   - {fileID: 737845386}
   - {fileID: 1929026399}
   - {fileID: 591693874}
+  - {fileID: 250125570}

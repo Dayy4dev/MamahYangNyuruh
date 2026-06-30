@@ -15,15 +15,13 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private GameObject playerObject; 
 
     [Header("Buff Manager Reference")]
-    [Tooltip("Drag GameObject yang memiliki komponen PlayerBuffManager di sini.")]
+    [Tooltip("Akan dicari secara otomatis jika kosong")]
     [SerializeField] private PlayerBuffManager buffManager;
 
     private void Start()
     {
-        if (buffManager == null)
-        {
-            Debug.LogWarning("[InventoryUI] Buff Manager belum di-assign di Inspector! Buff text tidak akan terupdate.");
-        }
+        // Cari buff manager di awal jika masih kosong
+        EnsureBuffManagerExists();
 
         if (GameManager.Instance != null)
         {
@@ -37,7 +35,6 @@ public class InventoryUI : MonoBehaviour
 
     private void Update()
     {
-        // Jika inventoryPanel sedang aktif di layar, terus perbarui teks buff-nya secara real-time
         if (inventoryPanel != null && inventoryPanel.activeSelf)
         {
             UpdateBuffStatusText();
@@ -47,11 +44,42 @@ public class InventoryUI : MonoBehaviour
     private void OnEnable()
     {
         GameManager.OnStateChanged += HandleStateChanged;
+        EnsureBuffManagerExists(); // Pastikan kita subscribe ke player yang ada di scene
     }
 
     private void OnDisable()
     {
         GameManager.OnStateChanged -= HandleStateChanged;
+
+        if (buffManager != null)
+        {
+            buffManager.OnBuffChanged -= HandleBuffChanged;
+        }
+    }
+
+    // --- TAMBAHAN FUNGSI PENCARIAN DINAMIS ---
+    private void EnsureBuffManagerExists()
+    {
+        if (buffManager == null)
+        {
+            GameObject player = GameObject.FindWithTag("Player");
+            if (player != null)
+            {
+                buffManager = player.GetComponent<PlayerBuffManager>();
+                
+                // Daftarkan event begitu kita menemukan Player di scene
+                if (buffManager != null)
+                {
+                    buffManager.OnBuffChanged -= HandleBuffChanged; // Cegah double subscribe
+                    buffManager.OnBuffChanged += HandleBuffChanged;
+                }
+            }
+        }
+    }
+
+    private void HandleBuffChanged()
+    {
+        UpdateBuffStatusText();
     }
 
     private void HandleStateChanged(GameState oldState, GameState newState)
@@ -59,28 +87,25 @@ public class InventoryUI : MonoBehaviour
         EvaluateVisibility(newState);
     }
 
-    private void EvaluateVisibility(GameState state)
+    private void EvaluateVisibility(GameState state) 
     {
-        if (inventoryPanel == null) return;
-
-        bool isWindowOpen = state == GameState.Inventory;
-        inventoryPanel.SetActive(isWindowOpen);
-
-        if (isWindowOpen)
-        {
-            if (equipmentUI != null)
-            {
-                equipmentUI.RefreshUI();
-            }
-            UpdateBuffStatusText(); 
+        if (inventoryPanel == null) return; 
+        bool isWindowOpen = state == GameState.Inventory; 
+        inventoryPanel.transform.localScale = isWindowOpen ? Vector3.one : Vector3.zero; 
+        
+        if (isWindowOpen) { 
+            if (equipmentUI != null) equipmentUI.RefreshUI(); 
+            UpdateBuffStatusText();
         }
     }
 
     private void UpdateBuffStatusText()
     {
+        // Panggil pencarian lagi buat berjaga-jaga jika player baru saja respawn
+        EnsureBuffManagerExists();
+
         if (buffManager != null)
         {
-            // Menghitung total nilai gabungan akumulatif (Dari Tombol J/H + Dari Permen)
             int currentAtkBonus = buffManager.GetDamageBuffStack() * 50;
             int currentHpBonus = buffManager.GetHpBuffStack() * 100;
 
@@ -91,23 +116,12 @@ public class InventoryUI : MonoBehaviour
                     : "BUFF ATK: ";
             }
 
-            // SINKRONISASI DI SINI: Menggunakan currentHpBonus agar tidak eror lagi
-            if (currentHpBonus > 0)
+            if (maxHpBuffText != null)
             {
-                if (maxHpBuffText != null)
-                {
-                    maxHpBuffText.text = $"BUFF MAX HP: <color=green>+{currentHpBonus}</color> (x{buffManager.GetHpBuffStack()})";
-                }
+                maxHpBuffText.text = currentHpBonus > 0 
+                    ? $"BUFF MAX HP: <color=green>+{currentHpBonus}</color> (x{buffManager.GetHpBuffStack()})" 
+                    : "BUFF MAX HP: ";
             }
-            else
-            {
-                if (maxHpBuffText != null) maxHpBuffText.text = "BUFF MAX HP: ";
-            }
-        }
-        else
-        {
-            if (atkBuffText != null) atkBuffText.text = "BUFF ATK: ";
-            if (maxHpBuffText != null) maxHpBuffText.text = "BUFF MAX HP: ";
         }
     }
 }
