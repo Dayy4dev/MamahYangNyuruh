@@ -4492,9 +4492,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DungeonGenerator
   bottomRoomVariants:
-  - {fileID: 6871334240127201030, guid: d2a4b30de39452a4db525f79f8fbede3, type: 3}
+  - {fileID: 8230689404744903013, guid: 1a5b223ccdb6832458bf340fe794163f, type: 3}
+  - {fileID: 1508734938649661671, guid: ae7001d63cd4f2f40bcce05b5994fe42, type: 3}
+  - {fileID: 2557256239335428862, guid: 06ac988b9acbe5741ba068cf7099b472, type: 3}
+  - {fileID: 3445409406904427508, guid: 698984b6426e73b4fab01bc7d4baf9eb, type: 3}
+  - {fileID: 9073347494706242509, guid: c36ea546ceeee504e84392d4ba9dd8dc, type: 3}
   centerRoomVariants:
-  - {fileID: 8599616117974265876, guid: d4b783d34036da546a69ef7e269ae6d9, type: 3}
+  - {fileID: 7173319257066134660, guid: 76795b79b2faf384e9cb9696ce9ca337, type: 3}
+  - {fileID: 1518094928098847144, guid: 6fbfa5cddbe18b348bb14e4939ef71ed, type: 3}
+  - {fileID: 7154253390692515548, guid: 8ecd28abf42c0e741b0a784d5edb47f8, type: 3}
+  - {fileID: 3155391227122686598, guid: 90bfe766c8af3e9418607958866a7c29, type: 3}
+  - {fileID: 2022124465900813006, guid: e5c9ef6a32807ee478ceabd710736436, type: 3}
   leftRoomVariants:
   - {fileID: 8309417544112723291, guid: c40d25b7f9e0f70479923bb86eb267da, type: 3}
   - {fileID: 8077712405850217505, guid: 309fb074d3898ce4ba5f2acd547422f9, type: 3}
@@ -4508,7 +4516,11 @@ MonoBehaviour:
   - {fileID: 6691090312429912805, guid: 570a33dd7a599074b9eaad2ab88fdf53, type: 3}
   - {fileID: 6019468401289385556, guid: cd7c8f96b1f6aa144af233bc9a705c69, type: 3}
   topRoomVariants:
-  - {fileID: 8681123837613130672, guid: da05eba03f4718e4080e1518e53f0644, type: 3}
+  - {fileID: 4045987073846471127, guid: 8b5c7d9f77bd1fb41afbde6c16f81279, type: 3}
+  - {fileID: 91733403690550897, guid: a7bac2856a25b6643b9e239eeb9fadec, type: 3}
+  - {fileID: 4895383661751921054, guid: 35408dfdb25b1524c88e927ea43b476c, type: 3}
+  - {fileID: 4700658878220558308, guid: cfe7f54ae6d42a44bbef04b477433d08, type: 3}
+  - {fileID: 1083121569693235638, guid: 566894d8b312178489a62f9e92dfb84e, type: 3}
   roomSize: 40
 --- !u!114 &634518727
 MonoBehaviour:
@@ -11495,7 +11507,7 @@ Transform:
   m_GameObject: {fileID: 1774844244}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 7.140478, y: 8.28129, z: -2.756225}
+  m_LocalPosition: {x: 7.344966, y: 8.28129, z: -2.7831466}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14422,7 +14434,7 @@ Transform:
   m_GameObject: {fileID: 2099797335}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 7.140478, y: 8.28129, z: -2.756225}
+  m_LocalPosition: {x: 7.344966, y: 8.28129, z: -2.7831466}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
