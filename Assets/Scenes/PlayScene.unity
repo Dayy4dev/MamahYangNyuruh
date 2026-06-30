@@ -7121,7 +7121,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1147937984}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &1147937988
 Camera:
   m_ObjectHideFlags: 0
@@ -11359,7 +11359,7 @@ Transform:
   m_GameObject: {fileID: 1774844244}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 7.140151, y: 8.28129, z: -2.7561822}
+  m_LocalPosition: {x: 7.140478, y: 8.28129, z: -2.756225}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14229,7 +14229,7 @@ Transform:
   m_GameObject: {fileID: 2099797335}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 7.140151, y: 8.28129, z: -2.7561822}
+  m_LocalPosition: {x: 7.140478, y: 8.28129, z: -2.756225}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
