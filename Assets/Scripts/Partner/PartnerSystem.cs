@@ -6,10 +6,6 @@ public class PartnerSystem : MonoBehaviour
 {
     public event Action OnCandySelected;
 
-    [Header("Candy Settings Data")]
-    [SerializeField] private int maxHpIncreaseAmount = 30; // Sesuai request: +30 Max HP
-    [SerializeField] private int buffDamageAmount = 10;     // Nilai buff damage tetap diatur dari Inspector
-
     [Header("Child Box Components")]
     [SerializeField] private CandyBox[] candyBoxes;
 
@@ -48,20 +44,32 @@ public class PartnerSystem : MonoBehaviour
         if (player == null) return;
 
         PlayerHealth healthComponent = player.GetComponent<PlayerHealth>();
-        PlayerAttack attackComponent = player.GetComponent<PlayerAttack>();
+        PlayerBuffManager buffManager = player.GetComponent<PlayerBuffManager>();
 
-        // --- LOGIKA EFEK PERMEN (Tetap sama seperti sistem sebelumnya) ---
+        // --- LOGIKA EFEK PERMEN (SINKRON DENGAN PLAYERBUFFMANAGER) ---
         switch (chosenEffect)
         {
             case "Heal":
+                // Tetap Full Heal biasa (g usah diganti ke buff manager)
                 if (healthComponent != null) healthComponent.Heal(healthComponent.GetMaxHealth());
                 break;
+
             case "MaxHP":
-                if (healthComponent != null) healthComponent.IncreaseMaxHealth(maxHpIncreaseAmount);
+                // Permen MaxHP memanggil fungsi Max HP +100 & Heal 30% gabungan
+                if (buffManager != null)
+                {
+                    buffManager.ApplyHpAndHealBuff();
+                }
                 break;
+
             case "BuffDamage":
-                if (attackComponent != null) attackComponent.ApplyPermanentDamageBuff(buffDamageAmount);
+                // Permen BuffDamage memanggil fungsi Damage +50
+                if (buffManager != null)
+                {
+                    buffManager.ApplyDamageBuff();
+                }
                 break;
+
             case "InstantDamage":
                 if (healthComponent != null)
                 {
@@ -83,22 +91,15 @@ public class PartnerSystem : MonoBehaviour
         {
             LootboxManager.Instance.SetCandyEffectStatus(chosenEffect);
         }
-        // -----------------------------------------------------------------
 
-        // MODIFIKASI: Mengatur loop reveal untuk semua box permen yang ada di room
         foreach (CandyBox box in candyBoxes)
         {
             if (box != null)
             {
-                // Jika box ini adalah objek yang diklik player, kirim nilai true (terbang)
-                // Jika bukan, kirim nilai false (cuma keliatan isinya lalu hancur)
                 bool isThisTheChosenOne = (box == chosenBox);
                 box.RevealAndCleanUp(isThisTheChosenOne);
             }
         }
-
-        // Hancurkan objek Partner utamanya juga setelah berinteraksi jika diperlukan
-        // Destroy(gameObject, 1.6f); 
 
         OnCandySelected?.Invoke();
     }

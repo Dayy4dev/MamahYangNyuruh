@@ -21,11 +21,11 @@ MonoBehaviour:
   attackCooldown: 0
   knockbackForce: 0
   knockbackDuration: 0
-  maxComboCount: 0
+  maxComboCount: 10
   meleeReloadTime: 0
   defaultCapacity: 10
   maxPoolSize: 10
   speed: 30
   magazineSize: 10
   reloadTime: 2.5
-  fireRate: 0.1
+  fireRate: 0.085

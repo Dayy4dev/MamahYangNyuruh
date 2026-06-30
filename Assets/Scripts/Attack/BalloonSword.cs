@@ -4,7 +4,7 @@ using System.Collections;
 public class BalloonSword : Weapon
 {
     private WeaponHitbox hitbox;
-    [SerializeField] private int damage = 25;
+
     [SerializeField] private WeaponData weaponData;
 
     // State Melee Reload/Rehat
@@ -13,6 +13,7 @@ public class BalloonSword : Weapon
     private int currentComboLeft;
     private bool isReheating;
     private float remainingReheatTime;
+    private int damage;
     
     private Coroutine reheatCoroutine;
 
@@ -31,6 +32,7 @@ public class BalloonSword : Weapon
         {
             maxComboCount = weaponData.maxComboCount;
             meleeReloadTime = weaponData.meleeReloadTime;
+            damage = weaponData.damage;
         }
         currentComboLeft = maxComboCount;
     }

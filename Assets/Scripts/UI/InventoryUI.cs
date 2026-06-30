@@ -9,22 +9,17 @@ public class InventoryUI : MonoBehaviour
 
     [Header("Status Display")]
     [SerializeField] private TextMeshProUGUI atkBuffText;
-    [SerializeField] private TextMeshProUGUI maxHpBuffText; // Khusus teks tulisan "BUFF MAX HP: X"
-    
-
+    [SerializeField] private TextMeshProUGUI maxHpBuffText; 
 
     [Header("Player Reference")]
     [SerializeField] private GameObject playerObject; 
 
     [Header("Buff Manager Reference")]
-    [Tooltip("Drag GameObject yang memiliki komponen PlayerBuffManager di sini (misal: Game Manager atau Player, sesuai di mana komponen itu sebenarnya berada).")]
+    [Tooltip("Drag GameObject yang memiliki komponen PlayerBuffManager di sini.")]
     [SerializeField] private PlayerBuffManager buffManager;
 
     private void Start()
     {
-        // CATATAN: buffManager sekarang di-assign langsung lewat Inspector (field di atas),
-        // tidak lagi dicari otomatis via playerObject.GetComponentInChildren(),
-        // karena PlayerBuffManager bisa saja berada di GameObject lain (misal Game Manager).
         if (buffManager == null)
         {
             Debug.LogWarning("[InventoryUI] Buff Manager belum di-assign di Inspector! Buff text tidak akan terupdate.");
@@ -37,6 +32,15 @@ public class InventoryUI : MonoBehaviour
         else
         {
             if (inventoryPanel != null) inventoryPanel.SetActive(false);
+        }
+    }
+
+    private void Update()
+    {
+        // Jika inventoryPanel sedang aktif di layar, terus perbarui teks buff-nya secara real-time
+        if (inventoryPanel != null && inventoryPanel.activeSelf)
+        {
+            UpdateBuffStatusText();
         }
     }
 
@@ -69,7 +73,6 @@ public class InventoryUI : MonoBehaviour
                 equipmentUI.RefreshUI();
             }
             UpdateBuffStatusText(); 
-           
         }
     }
 
@@ -77,6 +80,7 @@ public class InventoryUI : MonoBehaviour
     {
         if (buffManager != null)
         {
+            // Menghitung total nilai gabungan akumulatif (Dari Tombol J/H + Dari Permen)
             int currentAtkBonus = buffManager.GetDamageBuffStack() * 50;
             int currentHpBonus = buffManager.GetHpBuffStack() * 100;
 
@@ -87,11 +91,17 @@ public class InventoryUI : MonoBehaviour
                     : "BUFF ATK: ";
             }
 
-            if (maxHpBuffText != null)
+            // SINKRONISASI DI SINI: Menggunakan currentHpBonus agar tidak eror lagi
+            if (currentHpBonus > 0)
             {
-                maxHpBuffText.text = currentHpBonus > 0 
-                    ? $"BUFF MAX HP: <color=green>+{currentHpBonus}</color> (x{buffManager.GetHpBuffStack()})" 
-                    : "BUFF MAX HP: ";
+                if (maxHpBuffText != null)
+                {
+                    maxHpBuffText.text = $"BUFF MAX HP: <color=green>+{currentHpBonus}</color> (x{buffManager.GetHpBuffStack()})";
+                }
+            }
+            else
+            {
+                if (maxHpBuffText != null) maxHpBuffText.text = "BUFF MAX HP: ";
             }
         }
         else
@@ -100,6 +110,4 @@ public class InventoryUI : MonoBehaviour
             if (maxHpBuffText != null) maxHpBuffText.text = "BUFF MAX HP: ";
         }
     }
-
-
 }

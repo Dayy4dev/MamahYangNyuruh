@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1001 &8144609268008522670
+--- !u!1001 &7678879710696591211
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -22,15 +22,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b1ab9571012a4c7458499064afe45299, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 14.86449
+      value: 5.09515
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b1ab9571012a4c7458499064afe45299, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.77
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b1ab9571012a4c7458499064afe45299, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 8.16
+      value: 6.40298
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: b1ab9571012a4c7458499064afe45299, type: 3}
       propertyPath: m_LocalRotation.w
@@ -70,7 +70,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b1ab9571012a4c7458499064afe45299, type: 3}
       propertyPath: m_Name
-      value: LegendarySqueekHammer
+      value: CommonSqueekHammer
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: b1ab9571012a4c7458499064afe45299, type: 3}
       propertyPath: m_Layer
@@ -82,44 +82,45 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b1ab9571012a4c7458499064afe45299, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7967141128309621553}
+      addedObject: {fileID: 6488376943760159322}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b1ab9571012a4c7458499064afe45299, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5019545347003612235}
+      addedObject: {fileID: 7182986944144031856}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: b1ab9571012a4c7458499064afe45299, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2525164959996770472}
+      addedObject: {fileID: 1094762853687830749}
   m_SourcePrefab: {fileID: 100100000, guid: b1ab9571012a4c7458499064afe45299, type: 3}
---- !u!1 &9062965573063651071 stripped
+--- !u!1 &7372873868757398074 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: b1ab9571012a4c7458499064afe45299, type: 3}
-  m_PrefabInstance: {fileID: 8144609268008522670}
+  m_PrefabInstance: {fileID: 7678879710696591211}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &7967141128309621553
+--- !u!114 &6488376943760159322
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9062965573063651071}
+  m_GameObject: {fileID: 7372873868757398074}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7a6712493e5553f4a89acdef3063abc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponPickup
-  weaponData: {fileID: 11400000, guid: 1b9f3c785b4faa34eab1354737e67aaf, type: 2}
+  weaponData: {fileID: 11400000, guid: 3d94d0f8252b44747b7432e4970a5222, type: 2}
   enableFloat: 1
   floatAmplitude: 0.2
   floatSpeed: 2
   rotationSpeed: {x: 0, y: 90, z: 0}
   localPromptUI: {fileID: 8881856594733627911, guid: 84e1a0e3ca24232438ddea5c9d0f29cc, type: 3}
---- !u!65 &5019545347003612235
+  customRarity: 
+--- !u!65 &7182986944144031856
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9062965573063651071}
+  m_GameObject: {fileID: 7372873868757398074}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -134,18 +135,17 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.1, y: 0.1, z: 0.1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &2525164959996770472
+--- !u!114 &1094762853687830749
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9062965573063651071}
+  m_GameObject: {fileID: 7372873868757398074}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8589679cecfd32f44808f3c491241466, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ToyHammer
   weaponRig: {fileID: 0}
-  damage: 35
-  weaponData: {fileID: 11400000, guid: 1b9f3c785b4faa34eab1354737e67aaf, type: 2}
+  weaponData: {fileID: 11400000, guid: 3d94d0f8252b44747b7432e4970a5222, type: 2}

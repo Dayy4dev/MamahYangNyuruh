@@ -7,7 +7,7 @@ public class CandyBox : MonoBehaviour
     private string myEffect;
     private PartnerSystem partnerSystem;
     private bool isSelected = false;
-    private bool isPlayerNearby = false; // Deteksi jarak player
+    private bool isPlayerNearby = false; 
 
     [SerializeField] private GameObject interactionCanvasUI;
 
@@ -56,7 +56,6 @@ public class CandyBox : MonoBehaviour
         }
     }
 
-    // CEK INPUT TOMBOL E SETIAP FRAME
     void Update()
     {
         if (isPlayerNearby && !isSelected && partnerSystem != null)
@@ -64,7 +63,7 @@ public class CandyBox : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.F))
             {
                 isSelected = true;
-                if (interactionCanvasUI != null) interactionCanvasUI.SetActive(false); // Matikan UI
+                if (interactionCanvasUI != null) interactionCanvasUI.SetActive(false); 
                 partnerSystem.ProcessBoxSelection(myEffect, this);
             }
         }
@@ -77,20 +76,17 @@ public class CandyBox : MonoBehaviour
             switch (myEffect)
             {
                 case "Heal": textMesh.text = "Full Heal"; textMesh.color = Color.green; break;
-                case "MaxHP": textMesh.text = "Max HP +30"; textMesh.color = Color.cyan; break;
-                case "BuffDamage": textMesh.text = "Buff ATK"; textMesh.color = Color.red; break;
+                case "MaxHP": textMesh.text = "HP +100 & Heal 30%"; textMesh.color = Color.cyan; break;
+                case "BuffDamage": textMesh.text = "Buff ATK +50"; textMesh.color = Color.red; break;
                 case "InstantDamage": textMesh.text = "-50% HP"; textMesh.color = Color.black; break;
             }
         }
 
-        // Ketiga permen memunculkan modelnya masing-masing secara bersamaan
         if (activeCandyModel != null)
         {
             activeCandyModel.SetActive(true);
         }
 
-        // Baik dipilih maupun tidak, semuanya sekarang menjalankan FlyUpRoutine 
-        // agar memicu animasi terbang ke atas dan hancur secara bersamaan
         StartCoroutine(FlyUpRoutine());
     }
 
@@ -101,7 +97,6 @@ public class CandyBox : MonoBehaviour
         float duration = 1f;
         float elapsed = 0f;
 
-        // Lepas dari parent agar posisinya stabil saat bergerak
         if (activeCandyModel != null) activeCandyModel.transform.parent = null;
 
         while (elapsed < duration)
@@ -111,41 +106,16 @@ public class CandyBox : MonoBehaviour
 
             if (activeCandyModel != null)
             {
-                // Menggerakkan model permen ke atas sambil berputar
                 activeCandyModel.transform.position = Vector3.Lerp(startPos, targetPos, percent);
                 activeCandyModel.transform.Rotate(Vector3.up, 360f * Time.deltaTime);
             }
             yield return null;
         }
 
-        // Hancurkan model permen dan game object kotak secara bersamaan setelah animasi selesai
         if (activeCandyModel != null) Destroy(activeCandyModel);
         Destroy(gameObject);
     }
 
-    private IEnumerator LeaveCandyModelRoutine()
-    {
-        yield return new WaitForSeconds(0.1f);
-
-        if (activeCandyModel != null)
-        {
-            // Putus hubungan parent agar saat CandyBox dihancurkan, 
-            // model permennya tidak ikut hancur dan tetap tertinggal di map
-            activeCandyModel.transform.parent = null;
-        }
-
-        // Hancurkan box / teks penanda saja
-        Destroy(gameObject);
-    }
-
-    private IEnumerator FadeAndDestroyRoutine()
-    {
-        yield return new WaitForSeconds(1.5f);
-        if (activeCandyModel != null) Destroy(activeCandyModel);
-        Destroy(gameObject);
-    }
-
-    // DETEKSI PLAYER MENDEKAT
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player") && !isSelected)

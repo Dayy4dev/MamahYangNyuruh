@@ -121,6 +121,7 @@ MonoBehaviour:
   floatSpeed: 2
   rotationSpeed: {x: 0, y: 90, z: 0}
   localPromptUI: {fileID: 8881856594733627911, guid: 84e1a0e3ca24232438ddea5c9d0f29cc, type: 3}
+  customRarity: 
 --- !u!65 &-532365873998905325
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -155,5 +156,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BalloonSword
   weaponRig: {fileID: 0}
-  damage: 100
+  damage: 0
   weaponData: {fileID: 11400000, guid: 240bf721be4d2f6439e662e705654b3b, type: 2}

@@ -4,7 +4,6 @@ using System.Collections;
 public class ToyHammer : Weapon
 {
     private WeaponHitbox hitbox;
-    [SerializeField] private int damage = 35;
     [SerializeField] private WeaponData weaponData;
 
     // State Melee Reload/Rehat
@@ -14,6 +13,8 @@ public class ToyHammer : Weapon
     private bool isReheating;
     private float remainingReheatTime;
     private Coroutine reheatCoroutine;
+    private int damage;
+
 
     private void Awake()
     {
@@ -30,6 +31,7 @@ public class ToyHammer : Weapon
         {
             maxComboCount = weaponData.maxComboCount;
             meleeReloadTime = weaponData.meleeReloadTime;
+            damage = weaponData.damage;
         }
         currentComboLeft = maxComboCount;
     }
