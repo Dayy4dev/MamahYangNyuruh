@@ -2356,10 +2356,10 @@ GameObject:
   - component: {fileID: 4551739601292151713}
   - component: {fileID: 6351839981106544148}
   - component: {fileID: 5192306811957434602}
+  - component: {fileID: 4669038041546032923}
   - component: {fileID: 8789450234712980830}
   - component: {fileID: 4433459829314455659}
   - component: {fileID: 442314521920604065}
-  - component: {fileID: 4669038041546032923}
   - component: {fileID: -4551204849783851648}
   m_Layer: 7
   m_Name: EnemyGun
@@ -2440,7 +2440,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 3.5
+  m_Speed: 4
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -2475,8 +2475,8 @@ MonoBehaviour:
   playerLayerMask:
     serializedVersion: 2
     m_Bits: 128
-  maxHealth: 80
-  projectileDamage: 15
+  maxHealth: 100
+  projectileDamage: 20
   patrolRadius: 10
   attackCooldown: 1
   projectileSpeed: 20
@@ -2500,12 +2500,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2115712d61cb27a4ba1ad8a11930c57f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDummy
-  maxHealth: 300
+  maxHealth: 100
   hitFlashDuration: 0.1
   hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
   healthBar: {fileID: 8262082258519199807}
   audioSource: {fileID: 0}
   enemyHurtSound: {fileID: 0}
+--- !u!114 &4669038041546032923
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6077987226358072364}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d48d60ccfda7902459edd6326006428a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyScaling
+  baseHP: 100
+  baseDamage: 20
+  baseSpeed: 4
 --- !u!114 &8789450234712980830
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2568,21 +2583,6 @@ CapsuleCollider:
   m_Height: 2.3981504
   m_Direction: 1
   m_Center: {x: 0, y: 0.6990752, z: 0}
---- !u!114 &4669038041546032923
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6077987226358072364}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d48d60ccfda7902459edd6326006428a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyScaling
-  baseHP: 200
-  baseDamage: 20
-  baseSpeed: 8
 --- !u!114 &-4551204849783851648
 MonoBehaviour:
   m_ObjectHideFlags: 0

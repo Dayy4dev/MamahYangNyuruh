@@ -4139,6 +4139,8 @@ GameObject:
   - component: {fileID: 634518726}
   - component: {fileID: 634518725}
   - component: {fileID: 634518724}
+  - component: {fileID: 634518728}
+  - component: {fileID: 634518727}
   m_Layer: 0
   m_Name: Game Manager
   m_TagString: Untagged
@@ -4247,6 +4249,33 @@ MonoBehaviour:
   topRoomVariants:
   - {fileID: 8681123837613130672, guid: da05eba03f4718e4080e1518e53f0644, type: 3}
   roomSize: 40
+--- !u!114 &634518727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 634518720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41167f63721b3504ba0327bebae236dd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BuffTester
+  buffManager: {fileID: 634518728}
+--- !u!114 &634518728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 634518720}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97658bcfeabc5ec4382e07676c6fbe94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerBuffManager
+  playerHealth: {fileID: 1929026396}
+  playerAttack: {fileID: 1929026394}
 --- !u!1001 &635794299
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11562,7 +11591,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 550ae5fa205cc54468a53ad4b76555e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInventory
-  unarmedData: {fileID: 0}
+  unarmedData: {fileID: 11400000, guid: 06c09bed0d481a443b34aefa1fe76022, type: 2}
   playerAttack: {fileID: 1929026394}
   dropPoint: {fileID: 1942983255}
   pickupRadius: 2
@@ -11593,7 +11622,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2b47c7c99f731d84e9ec64b56c2a6e65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHealth: 2917
+  maxHealth: 250
   deathSceneReloadDelay: 2
 --- !u!114 &1929026397
 MonoBehaviour:
@@ -11607,7 +11636,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf1325a72d31c77419a708677b9f7d06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovement
-  moveSpeed: 6
+  moveSpeed: 8
   gravity: -9.81
   aimIndicator: {fileID: 373971690}
   movementAudioSource: {fileID: 0}

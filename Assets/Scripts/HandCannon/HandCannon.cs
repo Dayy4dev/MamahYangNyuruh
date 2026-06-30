@@ -112,7 +112,7 @@ private void FireBullet()
         }
     }
 
- public override void Attack()
+public override void Attack()
 {
     if (!CanFire() || playerMovement == null) return;
 
@@ -125,14 +125,30 @@ private void FireBullet()
     Vector3 shootDirection = (targetPos - firePoint.position).normalized;
     bullet.transform.rotation = Quaternion.LookRotation(shootDirection);
 
-    // --- TAMBAHKAN BARIS INI (PENTING) ---
-    // Mengatur speed peluru (misal: 20f) dan mengambil damage dari weaponData
-    int damageLuar = (weaponData != null) ? weaponData.damage : 10;
-    bullet.Setup(20f, damageLuar); 
+    // --- LOGIKA KALKULASI BUFF DAMAGE RANGE SESUAI MATRIKS STAT ---
+    int baseWeaponDamage = (weaponData != null) ? weaponData.damage : 10;
+    int finalPeluruDamage = baseWeaponDamage;
+
+    // 1. Cari komponen PlayerAttack di Parent GameObject (Player)
+    PlayerAttack playerAttack = GetComponentInParent<PlayerAttack>();
+    if (playerAttack != null)
+    {
+        // 2. Ambil nilai permanentDamageBuff dari PlayerAttack
+        int buffDmg = playerAttack.GetPermanentDamageBuff();
+
+        // 3. Jalankan rumus jika ada buff damage yang aktif dan magazineSize valid
+        if (buffDmg > 0 && magazineSize > 0)
+        {
+            float setengahMagazine = (float)magazineSize / 2f;
+            finalPeluruDamage += Mathf.RoundToInt((float)buffDmg / setengahMagazine);
+        }
+    }
+
+    // 4. Kirim hasil kalkulasi damage yang sudah mencakup buff ke peluru
+    bullet.Setup(20f, finalPeluruDamage); 
 
     ConsumeBullet();
 }
-
     private void OnDisable()
     {
         // Jika senjata dihancurkan/dibuang saat reload, amankan statenya

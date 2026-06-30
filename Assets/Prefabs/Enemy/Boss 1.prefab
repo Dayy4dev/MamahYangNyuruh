@@ -1926,14 +1926,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4372b96f71d3a94458c5609380e774d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponHitbox
-  weaponRig: {fileID: 6252515472805871302}
-  hitCollider: {fileID: 91784669619648216}
-  targetLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  audioSource: {fileID: 0}
-  hitWallSound: {fileID: 0}
-  hitEnemySound: {fileID: 0}
 --- !u!1 &5300056187150625924
 GameObject:
   m_ObjectHideFlags: 0
@@ -2944,13 +2936,13 @@ GameObject:
   - component: {fileID: 6323097423417023952}
   - component: {fileID: 4451881935684375643}
   - component: {fileID: 6401883331013972782}
+  - component: {fileID: 7214650350086101758}
+  - component: {fileID: 2410079404887067153}
+  - component: {fileID: -4867004715899401255}
   - component: {fileID: 8159064537748001607}
   - component: {fileID: 8593905546181598762}
   - component: {fileID: 8573473364257833962}
   - component: {fileID: 6127565424378667084}
-  - component: {fileID: 7214650350086101758}
-  - component: {fileID: 2410079404887067153}
-  - component: {fileID: -4867004715899401255}
   - component: {fileID: -8929483542370849286}
   m_Layer: 7
   m_Name: Boss 1
@@ -3036,7 +3028,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 4.81
+  m_Speed: 5
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -3048,6 +3040,72 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!114 &7214650350086101758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7734134644095645850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2115712d61cb27a4ba1ad8a11930c57f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDummy
+  maxHealth: 1000
+  hitFlashDuration: 0.1
+  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
+  healthBar: {fileID: 505768877341836158}
+  audioSource: {fileID: 0}
+  enemyHurtSound: {fileID: 0}
+--- !u!114 &2410079404887067153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7734134644095645850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d48d60ccfda7902459edd6326006428a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyScaling
+  baseHP: 1000
+  baseDamage: 150
+  baseSpeed: 5
+--- !u!114 &-4867004715899401255
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7734134644095645850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8903cd4aceb5a141ad3791c93021ec8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BossController
+  maxHealth: 1000
+  contactDamage: 150
+  minionPrefabs:
+  - {fileID: 3807745660598645816, guid: 3aecd6a32eeed7548a99264e7e5a78e9, type: 3}
+  - {fileID: 3807745660598645816, guid: 3aecd6a32eeed7548a99264e7e5a78e9, type: 3}
+  minionSpawnPoints:
+  - {fileID: 5692171124671383029}
+  - {fileID: 3547048216193071088}
+  - {fileID: 213099347722408547}
+  - {fileID: 5708921403225138634}
+  maxMinions: 4
+  minionSpawnInterval: 8
+  minionsPerWave: 2
+  moveSpeed: 6
+  chargeSpeed: 8
+  engagementRange: 3
+  visionRange: 30
+  phase2Threshold: 0.5
+  phase2SpeedBonus: 2
+  phase2SpawnIntervalBonus: 3
+  healthBar: {fileID: 505768877341836158}
 --- !u!114 &8159064537748001607
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3139,72 +3197,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
---- !u!114 &7214650350086101758
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7734134644095645850}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2115712d61cb27a4ba1ad8a11930c57f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyDummy
-  maxHealth: 100
-  hitFlashDuration: 0.1
-  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
-  healthBar: {fileID: 505768877341836158}
-  audioSource: {fileID: 0}
-  enemyHurtSound: {fileID: 0}
---- !u!114 &2410079404887067153
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7734134644095645850}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d48d60ccfda7902459edd6326006428a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyScaling
-  baseHP: 500
-  baseDamage: 67
-  baseSpeed: 5
---- !u!114 &-4867004715899401255
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7734134644095645850}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8903cd4aceb5a141ad3791c93021ec8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BossController
-  maxHealth: 2000
-  contactDamage: 30
-  minionPrefabs:
-  - {fileID: 3807745660598645816, guid: 3aecd6a32eeed7548a99264e7e5a78e9, type: 3}
-  - {fileID: 3807745660598645816, guid: 3aecd6a32eeed7548a99264e7e5a78e9, type: 3}
-  minionSpawnPoints:
-  - {fileID: 5692171124671383029}
-  - {fileID: 3547048216193071088}
-  - {fileID: 213099347722408547}
-  - {fileID: 5708921403225138634}
-  maxMinions: 4
-  minionSpawnInterval: 8
-  minionsPerWave: 2
-  moveSpeed: 4
-  chargeSpeed: 12
-  engagementRange: 3
-  visionRange: 30
-  phase2Threshold: 0.5
-  phase2SpeedBonus: 2
-  phase2SpawnIntervalBonus: 3
-  healthBar: {fileID: 505768877341836158}
 --- !u!114 &-8929483542370849286
 MonoBehaviour:
   m_ObjectHideFlags: 0
