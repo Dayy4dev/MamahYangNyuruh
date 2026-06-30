@@ -14,7 +14,7 @@ public class BalloonSword : Weapon
     private bool isReheating;
     private float remainingReheatTime;
     private int damage;
-    
+
     private Coroutine reheatCoroutine;
 
     private void Awake()
@@ -37,22 +37,52 @@ public class BalloonSword : Weapon
         currentComboLeft = maxComboCount;
     }
 
+    // =========================================================================
+    // PERBAIKAN: Masukkan fungsi OnEnable ini di BalloonSword.cs lu
+    // =========================================================================
+    private void OnEnable()
+    {
+        // Pas senjata dipegang lagi, cek apakah combo-nya lagi kosong
+        // DAN sisa waktu rehatnya kemarin masih ada!
+        if (currentComboLeft <= 0 && remainingReheatTime > 0f)
+        {
+            if (reheatCoroutine != null) StopCoroutine(reheatCoroutine);
+
+            // PASTIKAN di dalam kurung ini isinya: remainingReheatTime (bukan remainingReloadTime!)
+            reheatCoroutine = StartCoroutine(ReheatWithRemainingTime(remainingReheatTime));
+
+            Debug.Log($"[BalloonSword] Rehat dilanjutkan. Sisa waktu: {remainingReheatTime:F1}s");
+        }
+        else if (currentComboLeft <= 0 && remainingReheatTime <= 0f)
+        {
+            // Antisipasi darurat jika waktu rehat di latar belakang sudah habis 
+            // tapi combo belum ter-reset
+            CompleteReheat();
+        }
+    }
+
+    // =========================================================================
+    // PERBAIKAN: Sesuaikan fungsi OnDisable lu agar seperti ini
+    // =========================================================================
     private void OnDisable()
     {
+        // 🛑 JANGAN direset remainingReheatTime ke 0f di sini!
+        // Biarkan nilainya tetap tersimpan agar bisa dibaca pas OnEnable di atas.
         if (reheatCoroutine != null)
         {
             StopCoroutine(reheatCoroutine);
             reheatCoroutine = null;
         }
+
+        // Matikan status rehat lokal saat masuk kantong agar tidak merusak visual hotbar
         isReheating = false;
-        remainingReheatTime = 0f;
     }
 
     public override bool CanAttack()
     {
         return !isReheating && currentComboLeft > 0;
     }
-    
+
 
     public override void Attack()
     {
@@ -86,17 +116,17 @@ public class BalloonSword : Weapon
         }
     }
 
-  public override void OnWeaponActivate() //[cite: 4]
+    public override void OnWeaponActivate() //[cite: 4]
     {
         // 1. Cari komponen PlayerAttack di parent (Player utama)
         PlayerAttack playerAttack = GetComponentInParent<PlayerAttack>();
-        
+
         if (playerAttack != null)
         {
             // 2. Ambil data senjata yang saat ini aktif di PlayerAttack
             // Catatan: Pastikan kamu sudah membuat fungsi GetCurrentWeaponData() di PlayerAttack jika belum ada
-            WeaponData dataAktif = playerAttack.GetCurrentWeaponData(); 
-            
+            WeaponData dataAktif = playerAttack.GetCurrentWeaponData();
+
             if (dataAktif != null)
             {
                 weaponData = dataAktif;
