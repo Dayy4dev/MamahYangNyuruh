@@ -43,7 +43,7 @@ public class PartnerSystem : MonoBehaviour
         {
             LootboxManager.Instance.SetCandyEffectStatus(chosenEffect);
         }
-        
+
         GameObject player = GameObject.FindWithTag("Player");
         if (player == null) return;
 
@@ -67,13 +67,21 @@ public class PartnerSystem : MonoBehaviour
                 {
                     int currentHp = healthComponent.GetCurrentHealth();
                     int maxHp = healthComponent.GetMaxHealth();
-                    if (currentHp < (maxHp * 0.10f)) {
+                    if (currentHp < (maxHp * 0.10f))
+                    {
                         Debug.Log("[Partner Effect] Proteksi Aktif.");
-                    } else {
+                    }
+                    else
+                    {
                         healthComponent.TakeDamage(Mathf.RoundToInt(currentHp * 0.50f));
                     }
                 }
                 break;
+        }
+
+        if (LootboxManager.Instance != null)
+        {
+            LootboxManager.Instance.SetCandyEffectStatus(chosenEffect);
         }
         // -----------------------------------------------------------------
 

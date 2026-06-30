@@ -6,6 +6,10 @@ public class WeaponData : ScriptableObject
     [Header("Info")]
     public string weaponName = "Unnamed Weapon";
     public Sprite icon;
+    
+    // --- TAMBAHAN BARU UNTUK MENYIMPAN RARITY DINAMIS ---
+    [HideInInspector] 
+    public string overrideRarity = "";
 
     [Header("Pickup")]
     [Tooltip("Prefab WeaponPickup yang di-spawn saat senjata dijatuhkan")]

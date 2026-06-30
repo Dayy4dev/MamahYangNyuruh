@@ -47,11 +47,24 @@ public class WeaponSlotUI : MonoBehaviour
         // 3. TAMPILKAN STATS HANYA SAAT ADA SENJATA
         if (weaponStats != null)
         {
-            // Deteksi Rarity otomatis dari kata di nama senjata
-            string rarity = "Normal";
-            string nameLower = weapon.weaponName.ToLower();
-            if (nameLower.Contains("rusty")) rarity = "Rusty";
-            else if (nameLower.Contains("legendary")) rarity = "Legendary";
+            // =========================================================================
+            // 🛑 BAGIAN YANG DIGANTI: Membaca Rarity Dinamis dari overrideRarity
+            // =========================================================================
+            string rarity = "Normal"; // Nilai default awal
+
+            if (!string.IsNullOrEmpty(weapon.overrideRarity))
+            {
+                // Jika senjata memiliki data kelangkaan dari peti gacha, pakai data itu!
+                rarity = weapon.overrideRarity;
+            }
+            else
+            {
+                // Cadangan (Fallback) jika senjata ditaruh langsung di map tanpa lewat peti
+                string nameLower = weapon.weaponName.ToLower();
+                if (nameLower.Contains("rusty")) rarity = "Rusty";
+                else if (nameLower.Contains("legendary")) rarity = "Legendary";
+            }
+            // =========================================================================
 
             // Deteksi Attack Speed (Ranged vs Melee)
             float atkSpeed = weapon.magazineSize > 0 ? weapon.fireRate : weapon.attackCooldown;
