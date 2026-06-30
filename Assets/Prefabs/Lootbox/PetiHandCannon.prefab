@@ -132,8 +132,10 @@ MonoBehaviour:
   weaponName: HandCannon
   legendaryPrefabs:
   - {fileID: 9113066625481402298, guid: 1baafbb269ed1404eb70c45971a0c591, type: 3}
-  biasaPrefabs:
-  - {fileID: 4041648436681506966, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
+  rarePrefabs:
+  - {fileID: 5645088245580584797, guid: 1eb35c86ca8b0de48975396700abb2ca, type: 3}
+  commonPrefabs:
+  - {fileID: 3243807904644116254, guid: a87d67ac10a1b004289f7d952f7dc53c, type: 3}
   rustyPrefabs:
   - {fileID: 827723065627645319, guid: a44dda729bad9b9499a9230aec3a5670, type: 3}
   rotationSpeed: 70

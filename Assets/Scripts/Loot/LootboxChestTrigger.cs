@@ -14,10 +14,11 @@ public class LootboxChestTrigger : MonoBehaviour
     [Header("Identitas Senjata Box Ini")]
     public string weaponName; 
 
-    // SEKARANG MENGGUNAKAN ARRAY AGAR BISA RANDOMIZE ISI SENJATANYA
-    [Header("Pool Varian Model 3D (Isi Banyak Lebih Seru!)")]
+    // SUDAH DISESUAIKAN MENJADI 4 VARIAN
+    [Header("Pool Varian Model 3D")]
     public GameObject[] legendaryPrefabs;
-    public GameObject[] biasaPrefabs;
+    public GameObject[] rarePrefabs;
+    public GameObject[] commonPrefabs;
     public GameObject[] rustyPrefabs;
 
     [Header("Visual Animation Settings")]
@@ -71,9 +72,9 @@ public class LootboxChestTrigger : MonoBehaviour
 
             Transform currentRoomParent = this.transform.parent;
 
-            // Mengirimkan array pool senjata ke manager untuk diacak isinya
+            // Mengirimkan 4 parameter pool varian ke LootboxManager
             LootboxManager.GachaOutput result = lootboxManager.OpenWeaponBox(
-                legendaryPrefabs, biasaPrefabs, rustyPrefabs, weaponName, mySpawnPoint.position, currentRoomParent
+                legendaryPrefabs, rarePrefabs, commonPrefabs, rustyPrefabs, weaponName, mySpawnPoint.position, currentRoomParent
             );
             
             mySpawnedWeapon = result.spawnedObject;
@@ -84,6 +85,7 @@ public class LootboxChestTrigger : MonoBehaviour
                 WeaponPickup pickupComponent = mySpawnedWeapon.GetComponent<WeaponPickup>();
                 if (pickupComponent != null)
                 {
+                    // string ini otomatis berubah jadi "Legendary", "Rare", "Common", atau "Rusty"
                     pickupComponent.customRarity = weaponRarity.ToString();
                 }
             }

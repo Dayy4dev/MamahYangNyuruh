@@ -163,8 +163,10 @@ MonoBehaviour:
   weaponName: SqueekHammer
   legendaryPrefabs:
   - {fileID: 9062965573063651071, guid: a16af6212ad7ac240b0eb432b16a9db4, type: 3}
-  biasaPrefabs:
-  - {fileID: 8489721802318889066, guid: cd036784138778441b23a5c82198b119, type: 3}
+  rarePrefabs:
+  - {fileID: 154535475033350332, guid: 90d9c5e27676f0840911cc4d46379c28, type: 3}
+  commonPrefabs:
+  - {fileID: 7372873868757398074, guid: c29ecb86ab121d14480bfc1fa675af4e, type: 3}
   rustyPrefabs:
   - {fileID: 7191896599336899810, guid: f7e11fe53ca7bfb43b3efa58d85ae20a, type: 3}
   rotationSpeed: 70
