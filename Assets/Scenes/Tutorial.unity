@@ -1388,12 +1388,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::HotbarUI
   playerInventory: {fileID: 0}
+  unarmedSlot: {fileID: 0}
   primarySlot: {fileID: 893088429}
   secondarySlot: {fileID: 1816143369}
+  unarmedBorder: {fileID: 0}
   primaryBorder: {fileID: 1201707210}
   secondaryBorder: {fileID: 1719197149}
   activeColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   inactiveColor: {r: 1, g: 1, b: 1, a: 1}
+  cooldownIndicator: {fileID: 0}
 --- !u!114 &146298264
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3389,6 +3392,8 @@ MonoBehaviour:
   audioMixer: {fileID: 24100000, guid: 2738c10d8c88e4741a24bff20edfec02, type: 2}
   musicSlider: {fileID: 1303998015}
   pauseMenu: {fileID: 90555847}
+  playSelectionMenu: {fileID: 0}
+  mainMenuPanel: {fileID: 0}
 --- !u!114 &408050692
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4587,7 +4592,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c0e619ea0c5b5f41ac3de4f72ce6df7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FloorManager
-  bossFloor: 4
 --- !u!114 &634518725
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4607,6 +4611,9 @@ MonoBehaviour:
   fallbackOffset: {x: 0, y: 1, z: 0}
   transitionDelay: 0.5
   roomUIBar: {fileID: 668540482}
+  floorUIText: {fileID: 0}
+  partnerPrefab: {fileID: 0}
+  partnerSpawnChance: 40
 --- !u!114 &634518726
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7021,6 +7028,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponSlotUI
   weaponImage: {fileID: 893088430}
   weaponName: {fileID: 0}
+  weaponStats: {fileID: 0}
 --- !u!114 &893088430
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7803,6 +7811,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponSlotUI
   weaponImage: {fileID: 896008479}
   weaponName: {fileID: 2090806286}
+  weaponStats: {fileID: 0}
 --- !u!1 &1036717873
 GameObject:
   m_ObjectHideFlags: 0
@@ -9719,6 +9728,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponSlotUI
   weaponImage: {fileID: 142821331}
   weaponName: {fileID: 971338518}
+  weaponStats: {fileID: 0}
 --- !u!1 &1264343102
 GameObject:
   m_ObjectHideFlags: 0
@@ -12507,11 +12517,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1588324407}
   m_SourcePrefab: {fileID: 100100000, guid: 79e59df9a49e54c4981b8d03109d3a93, type: 3}
---- !u!4 &1588324402 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4947985785571846524, guid: 79e59df9a49e54c4981b8d03109d3a93, type: 3}
-  m_PrefabInstance: {fileID: 1588324401}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1588324403 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8610606156940947158, guid: 79e59df9a49e54c4981b8d03109d3a93, type: 3}
@@ -12996,6 +13001,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventoryUI
   inventoryPanel: {fileID: 2018715806}
   equipmentUI: {fileID: 668856124}
+  atkBuffText: {fileID: 0}
+  maxHpBuffText: {fileID: 0}
+  playerObject: {fileID: 0}
+  buffManager: {fileID: 0}
 --- !u!114 &1703006494
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13408,7 +13417,7 @@ Transform:
   m_GameObject: {fileID: 1774844244}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 7.140478, y: 8.28129, z: -2.756225}
+  m_LocalPosition: {x: 8.090478, y: 8.281289, z: -2.5062256}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -13735,14 +13744,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4372b96f71d3a94458c5609380e774d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponHitbox
-  weaponRig: {fileID: 0}
-  hitCollider: {fileID: 1790013365}
-  targetLayers:
-    serializedVersion: 2
-    m_Bits: 128
-  audioSource: {fileID: 0}
-  hitWallSound: {fileID: 0}
-  hitEnemySound: {fileID: 0}
 --- !u!65 &1790013365
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -14010,16 +14011,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e9cba6ddebad4d47b0218f571539083, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAttack
-  weaponHitbox: {fileID: 0}
-  audioSource: {fileID: 0}
-  swordAttackCycles: []
-  handCannonSound: {fileID: 0}
-  squeekHammerSound: {fileID: 0}
-  genericMeleeEquipSound: {fileID: 0}
-  handCannonEquipSound: {fileID: 0}
-  bulletPrefab: {fileID: 4859117371281068152, guid: 3b1ffcdb23098ee48a2062b0b11a6352, type: 3}
-  firePoint: {fileID: 1588324402}
-  cooldownUiImage: {fileID: 1716972787}
+  comboResetDuration: 1
+  playerHealth: {fileID: 0}
 --- !u!114 &1810503391
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14032,6 +14025,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 550ae5fa205cc54468a53ad4b76555e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInventory
+  unarmedData: {fileID: 0}
   playerAttack: {fileID: 1810503390}
   dropPoint: {fileID: 1407617587}
   pickupRadius: 2
@@ -14063,7 +14057,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 200
-  currentHealth: 0
   deathSceneReloadDelay: 2
 --- !u!114 &1810503393
 MonoBehaviour:
@@ -14117,7 +14110,7 @@ Transform:
   m_GameObject: {fileID: 1810503389}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.03, y: 0, z: 4.69}
+  m_LocalPosition: {x: 9.98, y: 0, z: 4.94}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -14212,6 +14205,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponSlotUI
   weaponImage: {fileID: 1816143368}
   weaponName: {fileID: 0}
+  weaponStats: {fileID: 0}
 --- !u!222 &1816143370
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -16326,7 +16320,7 @@ Transform:
   m_GameObject: {fileID: 2099797335}
   serializedVersion: 2
   m_LocalRotation: {x: 0.32075116, y: 0.06193222, z: -0.02102315, w: 0.9449027}
-  m_LocalPosition: {x: 7.140478, y: 8.28129, z: -2.756225}
+  m_LocalPosition: {x: 8.090478, y: 8.281289, z: -2.5062256}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
