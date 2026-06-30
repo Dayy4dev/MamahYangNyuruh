@@ -37,47 +37,61 @@ public class WeaponHitbox : MonoBehaviour
         if (hitboxCollider != null) hitboxCollider.enabled = false; 
     }
 
-    private void OnTriggerEnter(Collider other)
+private void OnTriggerEnter(Collider other)
     {
-        // Cegah melukai diri sendiri
+        // Cegah melukai diri sendiri atau objek sesama Player
         if (other.CompareTag("Player")) return;
 
         IDamageable enemyHealth = other.GetComponent<IDamageable>();
 
         if (enemyHealth != null)
         {
-            // 1. Cari PlayerAttack secara dinamis dari parent saat terjadi hit
-            PlayerAttack playerAttack = GetComponentInParent<PlayerAttack>();
-
-            // 2. Ambil data damage dari script BalloonSword terdekat
-            BalloonSword sword = GetComponentInParent<BalloonSword>();
             int damageYangDiberikan = 0;
 
-            if (sword != null)
+            // --- PERBAIKAN UTAMA: Mencari PlayerAttack dari root objek tertinggi (Player) ---
+            PlayerAttack playerAttack = transform.root.GetComponentInChildren<PlayerAttack>();
+
+            if (playerAttack != null)
             {
-                damageYangDiberikan = sword.GetDamageValue();
-            }
-            else if (playerAttack != null)
-            {
+                // Panggil kalkulasi terpusat (Base Damage + Buff Damage + Combo Multiplier)
                 playerAttack.CalculateHitEffects(out damageYangDiberikan, out _);
             }
+            else
+            {
+                // Backup darurat jika PlayerAttack benar-benar tidak ada di dunia
+                BalloonSword sword = GetComponentInParent<BalloonSword>();
+                if (sword != null)
+                {
+                    damageYangDiberikan = sword.GetDamageValue();
+                }
+                else
+                {
+                    ToyHammer hammer = GetComponentInParent<ToyHammer>();
+                    if (hammer != null)
+                    {
+                        // Anda bisa menambahkan fungsi GetDamageValue() di ToyHammer jika dibutuhkan
+                        damageYangDiberikan = 35; 
+                    }
+                }
+            }
 
-            // Jika damage masih 0/gagal ke-load, beri backup angka 10 agar game tidak nge-bug
+            // Pengaman akhir: Jika damage masih 0 atau minus, beri nilai default 10
             if (damageYangDiberikan <= 0) damageYangDiberikan = 10;
 
-            // 3. Berikan damage ke musuh!
+            // 1. Berikan damage hasil kalkulasi buff ke musuh!
             enemyHealth.TakeDamage(damageYangDiberikan);
-            Debug.Log($"[Hitbox] Berhasil memberikan Damage: {damageYangDiberikan} ke {other.name}");
+            Debug.Log($"[Hitbox Melee] Berhasil memukul {other.name} | Total Damage + Buff: {damageYangDiberikan}");
 
-            // 4. Berikan efek dorongan (Knockback) jika playerAttack ditemukan
+            // 2. Berikan efek dorongan (Knockback)
             if (playerAttack != null)
             {
                 playerAttack.ApplyKnockback(other.gameObject);
             }
 
+            // 3. Berikan efek Stun jika ada komponen handler stun di musuh
             if (other.TryGetComponent<EnemyStunHandler>(out var stunHandler))
             {
-                stunHandler.TriggerStun(0.3f);
+                stunHandler.TriggerStun(0.3f); 
             }
         }
     }

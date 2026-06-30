@@ -68,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9de4ee9eaa392124fa3a860e457f978b, type: 2}
+  - {fileID: 2100000, guid: ccf85dcef12269946baec1e002a3fa25, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -157,6 +157,7 @@ GameObject:
   - component: {fileID: 5405227333255959649}
   - component: {fileID: 7790195879833164798}
   - component: {fileID: 3906812364914721950}
+  - component: {fileID: 8100673710363194270}
   m_Layer: 0
   m_Name: RightRoomPlayGround
   m_TagString: Untagged
@@ -182,6 +183,7 @@ Transform:
   - {fileID: 7693972386280838093}
   - {fileID: 3100672256290322608}
   - {fileID: 3939706535823267341}
+  - {fileID: 1761367292950476611}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7790195879833164798
@@ -216,6 +218,23 @@ MonoBehaviour:
   autoDetectEnemies: 1
   enemyTag: Enemy
   enemies: []
+--- !u!114 &8100673710363194270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 157298611956432288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d7d8f2ed2c656845abc87174bc531d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LootboxRoomSpawner
+  chestPrefabs:
+  - {fileID: 4781265823809132254, guid: 09973e51fdc665e48a2d2ad5cc548738, type: 3}
+  - {fileID: 354435207424024918, guid: ed12b2bcfb9e30f45b810b8b1135ccd2, type: 3}
+  - {fileID: 4352296326627496743, guid: 89755cff83f768e4ab4f79ae7635bb54, type: 3}
+  chestSpawnPoint: {fileID: 1761367292950476611}
 --- !u!1 &849098985728978366
 GameObject:
   m_ObjectHideFlags: 0
@@ -486,6 +505,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NextMapPortal
   portalVisual: {fileID: 0}
   playerTag: Player
+--- !u!1 &3923421967419263307
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1761367292950476611}
+  m_Layer: 0
+  m_Name: SpawnLoot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1761367292950476611
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3923421967419263307}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 3.45, y: 0, z: 16.05}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5405227333255959649}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5770305095055944285
 GameObject:
   m_ObjectHideFlags: 0

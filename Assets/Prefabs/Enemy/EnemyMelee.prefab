@@ -1331,11 +1331,11 @@ GameObject:
   - component: {fileID: 6349498426602491569}
   - component: {fileID: 2255285491697273875}
   - component: {fileID: 1154688777401871716}
-  - component: {fileID: 4578677544186981569}
-  - component: {fileID: 1210440286633072247}
-  - component: {fileID: 6926897763404924081}
-  - component: {fileID: 3838396402797061184}
   - component: {fileID: -99885767059885274}
+  - component: {fileID: 3838396402797061184}
+  - component: {fileID: 1210440286633072247}
+  - component: {fileID: 4578677544186981569}
+  - component: {fileID: 6926897763404924081}
   - component: {fileID: -3669917849920726644}
   m_Layer: 7
   m_Name: EnemyMelee
@@ -1416,7 +1416,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 4.81
+  m_Speed: 6
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -1442,7 +1442,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MeleeEnemy
   navAgent: {fileID: 2255285491697273875}
   animator: {fileID: 2243213015419743282}
-  maxHealth: 100
+  maxHealth: 150
   healthBar: {fileID: 2003538304596154773}
   terrainLayer:
     serializedVersion: 2
@@ -1451,12 +1451,57 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   patrolRadius: 8
-  damage: 10
+  damage: 15
   attackCooldown: 1.2
   visionRange: 10
   engagementRange: 2.43
   enemyAudioSource: {fileID: 0}
   meleeAttackSound: {fileID: 0}
+--- !u!114 &-99885767059885274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3807745660598645816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d48d60ccfda7902459edd6326006428a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyScaling
+  baseHP: 150
+  baseDamage: 15
+  baseSpeed: 6
+--- !u!114 &3838396402797061184
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3807745660598645816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2115712d61cb27a4ba1ad8a11930c57f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDummy
+  maxHealth: 150
+  hitFlashDuration: 0.1
+  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
+  healthBar: {fileID: 2003538304596154773}
+  audioSource: {fileID: 0}
+  enemyHurtSound: {fileID: 0}
+--- !u!114 &1210440286633072247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3807745660598645816}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de009c17aeb21c54d9e25e33a782eadb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyKnockback
 --- !u!136 &4578677544186981569
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1480,18 +1525,6 @@ CapsuleCollider:
   m_Height: 2.3981504
   m_Direction: 1
   m_Center: {x: 0, y: 0.6990752, z: 0}
---- !u!114 &1210440286633072247
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3807745660598645816}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de009c17aeb21c54d9e25e33a782eadb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyKnockback
 --- !u!54 &6926897763404924081
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1519,39 +1552,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
---- !u!114 &3838396402797061184
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3807745660598645816}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2115712d61cb27a4ba1ad8a11930c57f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyDummy
-  maxHealth: 100
-  hitFlashDuration: 0.1
-  hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
-  healthBar: {fileID: 2003538304596154773}
-  audioSource: {fileID: 0}
-  enemyHurtSound: {fileID: 0}
---- !u!114 &-99885767059885274
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3807745660598645816}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d48d60ccfda7902459edd6326006428a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyScaling
-  baseHP: 300
-  baseDamage: 25
-  baseSpeed: 10
 --- !u!114 &-3669917849920726644
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2262,6 +2262,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7941906730271372661}
   - component: {fileID: 1566226392813262163}
+  - component: {fileID: 7446008825582836345}
   m_Layer: 7
   m_Name: Slider
   m_TagString: Untagged
@@ -2342,6 +2343,18 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
+--- !u!225 &7446008825582836345
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6202388053147074567}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &6584064882612096627
 GameObject:
   m_ObjectHideFlags: 0
@@ -3471,14 +3484,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4372b96f71d3a94458c5609380e774d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponHitbox
-  weaponRig: {fileID: 2692968200872996422}
-  hitCollider: {fileID: 7963803008576480447}
-  targetLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  audioSource: {fileID: 0}
-  hitWallSound: {fileID: 0}
-  hitEnemySound: {fileID: 0}
 --- !u!65 &7963803008576480447 stripped
 BoxCollider:
   m_CorrespondingSourceObject: {fileID: 1537226874727325128, guid: 9018edc178f79bd488296b9f5f61e63c, type: 3}
