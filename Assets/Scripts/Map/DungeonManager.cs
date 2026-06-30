@@ -455,4 +455,17 @@ public class DungeonManager : MonoBehaviour
             floorUIText.text = "Floor = " + floorSekarang;
         }
     }
+    // Taruh ini di bagian bawah DungeonManager.cs sebelum kurung kurawal tutup terakhir
+    public void ParentItemToCurrentRoom(Transform itemTransform)
+    {
+        if (currentRoom != null)
+        {
+            // Menjadikan item sebagai child dari ruangan saat ini
+            itemTransform.SetParent(currentRoom.transform);
+        }
+        else
+        {
+            Debug.LogWarning("[DungeonManager] Tidak ada currentRoom yang aktif! Barang tidak di-parent.");
+        }
+    }
 }

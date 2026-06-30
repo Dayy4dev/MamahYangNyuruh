@@ -179,7 +179,7 @@ public class PlayerInventory : MonoBehaviour
         onSlotChanged?.Invoke(index, data);
     }
 
-    private void DropFromSlot(int index)
+   private void DropFromSlot(int index)
     {
         if (index == SLOT_UNARMED) return;
         WeaponData data = slots[index];
@@ -189,12 +189,21 @@ public class PlayerInventory : MonoBehaviour
         {
             Vector3 spawnPos = dropPoint != null ? dropPoint.position : transform.position + transform.forward * 0.8f;
             if (dropPoint != null) spawnPos.y = dropPoint.position.y;
+            
+            // 1. Instantiate senjata yang dijatuhkan
             GameObject dropped = Instantiate(data.pickupPrefab, spawnPos, Quaternion.identity);
+            
             if (dropped.TryGetComponent<WeaponPickup>(out WeaponPickup wp)) wp.MarkAsDropped();
+
+            // 2. TAMBAHKAN LOGIKA INI: Jadikan item yang dijatuhkan sebagai child dari room saat ini
+            if (DungeonManager.Instance != null)
+            {
+                DungeonManager.Instance.ParentItemToCurrentRoom(dropped.transform);
+            }
         }
+        
         SetSlot(index, null);
     }
-
     private int FindEmptyWeaponSlot()
     {
         for (int i = SLOT_WEAPON_1; i <= SLOT_WEAPON_2; i++) { if (slots[i] == null) return i; }
