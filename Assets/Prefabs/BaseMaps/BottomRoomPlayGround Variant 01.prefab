@@ -175,7 +175,7 @@ PrefabInstance:
     - target: {fileID: 6814956971510538254, guid: d2a4b30de39452a4db525f79f8fbede3, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: bfd80b3c7186c2346a1d65e45335090a, type: 2}
+      objectReference: {fileID: 2100000, guid: 16ad845ab14afb24e8d3bd071629b0a8, type: 2}
     - target: {fileID: 6871334240127201030, guid: d2a4b30de39452a4db525f79f8fbede3, type: 3}
       propertyPath: m_Name
       value: BottomRoomPlayGround Variant 01

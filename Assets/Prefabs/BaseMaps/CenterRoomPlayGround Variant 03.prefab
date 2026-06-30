@@ -73,7 +73,7 @@ PrefabInstance:
     - target: {fileID: 2433954690610683629, guid: d4b783d34036da546a69ef7e269ae6d9, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: da65b7258d9295e44bec8fb804df5c1f, type: 2}
+      objectReference: {fileID: 2100000, guid: 0ca354af0640dd249853df6f667c69ab, type: 2}
     - target: {fileID: 8599616117974265876, guid: d4b783d34036da546a69ef7e269ae6d9, type: 3}
       propertyPath: m_Name
       value: CenterRoomPlayGround Variant 03
