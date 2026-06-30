@@ -36,6 +36,7 @@ public class WeaponPickup : MonoBehaviour
     // Properties
     // -------------------------------------------------------------------------
 
+    [HideInInspector] public string customRarity = "";
     public WeaponData Data => weaponData;
     public bool IsDropped => isDropped;
 
@@ -77,27 +78,33 @@ public class WeaponPickup : MonoBehaviour
     }
 
     /// <summary>Dipanggil PlayerInventory setelah senjata berhasil diambil.</summary>
-   public void OnPickedUp()
-{
-    TogglePrompt(false);
-
-    // ---- TAMBAHKAN KODE INI ----
-    if (TutorialManager.Instance != null && weaponData != null)
+    public void OnPickedUp()
     {
-        // Mengecek ID atau nama dari WeaponData Anda
-        if (weaponData.name.Contains("Sword")) 
-        {
-            TutorialManager.Instance.sudahAmbilPedang = true;
-        }
-        else if (weaponData.name.Contains("Cannon")) 
-        {
-            TutorialManager.Instance.sudahAmbilMeriam = true;
-        }
-    }
-    // ----------------------------
+        TogglePrompt(false);
 
-    Destroy(gameObject);
-}
+        // --- SUNTIKAN INFO RARITY SEBELUM MASUK INVENTORY ---
+        if (weaponData != null && !string.IsNullOrEmpty(customRarity))
+        {
+            weaponData.overrideRarity = customRarity;
+        }
+
+        // ---- TAMBAHKAN KODE INI ----
+        if (TutorialManager.Instance != null && weaponData != null)
+        {
+
+            // Mengecek ID atau nama dari WeaponData Anda
+            if (weaponData.name.Contains("Sword"))
+            {
+                TutorialManager.Instance.sudahAmbilPedang = true;
+            }
+            else if (weaponData.name.Contains("Cannon"))
+            {
+                TutorialManager.Instance.sudahAmbilMeriam = true;
+            }
+        }
+        // ----------------------------
+        Destroy(gameObject);
+    }
 
     /// <summary>Tandai sebagai senjata yang dijatuhkan player (dihapus saat pindah scene).</summary>
     public void MarkAsDropped()

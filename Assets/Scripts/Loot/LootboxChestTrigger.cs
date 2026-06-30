@@ -78,6 +78,15 @@ public class LootboxChestTrigger : MonoBehaviour
             
             mySpawnedWeapon = result.spawnedObject;
             weaponRarity = result.finalRarity; 
+            
+            if (mySpawnedWeapon != null)
+            {
+                WeaponPickup pickupComponent = mySpawnedWeapon.GetComponent<WeaponPickup>();
+                if (pickupComponent != null)
+                {
+                    pickupComponent.customRarity = weaponRarity.ToString();
+                }
+            }
         }
         else
         {

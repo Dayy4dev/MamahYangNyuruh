@@ -112,7 +112,7 @@ MonoBehaviour:
   floatAmplitude: 0.2
   floatSpeed: 2
   rotationSpeed: {x: 0, y: 90, z: 0}
-  localPromptUI: {fileID: 0}
+  localPromptUI: {fileID: 8881856594733627911, guid: 84e1a0e3ca24232438ddea5c9d0f29cc, type: 3}
 --- !u!65 &6906256945373157895
 BoxCollider:
   m_ObjectHideFlags: 0
