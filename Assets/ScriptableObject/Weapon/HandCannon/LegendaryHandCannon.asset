@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   weaponName: HandCannon
   icon: {fileID: 21300000, guid: 01cd077f718c76046931e0f57d11ba86, type: 3}
+  overrideRarity: Legendary
   pickupPrefab: {fileID: 9113066625481402298, guid: 1baafbb269ed1404eb70c45971a0c591, type: 3}
-  damage: 50
+  damage: 150
   attackDuration: 0
   attackCooldown: 0
   knockbackForce: 0
@@ -25,6 +26,6 @@ MonoBehaviour:
   defaultCapacity: 10
   maxPoolSize: 10
   speed: 30
-  magazineSize: 10
+  magazineSize: 15
   reloadTime: 2
   fireRate: 0.1

@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2c7051759f577d4e90bc60644040fe1, type: 3}
-  m_Name: RustyHandCannon
+  m_Name: CommonHandCannon
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   weaponName: HandCannon
   icon: {fileID: 21300000, guid: 01cd077f718c76046931e0f57d11ba86, type: 3}
   overrideRarity: 
-  pickupPrefab: {fileID: 827723065627645319, guid: a44dda729bad9b9499a9230aec3a5670, type: 3}
-  damage: 20
+  pickupPrefab: {fileID: 4041648436681506966, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
+  damage: 40
   attackDuration: 0
   attackCooldown: 0
   knockbackForce: 0
@@ -27,5 +27,5 @@ MonoBehaviour:
   maxPoolSize: 10
   speed: 30
   magazineSize: 10
-  reloadTime: 3
+  reloadTime: 2.5
   fireRate: 0.1

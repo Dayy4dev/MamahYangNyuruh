@@ -10,19 +10,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2c7051759f577d4e90bc60644040fe1, type: 3}
-  m_Name: RustyToyHammer
+  m_Name: RareBalloonSword
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  weaponName: SqueekHammer
-  icon: {fileID: 21300000, guid: 30ab8412c20019043b7dac3de75a76d8, type: 3}
+  weaponName: BallloonSword
+  icon: {fileID: 21300000, guid: 7f613faf5cf863e4b9d4dfa997a4ca38, type: 3}
   overrideRarity: 
-  pickupPrefab: {fileID: 7191896599336899810, guid: f7e11fe53ca7bfb43b3efa58d85ae20a, type: 3}
-  damage: 45
-  attackDuration: 0.75
-  attackCooldown: 1.5
-  knockbackForce: 30
+  pickupPrefab: {fileID: 0}
+  damage: 100
+  attackDuration: 0.5
+  attackCooldown: 0.5
+  knockbackForce: 10
   knockbackDuration: 0.2
-  maxComboCount: 2
-  meleeReloadTime: 2.5
+  maxComboCount: 3
+  meleeReloadTime: 75
   defaultCapacity: 0
   maxPoolSize: 0
   speed: 0

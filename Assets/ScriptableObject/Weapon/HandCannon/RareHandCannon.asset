@@ -10,21 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2c7051759f577d4e90bc60644040fe1, type: 3}
-  m_Name: BiasaHandCannon
+  m_Name: RareHandCannon
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   weaponName: HandCannon
   icon: {fileID: 21300000, guid: 01cd077f718c76046931e0f57d11ba86, type: 3}
-  pickupPrefab: {fileID: 4041648436681506966, guid: 3804fc6efe08d8343b6a7358e1484350, type: 3}
-  damage: 25
+  overrideRarity: 
+  pickupPrefab: {fileID: 0}
+  damage: 80
   attackDuration: 0
   attackCooldown: 0
   knockbackForce: 0
   knockbackDuration: 0
-  maxComboCount: 3
-  meleeReloadTime: 1.5
+  maxComboCount: 0
+  meleeReloadTime: 0
   defaultCapacity: 10
   maxPoolSize: 10
   speed: 30
-  magazineSize: 10
+  magazineSize: 15
   reloadTime: 2
   fireRate: 0.1

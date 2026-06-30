@@ -13,18 +13,19 @@ MonoBehaviour:
   m_Name: Unarmed
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   weaponName: Unarmed
-  icon: {fileID: 21300000, guid: 7f613faf5cf863e4b9d4dfa997a4ca38, type: 3}
+  icon: {fileID: 21300000, guid: 9be56b2a7765c8a4ca3a2e768286aa37, type: 3}
+  overrideRarity: 
   pickupPrefab: {fileID: 0}
-  damage: 10
-  attackDuration: 0.55
+  damage: 5
+  attackDuration: 0.5
   attackCooldown: 0.2
-  knockbackForce: 0
-  knockbackDuration: 0
+  knockbackForce: 10
+  knockbackDuration: 0.2
   maxComboCount: 5
-  meleeReloadTime: 2
+  meleeReloadTime: 1.2
   defaultCapacity: 0
   maxPoolSize: 0
   speed: 0
   magazineSize: 0
   reloadTime: 0
-  fireRate: 0.3
+  fireRate: 0

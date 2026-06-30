@@ -10,21 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2c7051759f577d4e90bc60644040fe1, type: 3}
-  m_Name: BiasaBalloonSword
+  m_Name: CommonBalloonSword
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   weaponName: BalloonSword
   icon: {fileID: 21300000, guid: 7f613faf5cf863e4b9d4dfa997a4ca38, type: 3}
+  overrideRarity: 
   pickupPrefab: {fileID: 9004413375024476235, guid: 7dc22a81197cb064bbe8110e893cac9d, type: 3}
-  damage: 1000
-  attackDuration: 0.55
-  attackCooldown: 0.2
-  knockbackForce: 0
-  knockbackDuration: 0
+  damage: 50
+  attackDuration: 0.5
+  attackCooldown: 0.5
+  knockbackForce: 10
+  knockbackDuration: 0.2
   maxComboCount: 3
-  meleeReloadTime: 0.5
+  meleeReloadTime: 1
   defaultCapacity: 0
   maxPoolSize: 0
   speed: 0
   magazineSize: 0
   reloadTime: 0
-  fireRate: 0.3
+  fireRate: 0
