@@ -51,4 +51,24 @@ public class PlayerBuffManager : MonoBehaviour
 
         Debug.Log($"[BUFF] Damage Buff Stack #{damageBuffStackCount} diaplikasikan! +50 Permanent Damage Buff.");
     }
+
+    // =========================================================================
+    // --- TAMBAHAN FUNGSI UNTUK REFRESH DI INVENTORY UI ---
+    // =========================================================================
+
+    /// <summary>
+    /// Mengembalikan jumlah total stack buff damage saat ini untuk dibaca UI
+    /// </summary>
+    public int GetDamageBuffStack()
+    {
+        return damageBuffStackCount;
+    }
+
+    /// <summary>
+    /// Mengembalikan jumlah total stack buff HP saat ini untuk dibaca UI
+    /// </summary>
+    public int GetHpBuffStack()
+    {
+        return hpBuffStackCount;
+    }
 }

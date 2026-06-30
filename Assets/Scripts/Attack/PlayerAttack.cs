@@ -51,31 +51,40 @@ public class PlayerAttack : MonoBehaviour
         currentComboHit = 0;
     }
 
-    void Update()
+   void Update()
+{
+    // Jika game sedang dipause, jangan panggil serangan
+    if (GameManager.Instance != null && !GameManager.Instance.IsPlaying)
+        return;
+
+    if (Input.GetMouseButtonDown(0))
     {
-        // Jika game sedang dipause, jangan panggil serangan
-        if (GameManager.Instance != null && !GameManager.Instance.IsPlaying) return;
+        Weapon activeWeapon = GetActiveWeapon();
 
-        if (Input.GetMouseButtonDown(0)) 
+        // Semua senjata selain HandCannon harus aim dulu
+        if (!(activeWeapon is HandCannon))
         {
-            // 1. Ambil komponen senjata yang sedang aktif saat ini
-            Weapon activeWeapon = GetActiveWeapon(); 
-
-            // 2. Cek apakah senjata itu adalah HandCannon
-            if (activeWeapon is HandCannon handCannon)
+            if (!Input.GetMouseButton(1))
             {
-                // 3. Panggil fungsi pengaman CanShoot()
-                if (!handCannon.CanShoot())
-                {
-                    Debug.Log("[PlayerAttack] Serangan dibatalkan karena player tidak menahan klik kanan!");
-                    return; 
-                }
+                Debug.Log("[PlayerAttack] Harus Aim (Mouse Kanan) terlebih dahulu!");
+                return;
             }
-
-            // Jika lolos semua pengaman, eksekusi serangan
-            ExecuteAttack();
         }
+        else
+        {
+            // HandCannon tetap memakai sistemnya sendiri
+            HandCannon handCannon = (HandCannon)activeWeapon;
+
+            if (!handCannon.CanShoot())
+            {
+                Debug.Log("[PlayerAttack] Serangan dibatalkan karena player tidak menahan klik kanan!");
+                return;
+            }
+        }
+
+        ExecuteAttack();
     }
+}
 
     private void ExecuteAttack()
     {

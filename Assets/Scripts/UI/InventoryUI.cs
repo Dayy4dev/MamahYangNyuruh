@@ -7,17 +7,29 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private GameObject inventoryPanel;
     [SerializeField] private EquipmentUI equipmentUI;
 
-    // --- SLOT BARU UNTUK MEMASUKKAN OBJEK TEKS DI INSPECTOR ---
     [Header("Status Display")]
     [SerializeField] private TextMeshProUGUI atkBuffText;
-    [SerializeField] private TextMeshProUGUI maxHpBuffText;
+    [SerializeField] private TextMeshProUGUI maxHpBuffText; // Khusus teks tulisan "BUFF MAX HP: X"
+    
 
-    // Menampung total nilai buff yang sudah diakumulasikan
-    private int totalAtkBuff = 0;
-    private int totalMaxHpBuff = 0;
+
+    [Header("Player Reference")]
+    [SerializeField] private GameObject playerObject; 
+
+    [Header("Buff Manager Reference")]
+    [Tooltip("Drag GameObject yang memiliki komponen PlayerBuffManager di sini (misal: Game Manager atau Player, sesuai di mana komponen itu sebenarnya berada).")]
+    [SerializeField] private PlayerBuffManager buffManager;
 
     private void Start()
     {
+        // CATATAN: buffManager sekarang di-assign langsung lewat Inspector (field di atas),
+        // tidak lagi dicari otomatis via playerObject.GetComponentInChildren(),
+        // karena PlayerBuffManager bisa saja berada di GameObject lain (misal Game Manager).
+        if (buffManager == null)
+        {
+            Debug.LogWarning("[InventoryUI] Buff Manager belum di-assign di Inspector! Buff text tidak akan terupdate.");
+        }
+
         if (GameManager.Instance != null)
         {
             EvaluateVisibility(GameManager.Instance.CurrentState);
@@ -47,51 +59,47 @@ public class InventoryUI : MonoBehaviour
     {
         if (inventoryPanel == null) return;
 
-        bool isWindowOpen = (state == GameState.Inventory);
+        bool isWindowOpen = state == GameState.Inventory;
         inventoryPanel.SetActive(isWindowOpen);
 
-        // Ketika tombol E ditekan dan inventory terbuka, refresh semua teks UI
         if (isWindowOpen)
         {
             if (equipmentUI != null)
             {
                 equipmentUI.RefreshUI();
             }
-
-            // AMBIL DATA TERBARU DAN UPDATE TEKS STATUS BUFF ATK & MAX HP
-            RefreshBuffText();
+            UpdateBuffStatusText(); 
+           
         }
     }
 
-    private void RefreshBuffText()
+    private void UpdateBuffStatusText()
     {
-        if (atkBuffText == null || maxHpBuffText == null) return;
-
-        // Tarik data dari pusat data di LootboxManager
-        if (LootboxManager.Instance != null)
+        if (buffManager != null)
         {
-            // --- CATATAN PENTING ---
-            // Di sini diasumsikan LootboxManager.Instance.currentBuff mengembalikan nilai angka dalam bentuk int atau float (misal: 10).
-            // Jika currentBuff saat ini masih berbentuk string (misal: "+10 ATK"), kamu perlu mengubah tipe datanya di LootboxManager menjadi angka (int).
-            
-            int newAtkBuff = LootboxManager.Instance.currentAtkBuff; // Ganti dengan variabel ATK baru dari LootboxManager-mu
-            int newMaxHpBuff = LootboxManager.Instance.currentMaxHpBuff; // Ganti dengan variabel Max HP baru dari LootboxManager-mu
+            int currentAtkBonus = buffManager.GetDamageBuffStack() * 50;
+            int currentHpBonus = buffManager.GetHpBuffStack() * 100;
 
-            // Akumulasikan nilai lama dengan nilai baru yang didapat
-            totalAtkBuff += newAtkBuff;
-            totalMaxHpBuff += newMaxHpBuff;
+            if (atkBuffText != null)
+            {
+                atkBuffText.text = currentAtkBonus > 0 
+                    ? $"BUFF ATK: <color=green>+{currentAtkBonus}</color> (x{buffManager.GetDamageBuffStack()})" 
+                    : "BUFF ATK: ";
+            }
 
-            // Cetak teks ke masing-masing TextMeshPro UI dengan warna hijau
-            atkBuffText.text = totalAtkBuff > 0 ? $"BUFF ATK: <color=green>+{totalAtkBuff}</color>" : "BUFF ATK: 0";
-            maxHpBuffText.text = totalMaxHpBuff > 0 ? $"BUFF MAX HP: <color=green>+{totalMaxHpBuff}</color>" : "BUFF MAX HP: 0";
-
-            // Setelah nilai ditambahkan ke total, reset buff di LootboxManager agar tidak terus bertambah secara tidak sengaja di frame berikutnya
-            LootboxManager.Instance.ResetCurrentBuffs(); 
+            if (maxHpBuffText != null)
+            {
+                maxHpBuffText.text = currentHpBonus > 0 
+                    ? $"BUFF MAX HP: <color=green>+{currentHpBonus}</color> (x{buffManager.GetHpBuffStack()})" 
+                    : "BUFF MAX HP: ";
+            }
         }
         else
         {
-            atkBuffText.text = "BUFF ATK: 0";
-            maxHpBuffText.text = "BUFF MAX HP: 0";
+            if (atkBuffText != null) atkBuffText.text = "BUFF ATK: ";
+            if (maxHpBuffText != null) maxHpBuffText.text = "BUFF MAX HP: ";
         }
     }
+
+
 }
