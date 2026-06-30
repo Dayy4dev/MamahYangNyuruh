@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 [AddComponentMenu("Player/MC Animation Controller")]
 [RequireComponent(typeof(Animator))]
@@ -21,6 +22,15 @@ public class MCAnimationController : MonoBehaviour
     private bool isInComboCooldown;
     private int currentWeaponIndex = WEAPON_SWORD;
 
+    // Hammer Attack2 Input Buffer
+    [Header("Hammer Attack2 Buffer")]
+    [Tooltip("How long (seconds) a buffered Attack2 input stays valid during Attack1 wind-up.")]
+    [SerializeField] private float comboInputBuffer = 0.4f;
+
+    public event Action OnHammerAttack2Fired;
+
+    private bool hammerAttack2Buffered;  
+    private float hammerBufferExpiry;    
 
     void Awake()
     {
@@ -59,6 +69,7 @@ public class MCAnimationController : MonoBehaviour
         if (GameManager.Instance != null && !GameManager.Instance.IsPlaying) return;
 
         UpdateComboCooldown();
+        FlushHammerAttack2Buffer();
     }
 
 
@@ -93,20 +104,66 @@ public class MCAnimationController : MonoBehaviour
     {
         if (isInComboCooldown) return;
 
+        if (currentWeaponIndex == WEAPON_HAMMER && comboHit == 2)
+        {
+            hammerAttack2Buffered = true;
+            hammerBufferExpiry = Time.time + comboInputBuffer;
+            Debug.Log("[MCAnimCtrl] Hammer Attack2 buffered.");
+            int maxCombo = GetMaxCombo();
+            if (comboHit >= maxCombo)
+            {
+                isInComboCooldown = true;
+                comboCooldownTimer = GetComboCooldownDuration();
+            }
+            return;
+        }
+
         switch (comboHit)
         {
             case 1: animator.SetTrigger(Attack1); break;
-            case 2: animator.SetTrigger(Attack2); break;
+            case 2: 
+                animator.SetTrigger(Attack2); 
+                // Hammer Attack2 fired directly (no buffer needed this time)
+                if (currentWeaponIndex == WEAPON_HAMMER)
+                    OnHammerAttack2Fired?.Invoke();
+                break;
             case 3: animator.SetTrigger(Attack3); break;
         }
 
-        int maxCombo = GetMaxCombo();
-        if (comboHit >= maxCombo)
+        int maxComboPassed = GetMaxCombo();
+        if (comboHit >= maxComboPassed)
         {
             isInComboCooldown = true;
             comboCooldownTimer = GetComboCooldownDuration();
         }
     }
+
+    // Hammer Buffer Flush
+    private void FlushHammerAttack2Buffer()
+    {
+        if (!hammerAttack2Buffered) return;
+
+        if (Time.time > hammerBufferExpiry)
+        {
+            hammerAttack2Buffered = false;
+            Debug.Log("[MCAnimCtrl] Hammer Attack2 buffer expired.");
+            return;
+        }
+
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(1); // Attack layer = 1
+        bool attack1Playing = stateInfo.IsName("Attack1");
+        bool attack1NearEnd = attack1Playing && stateInfo.normalizedTime >= 0.65f;
+        bool notInAttack1   = !attack1Playing;
+
+        if (notInAttack1 || attack1NearEnd)
+        {
+            hammerAttack2Buffered = false;
+            animator.SetTrigger(Attack2);
+            OnHammerAttack2Fired?.Invoke();
+            Debug.Log("[MCAnimCtrl] Hammer Attack2 trigger fired from buffer.");
+        }
+    }
+    // ─────────────────────────────────────────────────────────────────
 
     private void UpdateComboCooldown()
     {
@@ -160,6 +217,7 @@ public class MCAnimationController : MonoBehaviour
     {
         isInComboCooldown = false;
         comboCooldownTimer = 0f;
+        hammerAttack2Buffered = false;
     }
 
     public void OnWeaponChanged()

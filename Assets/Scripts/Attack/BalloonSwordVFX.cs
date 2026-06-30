@@ -1,11 +1,16 @@
 using UnityEngine;
 using UnityEngine.Video;
+using System.Collections;
 
 public class BalloonSwordVFX : MonoBehaviour
 {
     [Header("VFX Settings")]
     [SerializeField] private GameObject slashVfxPrefab;
     [SerializeField] private Vector3 offset = new Vector3(0, 1f, 1f);
+    [SerializeField] private Vector3 localRotation = new Vector3(0, 0, 0);
+    
+    [Header("Timing Settings")]
+    [SerializeField] private float playDelay = 0f;
     
     private GameObject currentVfxInstance;
     private VideoPlayer videoPlayer;
@@ -14,9 +19,9 @@ public class BalloonSwordVFX : MonoBehaviour
     {
         if (slashVfxPrefab != null)
         {
-            // Instantiate the VFX prefab and parent it to this weapon
             currentVfxInstance = Instantiate(slashVfxPrefab, transform);
             currentVfxInstance.transform.localPosition = offset;
+            currentVfxInstance.transform.localEulerAngles = localRotation;
             currentVfxInstance.SetActive(false);
 
             videoPlayer = currentVfxInstance.GetComponentInChildren<VideoPlayer>();
@@ -45,20 +50,42 @@ public class BalloonSwordVFX : MonoBehaviour
     {
         if (currentVfxInstance != null && videoPlayer != null)
         {
-            // Reset position and rotation
-            currentVfxInstance.transform.localPosition = offset;
-            currentVfxInstance.transform.localRotation = Quaternion.identity;
-
-            currentVfxInstance.SetActive(true);
+            StopAllCoroutines();
             
-            // Fast forward to beginning and play
-            videoPlayer.time = 0;
-            videoPlayer.Play();
+            if (playDelay > 0f)
+            {
+                StartCoroutine(PlayVFXWithDelay());
+            }
+            else
+            {
+                ExecutePlayVFX();
+            }
         }
+    }
+
+    private IEnumerator PlayVFXWithDelay()
+    {
+        yield return new WaitForSeconds(playDelay);
+        ExecutePlayVFX();
+    }
+
+    private void ExecutePlayVFX()
+    {
+        if (currentVfxInstance == null || videoPlayer == null) return;
+
+        currentVfxInstance.transform.localPosition = offset;
+        currentVfxInstance.transform.localEulerAngles = localRotation;
+
+        currentVfxInstance.SetActive(true);
+        
+        videoPlayer.time = 0;
+        videoPlayer.Play();
     }
 
     public void StopVFX()
     {
+        StopAllCoroutines();
+        
         if (currentVfxInstance != null)
         {
             currentVfxInstance.SetActive(false);
@@ -71,7 +98,6 @@ public class BalloonSwordVFX : MonoBehaviour
 
     private void OnVideoEnd(VideoPlayer vp)
     {
-        // Automatically hide the VFX when the video finishes
         if (currentVfxInstance != null)
         {
             currentVfxInstance.SetActive(false);
