@@ -6,9 +6,10 @@ public class LootboxManager : MonoBehaviour
 
     public enum Rarity { Legendary, Normal, Rusty }
 
-    // --- TEMPAT MENYIMPAN STATUS AKTIF YANG BISA DIBACA OLEH UI ---
-    [HideInInspector] public string currentBuff = "None";
-    [HideInInspector] public string currentDebuff = "None";
+    // --- TEMPAT MENYIMPAN BUFFER NILAI BUFF BARU YANG DIDAPAT ---
+    // Variabel ini menampung buff yang baru didapat dari peti/permen saat ini
+    [HideInInspector] public int currentAtkBuff = 0;
+    [HideInInspector] public int currentMaxHpBuff = 0;
 
     public struct GachaOutput
     {
@@ -22,53 +23,56 @@ public class LootboxManager : MonoBehaviour
         Instance = this;
     }
 
-    // --- FUNGSI BARU: Menerima nama efek dari kotak permen dan mengubahnya jadi teks status ---
+    // --- FUNGSI UPDATE: Menambah buff angka berdasarkan efek permen ---
     public void SetCandyEffectStatus(string effectName)
     {
         switch (effectName)
         {
             case "Heal":
-                currentBuff = "Full Restore Health";
+                // Jika ini adalah restore health biasa (bukan nambah batas Max HP), 
+                // kodenya bisa ditaruh di sini atau dibiarkan jika diurus script lain.
                 break;
             case "MaxHP":
-                currentBuff = "Max HP Limit (+30)";
+                currentMaxHpBuff = 30; // Mengirim angka 30 ke UI
                 break;
             case "BuffDamage":
-                currentBuff = "Permanent DMG Buff (+10)";
+                currentAtkBuff = 10; // Mengirim angka 10 ke UI
                 break;
             case "InstantDamage":
-                currentDebuff = "Curse: -50% Current HP";
+                // Debuff dihapus sesuai permintaan
                 break;
         }
     }
 
-    // Fungsi bawaan gacha senjata kamu (tetap aman tidak berubah)
+    // Fungsi bawaan gacha senjata kamu (Sudah disesuaikan tanpa Debuff & Menggunakan Angka)
     public GachaOutput OpenWeaponBox(GameObject[] legendaryPool, GameObject[] normalPool, GameObject[] rustyPool, string weaponName, Vector3 spawnPosition, Transform roomParent)
     {
         int roll = Random.Range(1, 11);
         Rarity obtainedRarity;
         GameObject[] selectedPool = null;
 
+        // Reset buffer terlebih dahulu sebelum diisi hasil gacha baru
+        currentAtkBuff = 0;
+        currentMaxHpBuff = 0;
+
         if (roll <= 2)
         {
             obtainedRarity = Rarity.Legendary;
             selectedPool = legendaryPool;
-            currentBuff = "ATK Booster (+20%)";
-            currentDebuff = "None";
+            currentAtkBuff = 20; // ATK Booster diganti jadi angka +20
         }
         else if (roll <= 5)
         {
             obtainedRarity = Rarity.Normal;
             selectedPool = normalPool;
-            currentBuff = Random.Range(0, 2) == 0 ? "Speed Up (+10%)" : "None";
-            currentDebuff = "None";
+            // Buff speed disesuaikan atau dihilangkan karena fokus ke ATK & Max HP
+            currentAtkBuff = 0; 
         }
         else
         {
             obtainedRarity = Rarity.Rusty;
             selectedPool = rustyPool;
-            currentBuff = "None";
-            currentDebuff = Random.Range(0, 2) == 0 ? "Slow Move (-15%)" : "Decreased Defense";
+            // Debuff di peti Rusty dihapus otomatis
         }
 
         GameObject prefabToSpawn = null;
@@ -85,5 +89,12 @@ public class LootboxManager : MonoBehaviour
             return new GachaOutput { spawnedObject = spawnedWeapon, finalRarity = obtainedRarity };
         }
         return default;
+    }
+
+    // --- FUNGSI BARU: Dipanggil oleh InventoryUI setelah berhasil mengambil nilainya ---
+    public void ResetCurrentBuffs()
+    {
+        currentAtkBuff = 0;
+        currentMaxHpBuff = 0;
     }
 }

@@ -76,10 +76,10 @@ public class CandyBox : MonoBehaviour
         {
             switch (myEffect)
             {
-                case "Heal": textMesh.text = "Full Heal permen"; textMesh.color = Color.green; break;
+                case "Heal": textMesh.text = "Full Heal"; textMesh.color = Color.green; break;
                 case "MaxHP": textMesh.text = "Max HP +30"; textMesh.color = Color.cyan; break;
-                case "BuffDamage": textMesh.text = "Buff ATK Permanen"; textMesh.color = Color.red; break;
-                case "InstantDamage": textMesh.text = "Kutukan -50% HP"; textMesh.color = Color.black; break;
+                case "BuffDamage": textMesh.text = "Buff ATK"; textMesh.color = Color.red; break;
+                case "InstantDamage": textMesh.text = "-50% HP"; textMesh.color = Color.black; break;
             }
         }
 
