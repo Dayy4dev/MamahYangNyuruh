@@ -3167,7 +3167,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &408050690
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5782,9 +5782,6 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 60, y: -207.3799}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 60, y: -207.3799}
   m_SizeDelta: {x: 120, y: 54.7598}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &794597653
@@ -6244,7 +6241,7 @@ RectTransform:
   m_Father: {fileID: 1454802587}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -11194,8 +11191,8 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1522800869}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -4.2, y: 0}
   m_SizeDelta: {x: 20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -11502,7 +11499,6 @@ GameObject:
   - component: {fileID: 1703006494}
   - component: {fileID: 1703006493}
   - component: {fileID: 1703006492}
-  - component: {fileID: 1703006497}
   m_Layer: 5
   m_Name: UI
   m_TagString: Untagged
@@ -11564,7 +11560,7 @@ MonoBehaviour:
   maxHpBuffText: {fileID: 1899237022}
   playerObject: {fileID: 1929026393}
   buffManager: {fileID: 1929026400}
-  inventoryAudioSource: {fileID: 1703006497}
+  inventoryAudioSource: {fileID: 0}
   openInventorySound: {fileID: 8300000, guid: a8cf559ba69379746ae86c445f54e917, type: 3}
   closeInventorySound: {fileID: 8300000, guid: 4d74d6686b5b09e4494f22517355c73d, type: 3}
 --- !u!114 &1703006494
@@ -15518,3 +15514,10 @@ SceneRoots:
   - {fileID: 737845386}
   - {fileID: 1929026399}
   - {fileID: 591693874}
+  - {fileID: 1881211680}
+  - {fileID: 1704108309}
+  - {fileID: 541319065}
+  - {fileID: 618332192}
+  - {fileID: 250125570}
+  - {fileID: 1038436113}
+  - {fileID: 1505129520}
