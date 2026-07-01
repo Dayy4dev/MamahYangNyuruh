@@ -12,6 +12,13 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     [Header("Death Settings")]
     [SerializeField] private float deathSceneReloadDelay = 2f;
 
+    [Header("Audio Settings")]
+    [SerializeField] private AudioSource playerAudioSource;
+    [Tooltip("Suara saat player kena damage (boleh isi beberapa varian, akan dipilih random)")]
+    [SerializeField] private AudioClip[] hurtSounds;
+    [Tooltip("Suara saat player mati")]
+    [SerializeField] private AudioClip deathSound;
+
     // Properti untuk melacak status kematian player (dicek oleh PlayerAttack dan PlayerInventory)
     public bool IsDead { get; private set; }
 
@@ -30,6 +37,20 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         currentHealth = maxHealth;
         IsDead = false; // Reset status saat game mulai
+
+        if (playerAudioSource == null)
+            playerAudioSource = GetComponent<AudioSource>();
+    }
+
+    private void PlayHurtSound()
+    {
+        if (playerAudioSource == null || hurtSounds == null || hurtSounds.Length == 0) return;
+
+        AudioClip clip = hurtSounds[Random.Range(0, hurtSounds.Length)];
+        if (clip != null)
+        {
+            playerAudioSource.PlayOneShot(clip);
+        }
     }
 
     public void TakeDamage(int amount)
@@ -39,6 +60,8 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
         currentHealth = Mathf.Max(0, currentHealth - amount);
         Debug.Log($"[PlayerHealth] Took {amount} damage. HP: {currentHealth}/{maxHealth}");
+
+        PlayHurtSound();
 
         if (currentHealth <= 0) Die();
     }
@@ -74,6 +97,12 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         IsDead = true;
 
         Debug.Log("[PlayerHealth] Player died. Freezing game and auto-reloading scene.");
+
+        if (playerAudioSource != null && deathSound != null)
+        {
+            playerAudioSource.ignoreListenerPause = true; // pastikan tetap kedengaran walau Time.timeScale = 0
+            playerAudioSource.PlayOneShot(deathSound);
+        }
 
         // Sembunyikan UI Room Bar saat player mati
         if (DungeonManager.Instance != null && DungeonManager.Instance.roomUIBar != null)

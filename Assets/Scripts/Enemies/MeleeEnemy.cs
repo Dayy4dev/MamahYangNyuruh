@@ -39,6 +39,10 @@ public class MeleeEnemy : MonoBehaviour, IDamageable
     [Header("Audio")]
     [SerializeField] private AudioSource enemyAudioSource;
     [SerializeField] private AudioClip meleeAttackSound;
+    [Tooltip("Suara saat musuh ini kena damage")]
+    [SerializeField] private AudioClip[] hurtSounds;
+    [Tooltip("Suara saat musuh ini mati")]
+    [SerializeField] private AudioClip deathSound;
 
     private bool isPlayerVisible;
     private bool isPlayerInRange;
@@ -233,14 +237,34 @@ public class MeleeEnemy : MonoBehaviour, IDamageable
 
         if (healthBar != null) healthBar.SetHealth(currentHealth);
 
+        PlayHurtSound();
+
         Debug.Log($"[MeleeEnemy] {gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
 
         if (currentHealth <= 0) Die();
     }
 
+    private void PlayHurtSound()
+    {
+        if (enemyAudioSource == null || hurtSounds == null || hurtSounds.Length == 0) return;
+
+        AudioClip clip = hurtSounds[Random.Range(0, hurtSounds.Length)];
+        if (clip != null) enemyAudioSource.PlayOneShot(clip);
+    }
+
     private void Die()
     {
         Debug.Log($"[MeleeEnemy] {gameObject.name} mati!");
+
+        if (enemyAudioSource != null && deathSound != null)
+        {
+            // Putar suara mati lalu hancurkan objek setelah suaranya kelar,
+            // biar tidak terpotong oleh Destroy(gameObject, 0.1f).
+            enemyAudioSource.PlayOneShot(deathSound);
+            if (spawner != null) spawner.NotifyEnemyDestroyed(gameObject);
+            Destroy(gameObject, Mathf.Max(0.1f, deathSound.length));
+            return;
+        }
 
         if (spawner != null) spawner.NotifyEnemyDestroyed(gameObject);
 

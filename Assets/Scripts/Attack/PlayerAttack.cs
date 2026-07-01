@@ -10,6 +10,15 @@ public class PlayerAttack : MonoBehaviour
     [Header("References")]
     [SerializeField] private PlayerHealth playerHealth;
 
+    [Header("Audio Settings")]
+    [SerializeField] private AudioSource attackAudioSource;
+    [Tooltip("Masukkan 3 sound untuk Sword (Hit 1, Hit 2, Hit 3) secara berurutan")]
+    [SerializeField] private AudioClip[] swordSounds = new AudioClip[3];
+    [Tooltip("Masukkan 3 sound untuk Hammer (Hit 1, Hit 2, Hit 3) secara berurutan")]
+    [SerializeField] private AudioClip[] hammerSounds = new AudioClip[3];
+    [Tooltip("Masukkan sound tembakan khusus untuk HandCannon")]
+    [SerializeField] private AudioClip[] handCannonSound = new AudioClip[3];
+
     private int currentComboHit = 0;
     private float lastAttackTime = 0f;
 
@@ -22,6 +31,10 @@ public class PlayerAttack : MonoBehaviour
     {
         if (playerHealth == null)
             playerHealth = GetComponent<PlayerHealth>();
+        
+        // Auto-assign AudioSource jika lupa ditarik di Inspector
+        if (attackAudioSource == null)
+            attackAudioSource = GetComponent<AudioSource>();
     }
 
     public void EquipWeapon(WeaponData data, Weapon weaponComponent)
@@ -86,18 +99,16 @@ public class PlayerAttack : MonoBehaviour
     }
 }
 
-    private void ExecuteAttack()
+   private void ExecuteAttack()
     {
         if (playerHealth != null && playerHealth.IsDead) return;
 
-        // 1. Cek apakah senjata siap dipakai (tidak sedang reload/rehat)
         if (activeWeaponComponent != null && !activeWeaponComponent.CanAttack()) return;
 
-        // 2. ATUR COMBO TERLEBIH DAHULU SEBELUM HITBOX SENJATA AKTIF
         float timeSinceLastAttack = Time.time - lastAttackTime;
         if (timeSinceLastAttack > comboResetDuration)
         {
-            currentComboHit = 1; // Mulai combo baru (Hit pertama)
+            currentComboHit = 1; 
         }
         else
         {
@@ -110,19 +121,50 @@ public class PlayerAttack : MonoBehaviour
         string weaponName = (currentWeaponData != null) ? currentWeaponData.weaponName : "Tangan Kosong";
         Debug.Log($"[Attack Melee] Mengayunkan {weaponName} | Combo Hit: {currentComboHit}");
 
-        // 3. JALANKAN LOGIKA SERANGAN SENJATA
+        // === LOGIKA BARU: MEMUTAR SUARA SENJATA BERDASARKAN COMBO ===
+        PlayAttackSound();
+
         if (activeWeaponComponent != null)
         {
             activeWeaponComponent.Attack(); 
         }
 
-        // 4. AKTIFKAN HITBOX SENJATA PALING TERAKHIR AGAR MEMBACA COMBO YANG SUDAH UP-TO-DATE
         if (weaponHitbox != null)
         {
             weaponHitbox.ActivateHitbox();
         }
     }
+    private void PlayAttackSound()
+    {
+        if (attackAudioSource == null || currentWeaponData == null) return;
 
+        string category = GetWeaponCategory(currentWeaponData);
+        AudioClip clipToPlay = null;
+        
+        // Index array untuk combo melee (Sword / Hammer)
+        int soundIndex = Mathf.Clamp(currentComboHit - 1, 0, 2);
+
+        if (category == "Sword")
+        {
+            if (swordSounds != null && soundIndex < swordSounds.Length)
+                clipToPlay = swordSounds[soundIndex];
+        }
+        else if (category == "Hammer")
+        {
+            if (hammerSounds != null && soundIndex < hammerSounds.Length)
+                clipToPlay = hammerSounds[soundIndex];
+        }
+        else if (category == "Cannon") // <--- TAMBAHKAN LOGIKA INI UNTUK HANDCANNON
+        {
+            if (handCannonSound != null && soundIndex < handCannonSound.Length)
+                clipToPlay = handCannonSound[soundIndex];
+        }
+
+        if (clipToPlay != null)
+        {
+            attackAudioSource.PlayOneShot(clipToPlay);
+        }
+    }
     public void CalculateHitEffects(out int finalDamage, out float stunDuration)
     {
         // --- PENGAMAN UTAMA: Jika data senjata null, langsung hitung Tangan Kosong + Buff ---

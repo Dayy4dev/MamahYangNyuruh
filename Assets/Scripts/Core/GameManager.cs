@@ -116,9 +116,12 @@ public class GameManager : MonoBehaviour
         OnStateChanged?.Invoke(oldState, newState);
     }
 
-    private void ApplyStateEffects()
+ private void ApplyStateEffects()
     {
         Time.timeScale = (CurrentState == GameState.Playing || CurrentState == GameState.GameOver) ? 1f : 0f;
+
+        // KUNCI PERBAIKAN: Pastikan AudioListener selalu menyala (false) agar suara UI Inventory tidak pernah mati!
+        AudioListener.pause = false;
 
         if (CurrentState == GameState.Playing)
         {
@@ -126,15 +129,10 @@ public class GameManager : MonoBehaviour
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
 
-            // ─────────────────────────────────────────────────────────────────────────
-            // KUNCI PERBAIKAN: Paksa RoomUIBar untuk muncul kembali saat lepas dari Pause/Inventory
-            // ─────────────────────────────────────────────────────────────────────────
             if (DungeonManager.Instance != null && DungeonManager.Instance.roomUIBar != null)
             {
-                // Panggil fungsi refresh khusus agar bar tahu dia harus menyala lagi
                 DungeonManager.Instance.roomUIBar.RefreshBarVisibilityOnResume();
             }
-            // ─────────────────────────────────────────────────────────────────────────
         }
         else
         {
@@ -143,7 +141,6 @@ public class GameManager : MonoBehaviour
             Cursor.lockState = CursorLockMode.None; 
         }
     }
-
     public void GameOver()
     {
         // Ubah state ke GameOver agar panel COOKED aktif

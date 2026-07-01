@@ -18,9 +18,17 @@ public class InventoryUI : MonoBehaviour
     [Tooltip("Akan dicari secara otomatis jika kosong")]
     [SerializeField] private PlayerBuffManager buffManager;
 
+    [Header("Inventory Audio Settings")]
+    [SerializeField] private AudioSource inventoryAudioSource;
+    [SerializeField] private AudioClip openInventorySound;
+    [SerializeField] private AudioClip closeInventorySound;
+
+    private bool isAlreadyOpen = false; 
+    private float soundDebounceTimer = 0f; 
+    private const float SOUND_DEBOUNCE_TIME = 0.1f; 
+
     private void Start()
     {
-        // Cari buff manager di awal jika masih kosong
         EnsureBuffManagerExists();
 
         if (GameManager.Instance != null)
@@ -35,6 +43,12 @@ public class InventoryUI : MonoBehaviour
 
     private void Update()
     {
+        // KUNCI PERBAIKAN 1: Gunakan unscaledDeltaTime karena Time.deltaTime bernilai 0 saat inventory terbuka!
+        if (soundDebounceTimer > 0f)
+        {
+            soundDebounceTimer -= Time.unscaledDeltaTime;
+        }
+
         if (inventoryPanel != null && inventoryPanel.activeSelf)
         {
             UpdateBuffStatusText();
@@ -44,7 +58,7 @@ public class InventoryUI : MonoBehaviour
     private void OnEnable()
     {
         GameManager.OnStateChanged += HandleStateChanged;
-        EnsureBuffManagerExists(); // Pastikan kita subscribe ke player yang ada di scene
+        EnsureBuffManagerExists(); 
     }
 
     private void OnDisable()
@@ -57,7 +71,6 @@ public class InventoryUI : MonoBehaviour
         }
     }
 
-    // --- TAMBAHAN FUNGSI PENCARIAN DINAMIS ---
     private void EnsureBuffManagerExists()
     {
         if (buffManager == null)
@@ -67,10 +80,9 @@ public class InventoryUI : MonoBehaviour
             {
                 buffManager = player.GetComponent<PlayerBuffManager>();
                 
-                // Daftarkan event begitu kita menemukan Player di scene
                 if (buffManager != null)
                 {
-                    buffManager.OnBuffChanged -= HandleBuffChanged; // Cegah double subscribe
+                    buffManager.OnBuffChanged -= HandleBuffChanged; 
                     buffManager.OnBuffChanged += HandleBuffChanged;
                 }
             }
@@ -93,15 +105,55 @@ public class InventoryUI : MonoBehaviour
         bool isWindowOpen = state == GameState.Inventory; 
         inventoryPanel.transform.localScale = isWindowOpen ? Vector3.one : Vector3.zero; 
         
+        if (isWindowOpen && !isAlreadyOpen)
+        {
+            PlaySound(openInventorySound);
+            isAlreadyOpen = true; 
+        }
+        else if (!isWindowOpen && isAlreadyOpen)
+        {
+            PlaySound(closeInventorySound);
+            isAlreadyOpen = false; 
+        }
+
         if (isWindowOpen) { 
             if (equipmentUI != null) equipmentUI.RefreshUI(); 
             UpdateBuffStatusText();
         }
     }
 
+    private void PlaySound(AudioClip clip)
+    {
+        if (clip == null)
+        {
+            Debug.LogWarning("[InventoryUI] AudioClip belum di-assign di Inspector (openInventorySound / closeInventorySound kosong).");
+            return;
+        }
+
+        // FIX: Debounce nyata — cegah suara open/close "makan" satu sama lain kalau
+        // state berubah 2x dalam waktu sangat singkat (mis. Inventory->Paused->Inventory).
+        // Sebelumnya field ini ada tapi tidak pernah dipakai, jadi Stop() bisa memotong
+        // suara open yang baru saja mulai.
+        if (soundDebounceTimer > 0f) return;
+        soundDebounceTimer = SOUND_DEBOUNCE_TIME;
+
+        if (inventoryAudioSource != null)
+        {
+            inventoryAudioSource.ignoreListenerPause = true;
+            inventoryAudioSource.PlayOneShot(clip);
+        }
+        else
+        {
+            Debug.LogWarning("[InventoryUI] inventoryAudioSource belum di-assign di Inspector, fallback ke PlayClipAtPoint.");
+            if (Camera.main != null)
+            {
+                AudioSource.PlayClipAtPoint(clip, Camera.main.transform.position, 1f);
+            }
+        }
+    }
+    
     private void UpdateBuffStatusText()
     {
-        // Panggil pencarian lagi buat berjaga-jaga jika player baru saja respawn
         EnsureBuffManagerExists();
 
         if (buffManager != null)

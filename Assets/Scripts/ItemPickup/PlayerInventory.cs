@@ -22,6 +22,9 @@ public class PlayerInventory : MonoBehaviour
     [SerializeField] private float normalSpeed = 2f;
     [SerializeField] private float unarmedSpeed = 4f;
 
+    [Header("Inventory Audio Settings")]
+    [SerializeField] private AudioSource inventoryAudioSource;
+
     private WeaponData[] slots = new WeaponData[TOTAL_SLOTS];
     private int currentSlot = SLOT_UNARMED;
     private WeaponPickup nearestPickup;
@@ -47,6 +50,7 @@ public class PlayerInventory : MonoBehaviour
         if (playerMovement == null)
             playerMovement = GetComponent<PlayerMovement>();
     }
+
 
     void Start()
     {

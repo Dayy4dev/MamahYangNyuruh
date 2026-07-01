@@ -27,6 +27,7 @@ public class EnemyDummy : MonoBehaviour, IDamageable
     [Header("Audio Setup")]
     [SerializeField] private AudioSource audioSource;   // Komponen AudioSource milik Enemy/Dummy
     [SerializeField] private AudioClip enemyHurtSound; // File suara placeholder musuh mengaduh
+    [SerializeField] private AudioClip enemyDeathSound; // Suara saat musuh ini mati
 
     void Start()
     {
@@ -149,7 +150,15 @@ public class EnemyDummy : MonoBehaviour, IDamageable
         TutorialManager.Instance.enemiesDefeated++;
     }
 
-    Destroy(gameObject, 0.1f);
+    float destroyDelay = 0.1f;
+    if (audioSource != null && enemyDeathSound != null)
+    {
+        audioSource.PlayOneShot(enemyDeathSound);
+        // Kasih waktu suara mati untuk selesai dulu sebelum objek dihancurkan.
+        destroyDelay = Mathf.Max(destroyDelay, enemyDeathSound.length);
+    }
+
+    Destroy(gameObject, destroyDelay);
 }
 
     void OnCollisionEnter(Collision collision)
