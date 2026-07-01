@@ -1458,7 +1458,10 @@ MonoBehaviour:
   engagementRange: 2.43
   enemyAudioSource: {fileID: 4354881217396108714}
   meleeAttackSound: {fileID: 8300000, guid: a7be4fde950227e44a42791025976828, type: 3}
-  hurtSounds: []
+  hurtSounds:
+  - {fileID: 8300000, guid: c8c31b8d9bc0dc342b0d41a0f194f663, type: 3}
+  - {fileID: 8300000, guid: dab7edfe21dd8054cba9c1bf154eaf2c, type: 3}
+  - {fileID: 8300000, guid: dc56b16cb71b8b34da8c0d39a495c9b5, type: 3}
   deathSound: {fileID: 0}
 --- !u!114 &-99885767059885274
 MonoBehaviour:
@@ -1492,7 +1495,7 @@ MonoBehaviour:
   hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
   healthBar: {fileID: 2003538304596154773}
   audioSource: {fileID: 4354881217396108714}
-  enemyHurtSound: {fileID: 0}
+  enemyHurtSound: {fileID: 8300000, guid: dab7edfe21dd8054cba9c1bf154eaf2c, type: 3}
   enemyDeathSound: {fileID: 0}
 --- !u!114 &1210440286633072247
 MonoBehaviour:
@@ -1581,7 +1584,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.65
   m_Pitch: 1
   Loop: 0
   Mute: 0

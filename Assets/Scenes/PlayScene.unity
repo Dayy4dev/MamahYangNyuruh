@@ -3429,7 +3429,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 876735405374313380, guid: 79e59df9a49e54c4981b8d03109d3a93, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2198864734182669174, guid: 79e59df9a49e54c4981b8d03109d3a93, type: 3}
       propertyPath: m_Enabled
@@ -12520,12 +12520,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 11594
   deathSceneReloadDelay: 2
-  playerAudioSource: {fileID: 1929026401}
+  playerAudioSource: {fileID: 1221553389}
   hurtSounds:
   - {fileID: 8300000, guid: c8c31b8d9bc0dc342b0d41a0f194f663, type: 3}
   - {fileID: 8300000, guid: dab7edfe21dd8054cba9c1bf154eaf2c, type: 3}
   - {fileID: 8300000, guid: dc56b16cb71b8b34da8c0d39a495c9b5, type: 3}
   deathSound: {fileID: 0}
+  hurtSoundCooldown: 0.2
 --- !u!114 &1929026397
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12619,7 +12620,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.696
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -13212,7 +13213,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2018715808}
   - component: {fileID: 2018715807}
-  - component: {fileID: 2018715809}
   m_Layer: 5
   m_Name: Inventory UI
   m_TagString: Untagged
@@ -13249,27 +13249,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &2018715809
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2018715806}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d8deb997dcf0eda4dbb64d72cf2cee4c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::InventoryUI
-  inventoryPanel: {fileID: 2018715806}
-  equipmentUI: {fileID: 668856124}
-  atkBuffText: {fileID: 2044325410}
-  maxHpBuffText: {fileID: 1899237022}
-  playerObject: {fileID: 1929026393}
-  buffManager: {fileID: 0}
-  inventoryAudioSource: {fileID: 0}
-  openInventorySound: {fileID: 0}
-  closeInventorySound: {fileID: 0}
 --- !u!1 &2032856335
 GameObject:
   m_ObjectHideFlags: 0

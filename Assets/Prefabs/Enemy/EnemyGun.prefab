@@ -2488,7 +2488,7 @@ MonoBehaviour:
   visionRange: 20
   engagementRange: 10
   hostileAudioSource: {fileID: -9053435891770530329}
-  rangedShootSound: {fileID: 0}
+  rangedShootSound: {fileID: 8300000, guid: 79ba2d3fd0d858c4a8b7fc1a88b51c22, type: 3}
 --- !u!114 &5192306811957434602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2506,7 +2506,7 @@ MonoBehaviour:
   hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
   healthBar: {fileID: 8262082258519199807}
   audioSource: {fileID: -9053435891770530329}
-  enemyHurtSound: {fileID: 8300000, guid: b0a6fb3f55437ad4caec8d8663d0e279, type: 3}
+  enemyHurtSound: {fileID: 8300000, guid: c8c31b8d9bc0dc342b0d41a0f194f663, type: 3}
   enemyDeathSound: {fileID: 8300000, guid: b0a6fb3f55437ad4caec8d8663d0e279, type: 3}
 --- !u!114 &4669038041546032923
 MonoBehaviour:
@@ -2610,7 +2610,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.631
   m_Pitch: 1
   Loop: 0
   Mute: 0

@@ -12,12 +12,16 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     [Header("Death Settings")]
     [SerializeField] private float deathSceneReloadDelay = 2f;
 
-    [Header("Audio Settings")]
-    [SerializeField] private AudioSource playerAudioSource;
-    [Tooltip("Suara saat player kena damage (boleh isi beberapa varian, akan dipilih random)")]
-    [SerializeField] private AudioClip[] hurtSounds;
-    [Tooltip("Suara saat player mati")]
-    [SerializeField] private AudioClip deathSound;
+   [Header("Audio Settings")]
+[SerializeField] private AudioSource playerAudioSource;
+[Tooltip("Suara saat player kena damage (boleh isi beberapa varian, akan dipilih random)")]
+[SerializeField] private AudioClip[] hurtSounds;
+[Tooltip("Suara saat player mati")]
+[SerializeField] private AudioClip deathSound;
+[SerializeField] private float hurtSoundCooldown = 0.2f; // Jeda waktu minimal antar suara sakit
+
+private float nextHurtSoundTime = 0f; // Melacak kapan suara boleh berbunyi lagi
+
 
     // Properti untuk melacak status kematian player (dicek oleh PlayerAttack dan PlayerInventory)
     public bool IsDead { get; private set; }
@@ -42,16 +46,21 @@ public class PlayerHealth : MonoBehaviour, IDamageable
             playerAudioSource = GetComponent<AudioSource>();
     }
 
-    private void PlayHurtSound()
-    {
-        if (playerAudioSource == null || hurtSounds == null || hurtSounds.Length == 0) return;
+private void PlayHurtSound()
+{
+    if (playerAudioSource == null || hurtSounds == null || hurtSounds.Length == 0) return;
 
-        AudioClip clip = hurtSounds[Random.Range(0, hurtSounds.Length)];
-        if (clip != null)
-        {
-            playerAudioSource.PlayOneShot(clip);
-        }
+    // JIKA belum melewati waktu cooldown, abaikan pemutaran suara kali ini
+    if (Time.time < nextHurtSoundTime) return; 
+
+    AudioClip clip = hurtSounds[Random.Range(0, hurtSounds.Length)];
+    if (clip != null)
+    {
+        playerAudioSource.PlayOneShot(clip);
+        // Perbarui waktu kapan suara berikutnya boleh dimainkan
+        nextHurtSoundTime = Time.time + hurtSoundCooldown;
     }
+}
 
     public void TakeDamage(int amount)
     {
