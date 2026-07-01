@@ -128,7 +128,7 @@ public class PlayerAttack : MonoBehaviour
         // --- PENGAMAN UTAMA: Jika data senjata null, langsung hitung Tangan Kosong + Buff ---
         if (currentWeaponData == null)
         {
-            finalDamage = 10 + permanentDamageBuff; 
+            finalDamage = currentWeaponData.damage + (permanentDamageBuff / currentWeaponData.maxComboCount); 
             stunDuration = 0.3f;
             Debug.LogWarning("[PlayerAttack] currentWeaponData null! Menggunakan rumus Tangan Kosong + Buff.");
             return;
@@ -140,13 +140,13 @@ public class PlayerAttack : MonoBehaviour
         // --- RUMUS MELEE UNTUK CANNON/HANDCANNON ---
         if (category == "Cannon")
         {
-            finalDamage = currentWeaponData.damage + permanentDamageBuff;
+            finalDamage = currentWeaponData.damage + (permanentDamageBuff / currentWeaponData.maxComboCount*2);
             stunDuration = 0f; 
             return;
         }
 
         // --- RUMUS MELEE UNTUK SWORD (BALLOONSWORD) & HAMMER ---
-        int baseTotal = currentWeaponData.damage + permanentDamageBuff;
+        int baseTotal = currentWeaponData.damage + (permanentDamageBuff / currentWeaponData.maxComboCount);
         finalDamage = baseTotal;
         stunDuration = 0.3f;
 
