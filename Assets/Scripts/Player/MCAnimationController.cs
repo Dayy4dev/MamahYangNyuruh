@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 using System;
 
 [AddComponentMenu("Player/MC Animation Controller")]
@@ -22,7 +23,6 @@ public class MCAnimationController : MonoBehaviour
     private bool isInComboCooldown;
     private int currentWeaponIndex = WEAPON_SWORD;
 
-    // Hammer Attack2 Input Buffer
     [Header("Hammer Attack2 Buffer")]
     [Tooltip("How long (seconds) a buffered Attack2 input stays valid during Attack1 wind-up.")]
     [SerializeField] private float comboInputBuffer = 0.4f;
@@ -61,6 +61,28 @@ public class MCAnimationController : MonoBehaviour
     void Start()
     {
         ApplyWeaponIndex(currentWeaponIndex);
+        EnsureAimRigLayer();
+    }
+
+    private void EnsureAimRigLayer()
+    {
+        Transform aimRigTransform = transform.Find("AimRig");
+        if (aimRigTransform == null) return;
+
+        var aimRig = aimRigTransform.GetComponent<Rig>();
+        if (aimRig == null) return;
+
+        var rigBuilder = GetComponent<RigBuilder>();
+        if (rigBuilder == null) return;
+
+        for (int i = 0; i < rigBuilder.layers.Count; i++)
+        {
+            if (rigBuilder.layers[i].rig == aimRig)
+                return;
+        }
+
+        rigBuilder.layers.Add(new UnityEngine.Animations.Rigging.RigLayer(aimRig));
+        Debug.Log("[MCAnimCtrl] AimRig added to RigBuilder layers.");
     }
 
     void Update()
@@ -123,7 +145,6 @@ public class MCAnimationController : MonoBehaviour
             case 1: animator.SetTrigger(Attack1); break;
             case 2: 
                 animator.SetTrigger(Attack2); 
-                // Hammer Attack2 fired directly (no buffer needed this time)
                 if (currentWeaponIndex == WEAPON_HAMMER)
                     OnHammerAttack2Fired?.Invoke();
                 break;
@@ -138,7 +159,6 @@ public class MCAnimationController : MonoBehaviour
         }
     }
 
-    // Hammer Buffer Flush
     private void FlushHammerAttack2Buffer()
     {
         if (!hammerAttack2Buffered) return;
@@ -163,7 +183,6 @@ public class MCAnimationController : MonoBehaviour
             Debug.Log("[MCAnimCtrl] Hammer Attack2 trigger fired from buffer.");
         }
     }
-    // ─────────────────────────────────────────────────────────────────
 
     private void UpdateComboCooldown()
     {
