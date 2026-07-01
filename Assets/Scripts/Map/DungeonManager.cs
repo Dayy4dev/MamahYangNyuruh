@@ -452,7 +452,14 @@ public class DungeonManager : MonoBehaviour
         if (floorUIText != null)
         {
             int floorSekarang = FloorManager.Instance != null ? FloorManager.Instance.CurrentFloor : 1;
-            floorUIText.text = "Floor = " + floorSekarang;
+            if (floorSekarang % 4 == 0)
+            {
+                floorUIText.text = "Boss Floor ";
+            }
+            else
+            {
+                floorUIText.text = "Floor " + floorSekarang;
+            }
         }
     }
     // Taruh ini di bagian bawah DungeonManager.cs sebelum kurung kurawal tutup terakhir
