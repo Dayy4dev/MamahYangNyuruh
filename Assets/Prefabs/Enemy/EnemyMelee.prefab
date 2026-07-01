@@ -1495,7 +1495,10 @@ MonoBehaviour:
   hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
   healthBar: {fileID: 2003538304596154773}
   audioSource: {fileID: 4354881217396108714}
-  enemyHurtSound: {fileID: 8300000, guid: dab7edfe21dd8054cba9c1bf154eaf2c, type: 3}
+  enemyHurtSounds:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   enemyDeathSound: {fileID: 0}
 --- !u!114 &1210440286633072247
 MonoBehaviour:
@@ -1584,7 +1587,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 0.65
+  m_Volume: 0.481
   m_Pitch: 1
   Loop: 0
   Mute: 0

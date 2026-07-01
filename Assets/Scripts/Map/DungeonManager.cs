@@ -30,6 +30,9 @@ public class DungeonManager : MonoBehaviour
     [Header("Partner Wildcard Setup")]
     public GameObject partnerPrefab; // Seret Prefab Partner ke sini di Inspector
     [Range(0, 100)] public float partnerSpawnChance = 40f; // Peluang muncul (40%)
+    [Header("Dungeon Audio Settings")]
+    [SerializeField] private AudioSource dungeonAudioSource;
+    [SerializeField] private AudioClip doorOpenSound;
 
     // Internal state
     private RoomController currentRoom;
@@ -238,11 +241,27 @@ public class DungeonManager : MonoBehaviour
 
     void OpenExitDoorsOfRoom(RoomType type)
     {
-        if (roomMap.TryGetValue(type, out RoomController room))
-            foreach (var door in room.exitDoors)
-                if (door != null) door.UnlockDoor();
-    }
+        bool doorUnlocked = false;
 
+        if (roomMap.TryGetValue(type, out RoomController room)) //
+        {
+            foreach (var door in room.exitDoors) //[cite: 6]
+            {
+                if (door != null) //[cite: 6]
+                {
+                    door.UnlockDoor(); //[cite: 6]
+                    doorUnlocked = true; // Tandai bahwa ada pintu yang berhasil terbuka
+                }
+            }
+        }
+
+        // TAMBAHKAN LOGIKA AUDIO INI:
+        // Jika ada pintu yang terbuka, mainkan efek suara doorOpen
+        if (doorUnlocked && dungeonAudioSource != null && doorOpenSound != null)
+        {
+            dungeonAudioSource.PlayOneShot(doorOpenSound);
+        }
+    }
     void ActivatePortalInRoom(RoomController room)
     {
         NextMapPortal portal = room.GetComponentInChildren<NextMapPortal>(true);

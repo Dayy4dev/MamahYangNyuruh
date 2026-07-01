@@ -17,6 +17,10 @@ public class MainMenu : MonoBehaviour
     public GameObject playSelectionMenu; 
     public GameObject mainMenuPanel;
 
+    [Header("Click Sound")]
+    [SerializeField] private AudioSource uiAudioSource;
+    [SerializeField] private AudioClip clickSound;
+
     private void Start()
     {
         // Paksa menyala di awal agar tidak ter-hide otomatis
@@ -56,15 +60,26 @@ public class MainMenu : MonoBehaviour
 
     public void BackMenu()
     {
+        PlayClickSound();
         LevelManager.Instance.LoadScene("MainMenu", "CircleWipe");
         Time.timeScale = 1f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
 
+    private void PlayClickSound()
+    {
+        if (uiAudioSource != null && clickSound != null)
+        {
+            uiAudioSource.ignoreListenerPause = true;
+            uiAudioSource.PlayOneShot(clickSound);
+        }
+    }
+
     // MODIFIKASI: Sekarang fungsi Play hanya membuka UI pilihan
     public void Play()
     {
+        PlayClickSound();
       
         if (playSelectionMenu != null)
         {
@@ -80,6 +95,7 @@ public class MainMenu : MonoBehaviour
     // Fungsi untuk menutup UI pilihan jika klik tombol 'Back'
     public void ClosePlaySelection()
     {
+        PlayClickSound();
         if (playSelectionMenu != null)
         {
             playSelectionMenu.SetActive(false);
@@ -93,6 +109,7 @@ public class MainMenu : MonoBehaviour
     // PILIHAN 1: Mulai dari Tutorial Scene
     public void StartTutorial()
     {
+        PlayClickSound();
         MusicManager.Instance.StopLobbyPlaylist();
         LevelManager.Instance.LoadScene("Tutorial", "CircleWipe"); 
         MusicManager.Instance.PlayMusic("Game");
@@ -104,6 +121,7 @@ public class MainMenu : MonoBehaviour
     // PILIHAN 2: Langsung Main (Ganti "PlayScene" dengan nama scene gameplay utama Anda)
     public void StartDirectGame()
     {
+        PlayClickSound();
         MusicManager.Instance.StopLobbyPlaylist();
         LevelManager.Instance.LoadScene("PlayScene", "CircleWipe"); 
         MusicManager.Instance.PlayMusic("Game");
@@ -114,6 +132,7 @@ public class MainMenu : MonoBehaviour
 
     public void PauseGame()
     {
+        PlayClickSound();
         currentState = MenuState.Paused;
         if (pauseMenu != null)
         {
@@ -129,6 +148,7 @@ public class MainMenu : MonoBehaviour
 
     public void ResumeGame()
     {
+        PlayClickSound();
         currentState = MenuState.Playing;
         if (pauseMenu != null)
         {
@@ -140,6 +160,7 @@ public class MainMenu : MonoBehaviour
 
     public void Quit()
     {
+        PlayClickSound();
         Application.Quit();
     }
 

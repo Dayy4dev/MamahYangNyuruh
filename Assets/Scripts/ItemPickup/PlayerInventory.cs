@@ -25,6 +25,9 @@ public class PlayerInventory : MonoBehaviour
     [Header("Inventory Audio Settings")]
     [SerializeField] private AudioSource inventoryAudioSource;
 
+    [SerializeField] private AudioClip switchWeaponSound; // <- TAMBAHKAN VARIABEL BARU INI
+
+
     private WeaponData[] slots = new WeaponData[TOTAL_SLOTS];
     private int currentSlot = SLOT_UNARMED;
     private WeaponPickup nearestPickup;
@@ -183,7 +186,7 @@ public class PlayerInventory : MonoBehaviour
         onSlotChanged?.Invoke(index, data);
     }
 
-   private void DropFromSlot(int index)
+    private void DropFromSlot(int index)
     {
         if (index == SLOT_UNARMED) return;
         WeaponData data = slots[index];
@@ -193,10 +196,10 @@ public class PlayerInventory : MonoBehaviour
         {
             Vector3 spawnPos = dropPoint != null ? dropPoint.position : transform.position + transform.forward * 0.8f;
             if (dropPoint != null) spawnPos.y = dropPoint.position.y;
-            
+
             // 1. Instantiate senjata yang dijatuhkan
             GameObject dropped = Instantiate(data.pickupPrefab, spawnPos, Quaternion.identity);
-            
+
             if (dropped.TryGetComponent<WeaponPickup>(out WeaponPickup wp)) wp.MarkAsDropped();
 
             // 2. TAMBAHKAN LOGIKA INI: Jadikan item yang dijatuhkan sebagai child dari room saat ini
@@ -205,7 +208,7 @@ public class PlayerInventory : MonoBehaviour
                 DungeonManager.Instance.ParentItemToCurrentRoom(dropped.transform);
             }
         }
-        
+
         SetSlot(index, null);
     }
     private int FindEmptyWeaponSlot()
@@ -214,21 +217,30 @@ public class PlayerInventory : MonoBehaviour
         return -1;
     }
 
-   private void SwitchToSlot(int slotIndex)
-{
-    if (slotIndex < 0 || slotIndex >= TOTAL_SLOTS) return;
+    private void SwitchToSlot(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= TOTAL_SLOTS) return;
 
-    // 1. Simpan slot yang sedang aktif saat ini
-    currentSlot = slotIndex; 
+        // Simpan slot lama untuk pengecekan apakah slotnya benar-benar berubah
+        int oldSlot = currentSlot;
 
-    // 2. Serahkan seluruh tugas pencarian visual & hitbox ke EquipSlot yang sudah terbukti bisa membaca mendalam (allChildrenCache)
-    EquipSlot(slotIndex);
+        // 1. Simpan slot yang sedang aktif saat ini[cite: 2]
+        currentSlot = slotIndex;
 
-    // 3. Jalankan event bawaan Unity Inventory kamu
-    onActiveSlotChanged?.Invoke(currentSlot); 
-    onSlotChanged?.Invoke(currentSlot, slots[currentSlot]); 
-}
+        // 2. Serahkan seluruh tugas pencarian visual & hitbox ke EquipSlot[cite: 2]
+        EquipSlot(slotIndex);
 
+        // TAMBAHKAN LOGIKA AUDIO INI:
+        // Putar suara jika slot yang dipilih berbeda dengan slot sebelumnya dan file audio telah di-assign
+        if (oldSlot != currentSlot && inventoryAudioSource != null && switchWeaponSound != null)
+        {
+            inventoryAudioSource.PlayOneShot(switchWeaponSound);
+        }
+
+        // 3. Jalankan event bawaan Unity Inventory kamu[cite: 2]
+        onActiveSlotChanged?.Invoke(currentSlot);
+        onSlotChanged?.Invoke(currentSlot, slots[currentSlot]);  //[cite: 2]
+    }
     private void EquipSlot(int index)
     {
         WeaponData activeData = slots[index];

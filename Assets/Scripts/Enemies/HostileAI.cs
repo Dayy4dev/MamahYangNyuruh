@@ -45,6 +45,8 @@ public class HostileAI : MonoBehaviour, IDamageable
     [Header("Audio")]
     [SerializeField] private AudioSource hostileAudioSource;
     [SerializeField] private AudioClip rangedShootSound;
+    [SerializeField] private AudioClip[] enemyHurtSounds;
+[SerializeField] private AudioClip enemyDeathSound;
 
     private bool isPlayerVisible;
     private bool isPlayerInRange;
@@ -324,38 +326,58 @@ public class HostileAI : MonoBehaviour, IDamageable
     // ── IDamageable ───────────────────────────────────────────────────────────
 
     public void TakeDamage(int amount)
+{
+    if (isDead) return; // Jaga agar tidak memproses damage jika sudah mati
+
+    currentHealth = Mathf.Clamp(currentHealth - amount, 0, maxHealth);
+
+    if (healthBar != null) healthBar.SetHealth(currentHealth);
+
+    Debug.Log($"[HostileAI] {gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
+
+    // --- TAMBAHAN: Memutar suara kesakitan acak ---
+    if (hostileAudioSource != null && currentHealth > 0 && enemyHurtSounds != null && enemyHurtSounds.Length > 0)
     {
-        if (isDead) return; // Jaga agar tidak memproses damage jika sudah mati
-
-        currentHealth = Mathf.Clamp(currentHealth - amount, 0, maxHealth);
-
-        if (healthBar != null) healthBar.SetHealth(currentHealth);
-
-        Debug.Log($"[HostileAI] {gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
-
-        if (currentHealth <= 0)
+        AudioClip randomHurtSound = enemyHurtSounds[Random.Range(0, enemyHurtSounds.Length)];
+        if (randomHurtSound != null)
         {
-            isDead = true; // Tandai sudah mati
-            Die();
+            hostileAudioSource.PlayOneShot(randomHurtSound);
         }
     }
+
+    if (currentHealth <= 0)
+    {
+        isDead = true; // Tandai sudah mati
+        Die();
+    }
+}
 
     private void Die()
+{
+    Debug.Log($"[HostileAI] {gameObject.name} mati!");
+
+    if (spawner != null) spawner.NotifyEnemyDestroyed(gameObject);
+
+    if (projectilePoolRoot != null)
     {
-        Debug.Log($"[HostileAI] {gameObject.name} mati!");
-
-        if (spawner != null) spawner.NotifyEnemyDestroyed(gameObject);
-
-        if (projectilePoolRoot != null)
-        {
-            Destroy(projectilePoolRoot.gameObject);
-        }
-
-        // Mematikan agent dan collider agar tidak mengganggu game saat proses hancur 0.1 detik
-        if (navAgent != null) navAgent.enabled = false;
-        Collider col = GetComponent<Collider>();
-        if (col != null) col.enabled = false;
-
-        Destroy(gameObject, 0.1f);
+        Destroy(projectilePoolRoot.gameObject);
     }
+
+    // Mematikan agent dan collider agar tidak mengganggu game
+    if (navAgent != null) navAgent.enabled = false;
+    Collider col = GetComponent<Collider>();
+    if (col != null) col.enabled = false;
+
+    float destroyDelay = 0.1f;
+
+    // --- TAMBAHAN: Memutar suara kematian ---
+    if (hostileAudioSource != null && enemyDeathSound != null)
+    {
+        hostileAudioSource.PlayOneShot(enemyDeathSound);
+        // Menunggu suara selesai sebelum menghancurkan GameObject
+        destroyDelay = Mathf.Max(destroyDelay, enemyDeathSound.length);
+    }
+
+    Destroy(gameObject, destroyDelay);
+}
 }

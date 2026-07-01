@@ -26,7 +26,7 @@ public class EnemyDummy : MonoBehaviour, IDamageable
     // -------------------------------------------------------------------------
     [Header("Audio Setup")]
     [SerializeField] private AudioSource audioSource;   // Komponen AudioSource milik Enemy/Dummy
-    [SerializeField] private AudioClip enemyHurtSound; // File suara placeholder musuh mengaduh
+    [SerializeField] private AudioClip[] enemyHurtSounds = new AudioClip[3]; // 3 variasi suara hurt
     [SerializeField] private AudioClip enemyDeathSound; // Suara saat musuh ini mati
 
     void Start()
@@ -39,7 +39,7 @@ public class EnemyDummy : MonoBehaviour, IDamageable
         // Daftar ke spawner terdekat agar counter UI terupdate
         spawner = GetComponentInParent<EnemySpawner>();
         if (spawner == null)
-            spawner = FindObjectOfType<EnemySpawner>();
+            spawner = FindFirstObjectByType<EnemySpawner>();
 
         skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
         originalColors = new Color[skinnedMeshRenderers.Length][];
@@ -59,41 +59,38 @@ public class EnemyDummy : MonoBehaviour, IDamageable
         }
     }
 
-    public void TakeDamage(int amount)
+public void TakeDamage(int amount)
 {
+    if (currentHealth <= 0) return; // Sudah mati, abaikan
+
     currentHealth -= amount;
-    currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+    Debug.Log($"{gameObject.name} terkena {amount} damage. HP tersisa: {currentHealth}");
 
     if (healthBar != null)
         healthBar.SetHealth(currentHealth);
 
-    if (audioSource != null && enemyHurtSound != null)
-        audioSource.PlayOneShot(enemyHurtSound);
+    // Efek flash warna merah
+    StartCoroutine(HitFlash());
 
-    if (skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0)
+    // ==========================================
+    // 🔴 PERBAIKAN: PLAY RANDOM HURT SOUND
+    // ==========================================
+    if (audioSource != null && currentHealth > 0)
     {
-        StartCoroutine(HitFlash());
-    }
-
-    // --- KNOCKBACK ---
-    // Cari objek player di dalam map
-    GameObject player = GameObject.FindGameObjectWithTag("Player");
-    if (player != null)
-    {
-
-        if (player.TryGetComponent<PlayerAttack>(out PlayerAttack pAttack))
+        // Pilih suara hurt random dari array
+        AudioClip randomHurtSound = enemyHurtSounds[Random.Range(0, enemyHurtSounds.Length)];
+        if (randomHurtSound != null)
         {
-            pAttack.ApplyKnockback(gameObject);
+            audioSource.PlayOneShot(randomHurtSound);
         }
     }
-    // ------------------------------------------
-
-    Debug.Log($"{gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
+    // ==========================================
 
     if (currentHealth <= 0)
+    {
         Die();
-} 
-
+    }
+}
     IEnumerator HitFlash()
     {
         ChangeMeshColor(hitFlashColor);
