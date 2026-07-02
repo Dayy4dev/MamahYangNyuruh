@@ -23,11 +23,14 @@ public class MCAnimationController : MonoBehaviour
     private bool isInComboCooldown;
     private int currentWeaponIndex = WEAPON_SWORD;
 
+    public bool IsInComboCooldown => isInComboCooldown;
+
     [Header("Hammer Attack2 Buffer")]
     [Tooltip("How long (seconds) a buffered Attack2 input stays valid during Attack1 wind-up.")]
     [SerializeField] private float comboInputBuffer = 0.4f;
 
     public event Action OnHammerAttack2Fired;
+    public event Action OnHammerAttack3Fired;
 
     private bool hammerAttack2Buffered;  
     private float hammerBufferExpiry;    
@@ -148,7 +151,11 @@ public class MCAnimationController : MonoBehaviour
                 if (currentWeaponIndex == WEAPON_HAMMER)
                     OnHammerAttack2Fired?.Invoke();
                 break;
-            case 3: animator.SetTrigger(Attack3); break;
+            case 3: 
+                animator.SetTrigger(Attack3); 
+                if (currentWeaponIndex == WEAPON_HAMMER)
+                    OnHammerAttack3Fired?.Invoke();
+                break;
         }
 
         int maxComboPassed = GetMaxCombo();

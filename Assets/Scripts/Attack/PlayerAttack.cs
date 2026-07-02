@@ -23,6 +23,8 @@ public class PlayerAttack : MonoBehaviour
 
     public event Action<int> OnAttackExecuted;
 
+    public event Action OnHeavyImpactExecuted;
+
     void Awake()
     {
         if (playerHealth == null)
@@ -58,11 +60,6 @@ public class PlayerAttack : MonoBehaviour
     {
         currentComboHit = 0;
     }
-
-    // public int GetCurrentComboHit()
-    // {
-    //     return currentComboHit;
-    // }
 
     public int GetCurrentComboHit()
     {
@@ -102,7 +99,12 @@ public class PlayerAttack : MonoBehaviour
         // 1. Cek apakah senjata siap dipakai (tidak sedang reload/rehat)
         if (activeWeaponComponent != null && !activeWeaponComponent.CanAttack()) return;
 
-        // 2. ATUR COMBO TERLEBIH DAHULU SEBELUM HITBOX SENJATA AKTIF
+        // 2. CEK COMBO COOLDOWN — jangan advance combo jika animasi sebelumnya
+        //    masih dalam cooldown (mencegah combo skip)
+        MCAnimationController animCtrl = FindFirstObjectByType<MCAnimationController>();
+        if (animCtrl != null && animCtrl.IsInComboCooldown) return;
+
+        // 3. ATUR COMBO TERLEBIH DAHULU SEBELUM HITBOX SENJATA AKTIF
         float timeSinceLastAttack = Time.time - lastAttackTime;
         if (timeSinceLastAttack > comboResetDuration)
         {
@@ -119,16 +121,16 @@ public class PlayerAttack : MonoBehaviour
         string weaponName = (currentWeaponData != null) ? currentWeaponData.weaponName : "Tangan Kosong";
         Debug.Log($"[Attack Melee] Mengayunkan {weaponName} | Combo Hit: {currentComboHit}");
 
-    // Notify animation system — fires for EVERY click, even when combo value wraps
-    OnAttackExecuted?.Invoke(currentComboHit);
+        // Notify animation system — fires for EVERY click, even when combo value wraps
+        OnAttackExecuted?.Invoke(currentComboHit);
 
-        // 3. JALANKAN LOGIKA SERANGAN SENJATA
+        // 4. JALANKAN LOGIKA SERANGAN SENJATA
         if (activeWeaponComponent != null)
         {
             activeWeaponComponent.Attack(); 
         }
 
-        // 4. AKTIFKAN HITBOX SENJATA PALING TERAKHIR AGAR MEMBACA COMBO YANG SUDAH UP-TO-DATE
+        // 5. AKTIFKAN HITBOX SENJATA PALING TERAKHIR AGAR MEMBACA COMBO YANG SUDAH UP-TO-DATE
         if (weaponHitbox != null)
         {
             weaponHitbox.ActivateHitbox();
@@ -171,6 +173,11 @@ public class PlayerAttack : MonoBehaviour
             finalDamage = Mathf.RoundToInt(baseTotal * 1.25f);
             stunDuration = 0.8f;
         }
+        else if (category == "Hammer" && currentComboHit == 3)
+        {
+            finalDamage = Mathf.RoundToInt(baseTotal * 1.50f);
+            stunDuration = 1.0f;
+        }
     }
     
     public int GetPermanentDamageBuff()
@@ -200,7 +207,7 @@ public class PlayerAttack : MonoBehaviour
         return currentWeaponData; 
     }
 
-    public void ApplyKnockback(GameObject target)
+    public void ApplyKnockback(GameObject target, float verticalForce = 0f)
     {
         if (target == null || currentWeaponData == null) return;
 
@@ -216,6 +223,16 @@ public class PlayerAttack : MonoBehaviour
             if (category == "Hammer") force = 8f; 
 
             targetRb.AddForce(knockbackDirection * force, ForceMode.VelocityChange);
+
+            if (verticalForce > 0f)
+            {
+                targetRb.AddForce(Vector3.up * verticalForce, ForceMode.VelocityChange);
+            }
         }
+    }
+
+    public void FireHeavyImpactEvent()
+    {
+        OnHeavyImpactExecuted?.Invoke();
     }
 }

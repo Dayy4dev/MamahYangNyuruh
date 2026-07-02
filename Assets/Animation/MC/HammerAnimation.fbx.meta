@@ -28,7 +28,8 @@ ModelImporter:
       quality.\n\t'upper_arm.L' has translation animation that will be discarded.\n\t'upper_arm.R'
       has translation animation that will be discarded.\n\t'thigh.L' has translation
       animation that will be discarded.\n\t'thigh.R' has translation animation that
-      will be discarded.\n"
+      will be discarded.\nEvent OnHeavyImpactAnimationEvent has a time (7.112000)
+      outside the clip's valid range (0.000000..2.666667). It will never be fired"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0

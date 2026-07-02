@@ -1,8 +1,11 @@
 using UnityEngine;
+using System;
 using System.Collections;
 
 public class WeaponHitbox : MonoBehaviour
 {
+    public event Action<GameObject> OnEnemyHit;
+
     private Collider hitboxCollider;
 
     void Awake()
@@ -81,6 +84,9 @@ private void OnTriggerEnter(Collider other)
             // 1. Berikan damage hasil kalkulasi buff ke musuh!
             enemyHealth.TakeDamage(damageYangDiberikan);
             Debug.Log($"[Hitbox Melee] Berhasil memukul {other.name} | Total Damage + Buff: {damageYangDiberikan}");
+
+            // Notify listeners (e.g. ToyHammer for HeavyImpact dedup)
+            OnEnemyHit?.Invoke(other.gameObject);
 
             // 2. Berikan efek dorongan (Knockback)
             if (playerAttack != null)
