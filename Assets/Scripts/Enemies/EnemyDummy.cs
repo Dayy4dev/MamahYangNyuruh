@@ -13,6 +13,7 @@ public class EnemyDummy : MonoBehaviour, IDamageable
 
     private SkinnedMeshRenderer[] skinnedMeshRenderers;
     private Color[][] originalColors;
+    private Coroutine hitFlashCoroutine;
 
     private string colorPropertyName = "_BaseColor";
 
@@ -35,27 +36,38 @@ public class EnemyDummy : MonoBehaviour, IDamageable
         if (healthBar != null)
             healthBar.SetMaxHealth(maxHealth);
 
-        // Daftar ke spawner terdekat agar counter UI terupdate
         spawner = GetComponentInParent<EnemySpawner>();
         if (spawner == null)
             spawner = FindObjectOfType<EnemySpawner>();
 
-        skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
-        originalColors = new Color[skinnedMeshRenderers.Length][];
+        CacheRenderers();
+    }
 
+    private bool renderersCached = false;
+
+    private void CacheRenderers()
+    {
+        if (renderersCached) return;
+
+        skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
+        if (skinnedMeshRenderers.Length == 0)
+        {
+            Debug.LogWarning($"[EnemyDummy] No SkinnedMeshRenderer found on '{gameObject.name}' or its children!");
+            return;
+        }
+
+        originalColors = new Color[skinnedMeshRenderers.Length][];
         for (int i = 0; i < skinnedMeshRenderers.Length; i++)
         {
             Material[] materials = skinnedMeshRenderers[i].materials;
             originalColors[i] = new Color[materials.Length];
-            
             for (int j = 0; j < materials.Length; j++)
             {
                 if (materials[j].HasProperty(colorPropertyName))
-                {
                     originalColors[i][j] = materials[j].GetColor(colorPropertyName);
-                }
             }
         }
+        renderersCached = true;
     }
 
     public void TakeDamage(int amount)
@@ -69,9 +81,13 @@ public class EnemyDummy : MonoBehaviour, IDamageable
     if (audioSource != null && enemyHurtSound != null)
         audioSource.PlayOneShot(enemyHurtSound);
 
+    if (!renderersCached) CacheRenderers();
+
     if (skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0)
     {
-        StartCoroutine(HitFlash());
+        if (hitFlashCoroutine != null)
+            StopCoroutine(hitFlashCoroutine);
+        hitFlashCoroutine = StartCoroutine(HitFlash());
     }
 
     // --- KNOCKBACK ---
@@ -100,6 +116,7 @@ public class EnemyDummy : MonoBehaviour, IDamageable
         yield return new WaitForSeconds(hitFlashDuration);
         
         ResetMeshColor();
+        hitFlashCoroutine = null;
     }
 
     private void ChangeMeshColor(Color color)

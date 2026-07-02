@@ -46,6 +46,10 @@ public class HostileAI : MonoBehaviour, IDamageable
     [SerializeField] private AudioSource hostileAudioSource;
     [SerializeField] private AudioClip rangedShootSound;
 
+    [Header("Visual Feedback")]
+    [SerializeField] private float hitFlashDuration = 0.1f;
+    [SerializeField] private Color hitFlashColor = Color.red;
+
     private bool isPlayerVisible;
     private bool isPlayerInRange;
     private readonly Queue<GameObject> projectilePool = new Queue<GameObject>();
@@ -53,6 +57,13 @@ public class HostileAI : MonoBehaviour, IDamageable
     private EnemySpawner spawner;
     private bool isDead = false;
     private EnemyStunHandler stunHandler;
+
+    // Hit flash
+    private SkinnedMeshRenderer[] skinnedMeshRenderers;
+    private Color[][] originalColors;
+    private Coroutine hitFlashCoroutine;
+    private bool renderersCached = false;
+    private readonly string colorPropertyName = "_BaseColor";
 
     // ── Scaling API ───────────────────────────────────────────────────────────
 
@@ -246,8 +257,6 @@ public class HostileAI : MonoBehaviour, IDamageable
         }
     }
 
-    // ── Behaviour State Machine ───────────────────────────────────────────────
-
     private void UpdateBehaviourState()
     {
         if (!isPlayerVisible && !isPlayerInRange) PerformPatrol();
@@ -321,22 +330,84 @@ public class HostileAI : MonoBehaviour, IDamageable
         animator.SetFloat("Vertical", localVelocity.z);
     }
 
-    // ── IDamageable ───────────────────────────────────────────────────────────
-
     public void TakeDamage(int amount)
     {
-        if (isDead) return; // Jaga agar tidak memproses damage jika sudah mati
+        if (isDead) return;
 
         currentHealth = Mathf.Clamp(currentHealth - amount, 0, maxHealth);
 
         if (healthBar != null) healthBar.SetHealth(currentHealth);
 
+        // Hit flash
+        if (!renderersCached) CacheRenderers();
+        if (skinnedMeshRenderers != null && skinnedMeshRenderers.Length > 0)
+        {
+            if (hitFlashCoroutine != null) StopCoroutine(hitFlashCoroutine);
+            hitFlashCoroutine = StartCoroutine(HitFlash());
+        }
+
         Debug.Log($"[HostileAI] {gameObject.name} kena {amount} damage — HP: {currentHealth}/{maxHealth}");
 
         if (currentHealth <= 0)
         {
-            isDead = true; // Tandai sudah mati
+            isDead = true;
             Die();
+        }
+    }
+
+    private void CacheRenderers()
+    {
+        if (renderersCached) return;
+        skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
+        if (skinnedMeshRenderers.Length == 0) return;
+
+        originalColors = new Color[skinnedMeshRenderers.Length][];
+        for (int i = 0; i < skinnedMeshRenderers.Length; i++)
+        {
+            Material[] mats = skinnedMeshRenderers[i].materials;
+            originalColors[i] = new Color[mats.Length];
+            for (int j = 0; j < mats.Length; j++)
+            {
+                if (mats[j].HasProperty(colorPropertyName))
+                    originalColors[i][j] = mats[j].GetColor(colorPropertyName);
+            }
+        }
+        renderersCached = true;
+    }
+
+    private IEnumerator HitFlash()
+    {
+        ChangeMeshColor(hitFlashColor);
+        yield return new WaitForSeconds(hitFlashDuration);
+        ResetMeshColor();
+        hitFlashCoroutine = null;
+    }
+
+    private void ChangeMeshColor(Color color)
+    {
+        for (int i = 0; i < skinnedMeshRenderers.Length; i++)
+        {
+            if (skinnedMeshRenderers[i] == null) continue;
+            Material[] mats = skinnedMeshRenderers[i].materials;
+            for (int j = 0; j < mats.Length; j++)
+            {
+                if (mats[j].HasProperty(colorPropertyName))
+                    mats[j].SetColor(colorPropertyName, color);
+            }
+        }
+    }
+
+    private void ResetMeshColor()
+    {
+        for (int i = 0; i < skinnedMeshRenderers.Length; i++)
+        {
+            if (skinnedMeshRenderers[i] == null) continue;
+            Material[] mats = skinnedMeshRenderers[i].materials;
+            for (int j = 0; j < mats.Length; j++)
+            {
+                if (mats[j].HasProperty(colorPropertyName))
+                    mats[j].SetColor(colorPropertyName, originalColors[i][j]);
+            }
         }
     }
 
