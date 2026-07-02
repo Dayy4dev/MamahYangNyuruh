@@ -27,7 +27,12 @@ public class LootboxChestTrigger : MonoBehaviour
     public float hoverAmount = 0.15f;
 
     [Header("Tombol Interaksi")]
-    public KeyCode interactionKey = KeyCode.E;
+    // PERBAIKAN: Ubah default key menjadi Q sesuai instruksi Anda
+    public KeyCode interactionKey = KeyCode.Q; 
+
+    // --- TAMBAHKAN AUDIO SETTING DI SINI ---
+    [Header("Audio Settings")]
+    public AudioClip openLootboxSound;
 
     private bool isPlayerNearby = false;
     private bool isOpened = false; 
@@ -63,12 +68,19 @@ public class LootboxChestTrigger : MonoBehaviour
         }
     }
 
-    private void OpenChest()
+   private void OpenChest()
     {
         if (lootboxManager != null && mySpawnPoint != null)
         {
             isOpened = true; 
             startSpawnPos = mySpawnPoint.position;
+
+            // --- TAMBAHAN KODE AUDIO UTK LOOTBOX ---
+            if (openLootboxSound != null)
+            {
+                AudioSource.PlayClipAtPoint(openLootboxSound, transform.position);
+            }
+            // ---------------------------------------
 
             Transform currentRoomParent = this.transform.parent;
 

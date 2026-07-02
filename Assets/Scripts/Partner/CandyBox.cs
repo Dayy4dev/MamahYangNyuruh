@@ -14,14 +14,17 @@ public class CandyBox : MonoBehaviour
     [Header("UI / Visual Components")]
     [SerializeField] private TextMeshPro textMesh;
 
-    [Header("Candy Models Setup")]
+  [Header("Candy Models Setup")]
     [SerializeField] private GameObject healCandyPrefab;
     [SerializeField] private GameObject maxHpCandyPrefab;
     [SerializeField] private GameObject buffCandyPrefab;
     [SerializeField] private GameObject damageCandyPrefab;
 
-    private GameObject activeCandyModel;
+    // --- TAMBAHKAN AUDIO SETTING DI SINI ---
+    [Header("Audio Settings")]
+    [SerializeField] private AudioClip openCandyboxSound;
 
+    private GameObject activeCandyModel;
     public void InitializeBox(string effect, PartnerSystem system)
     {
         myEffect = effect;
@@ -56,7 +59,7 @@ public class CandyBox : MonoBehaviour
         }
     }
 
-    void Update()
+  void Update()
     {
         if (isPlayerNearby && !isSelected && partnerSystem != null)
         {
@@ -64,6 +67,14 @@ public class CandyBox : MonoBehaviour
             {
                 isSelected = true;
                 if (interactionCanvasUI != null) interactionCanvasUI.SetActive(false); 
+
+                // --- TAMBAHAN KODE AUDIO UTK CANDYBOX ---
+                if (openCandyboxSound != null)
+                {
+                    AudioSource.PlayClipAtPoint(openCandyboxSound, transform.position);
+                }
+                // -----------------------------------------
+
                 partnerSystem.ProcessBoxSelection(myEffect, this);
             }
         }

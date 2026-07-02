@@ -4786,6 +4786,8 @@ MonoBehaviour:
   partnerSpawnChance: 75
   dungeonAudioSource: {fileID: 634518727}
   doorOpenSound: {fileID: 8300000, guid: 11f3246e0757d8145bf49a8e692e3074, type: 3}
+  roomEnterSound: {fileID: 8300000, guid: 4db5824cc5886c248acd537d7365326d, type: 3}
+  bossFloorEnterSound: {fileID: 8300000, guid: 5839c82abdc5b6046a89825768348a90, type: 3}
 --- !u!114 &634518726
 MonoBehaviour:
   m_ObjectHideFlags: 0

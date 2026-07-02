@@ -33,6 +33,8 @@ public class DungeonManager : MonoBehaviour
     [Header("Dungeon Audio Settings")]
     [SerializeField] private AudioSource dungeonAudioSource;
     [SerializeField] private AudioClip doorOpenSound;
+    [SerializeField] private AudioClip roomEnterSound;
+    [SerializeField] private AudioClip bossFloorEnterSound;
 
     // Internal state
     private RoomController currentRoom;
@@ -276,7 +278,7 @@ public class DungeonManager : MonoBehaviour
         }
     }
 
-    void TeleportPlayerToRoom(RoomType type)
+   void TeleportPlayerToRoom(RoomType type)
     {
         if (playerTransform == null) { Debug.LogWarning("[DungeonManager] playerTransform belum di-assign!"); return; }
         if (!roomMap.TryGetValue(type, out RoomController room)) { Debug.LogWarning($"[DungeonManager] Room {type} tidak ditemukan!"); return; }
@@ -298,7 +300,15 @@ public class DungeonManager : MonoBehaviour
         currentRoomType = type;
         Debug.Log($"[DungeonManager] Player diteleport ke {type}.");
 
+        // --- TAMBAHAN KODE AUDIO MASUK ROOM ---
+        if (dungeonAudioSource != null && roomEnterSound != null)
+        {
+            dungeonAudioSource.PlayOneShot(roomEnterSound);
+        }
+        // --------------------------------------
+
         EnemySpawner spawner = room.GetComponentInChildren<EnemySpawner>();
+        // ... (sisa kode di bawahnya tetap sama)
         if (spawner != null)
         {
             spawner.SpawnEnemies();
@@ -373,12 +383,19 @@ public class DungeonManager : MonoBehaviour
 
         yield return null;
 
-        bool isBossFloor = FloorManager.Instance != null && FloorManager.Instance.IsBossFloor;
+      bool isBossFloor = FloorManager.Instance != null && FloorManager.Instance.IsBossFloor;
 
         if (isBossFloor && bossRoomPrefab != null)
         {
             Debug.Log("[DungeonManager] BOSS FLOOR! Spawning boss room...");
             SpawnBossRoom();
+            
+            // --- TAMBAHAN KODE AUDIO BOSS FLOOR ---
+            if (dungeonAudioSource != null && bossFloorEnterSound != null)
+            {
+                dungeonAudioSource.PlayOneShot(bossFloorEnterSound);
+            }
+            // --------------------------------------
         }
         else
         {

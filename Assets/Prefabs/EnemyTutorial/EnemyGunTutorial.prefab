@@ -2363,7 +2363,7 @@ GameObject:
   - component: {fileID: -4551204849783851648}
   - component: {fileID: -9053435891770530329}
   m_Layer: 7
-  m_Name: EnemyGun
+  m_Name: EnemyGunTutorial
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2476,7 +2476,7 @@ MonoBehaviour:
   playerLayerMask:
     serializedVersion: 2
     m_Bits: 128
-  maxHealth: 100
+  maxHealth: 50
   projectileDamage: 20
   patrolRadius: 10
   attackCooldown: 1
@@ -2506,7 +2506,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2115712d61cb27a4ba1ad8a11930c57f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDummy
-  maxHealth: 100
+  maxHealth: 50
   hitFlashDuration: 0.1
   hitFlashColor: {r: 1, g: 0, b: 0, a: 1}
   healthBar: {fileID: 8262082258519199807}
@@ -2528,8 +2528,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d48d60ccfda7902459edd6326006428a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyScaling
-  baseHP: 100
-  baseDamage: 20
+  baseHP: 50
+  baseDamage: 5
   baseSpeed: 4
 --- !u!114 &8789450234712980830
 MonoBehaviour:
@@ -2618,7 +2618,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 0.176
+  m_Volume: 0.481
   m_Pitch: 1
   Loop: 0
   Mute: 0

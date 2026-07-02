@@ -569,6 +569,7 @@ MonoBehaviour:
   maxHpCandyPrefab: {fileID: 3665821530899995302, guid: 5fc93116cb2b0a047bb2440aa68f1703, type: 3}
   buffCandyPrefab: {fileID: 2847727705462490353, guid: 3f18bb036f444274a8022667ab11e8a2, type: 3}
   damageCandyPrefab: {fileID: 9150627346776294918, guid: d0b36c87186cfbc40a375866671ee9b9, type: 3}
+  openCandyboxSound: {fileID: 8300000, guid: 91ea480c51d84d348afafa0d90d72e8d, type: 3}
 --- !u!1 &3305852132477590097
 GameObject:
   m_ObjectHideFlags: 0
@@ -738,6 +739,7 @@ MonoBehaviour:
   maxHpCandyPrefab: {fileID: 3665821530899995302, guid: 5fc93116cb2b0a047bb2440aa68f1703, type: 3}
   buffCandyPrefab: {fileID: 2847727705462490353, guid: 3f18bb036f444274a8022667ab11e8a2, type: 3}
   damageCandyPrefab: {fileID: 9150627346776294918, guid: d0b36c87186cfbc40a375866671ee9b9, type: 3}
+  openCandyboxSound: {fileID: 8300000, guid: 91ea480c51d84d348afafa0d90d72e8d, type: 3}
 --- !u!1 &5624081671555686692
 GameObject:
   m_ObjectHideFlags: 0
@@ -870,6 +872,7 @@ MonoBehaviour:
   maxHpCandyPrefab: {fileID: 3665821530899995302, guid: 5fc93116cb2b0a047bb2440aa68f1703, type: 3}
   buffCandyPrefab: {fileID: 2847727705462490353, guid: 3f18bb036f444274a8022667ab11e8a2, type: 3}
   damageCandyPrefab: {fileID: 9150627346776294918, guid: d0b36c87186cfbc40a375866671ee9b9, type: 3}
+  openCandyboxSound: {fileID: 8300000, guid: 91ea480c51d84d348afafa0d90d72e8d, type: 3}
 --- !u!1 &5649872517489117677
 GameObject:
   m_ObjectHideFlags: 0
@@ -1135,8 +1138,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16414e5b79bc0f94993f94d59c335988, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PartnerSystem
-  maxHpIncreaseAmount: 30
-  buffDamageAmount: 10
   candyBoxes:
   - {fileID: 6817283697208143486}
   - {fileID: 6329800124939164724}
