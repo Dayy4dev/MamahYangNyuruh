@@ -88,27 +88,44 @@ public class HeavyImpact : MonoBehaviour
             // Knockback + Launch
             if (enableKnockback || enableEnemyLaunch)
             {
-                Rigidbody rb = col.attachedRigidbody;
-                if (rb == null) rb = col.GetComponent<Rigidbody>();
-                if (rb != null)
+                // First try the new EnemyKnockback system (NavMesh-aware)
+                if (col.TryGetComponent<EnemyKnockback>(out var enemyKb))
                 {
-                    Vector3 dir = (col.transform.position - impactOrigin);
-                    dir.y = 0f;
-                    float dist = dir.magnitude;
-                    dir.Normalize();
-
+                    float dist = Vector3.Distance(col.transform.position, impactOrigin);
                     float falloff = 1f;
                     if (forceFalloff && impactRadius > 0f)
                         falloff = Mathf.Clamp01(1f - (dist / impactRadius));
-
-                    if (enableKnockback)
+                        
+                    float hForce = enableKnockback ? horizontalForce * falloff : 0f;
+                    float vForce = enableEnemyLaunch ? verticalForce * falloff : 0f;
+                    
+                    enemyKb.ApplyHeavyKnockback(impactOrigin, hForce, vForce);
+                }
+                else
+                {
+                    // Fallback to raw Rigidbody (for non-enemy objects like props)
+                    Rigidbody rb = col.attachedRigidbody;
+                    if (rb == null) rb = col.GetComponent<Rigidbody>();
+                    if (rb != null)
                     {
-                        rb.AddForce(dir * horizontalForce * falloff, ForceMode.VelocityChange);
-                    }
+                        Vector3 dir = (col.transform.position - impactOrigin);
+                        dir.y = 0f;
+                        float dist = dir.magnitude;
+                        dir.Normalize();
 
-                    if (enableEnemyLaunch)
-                    {
-                        rb.AddForce(Vector3.up * verticalForce * falloff, ForceMode.VelocityChange);
+                        float falloff = 1f;
+                        if (forceFalloff && impactRadius > 0f)
+                            falloff = Mathf.Clamp01(1f - (dist / impactRadius));
+
+                        if (enableKnockback)
+                        {
+                            rb.AddForce(dir * horizontalForce * falloff, ForceMode.VelocityChange);
+                        }
+
+                        if (enableEnemyLaunch)
+                        {
+                            rb.AddForce(Vector3.up * verticalForce * falloff, ForceMode.VelocityChange);
+                        }
                     }
                 }
             }

@@ -211,16 +211,28 @@ public class PlayerAttack : MonoBehaviour
     {
         if (target == null || currentWeaponData == null) return;
 
+        float force = 5f;
+        string category = GetWeaponCategory(currentWeaponData);
+        if (category == "Hammer") force = 8f; 
+
+        // Try NavMesh-aware knockback first
+        if (target.TryGetComponent<EnemyKnockback>(out var enemyKb))
+        {
+            if (verticalForce > 0f)
+                enemyKb.ApplyHeavyKnockback(transform.position, force, verticalForce);
+            else
+                enemyKb.ApplyKnockback(transform.position, force);
+            return;
+        }
+
+        // Fallback for non-enemies (e.g. breakable props with Rigidbody)
         Rigidbody targetRb = target.GetComponent<Rigidbody>();
         if (targetRb != null)
         {
-            Vector3 knockbackDirection = (target.transform.position - transform.position).normalized;
+            Vector3 knockbackDirection = (target.transform.position - transform.position);
             knockbackDirection.y = 0; 
-
-            float force = 5f;
-
-            string category = GetWeaponCategory(currentWeaponData);
-            if (category == "Hammer") force = 8f; 
+            if (knockbackDirection.sqrMagnitude < 0.001f) knockbackDirection = transform.forward;
+            knockbackDirection.Normalize();
 
             targetRb.AddForce(knockbackDirection * force, ForceMode.VelocityChange);
 

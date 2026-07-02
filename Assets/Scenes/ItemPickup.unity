@@ -5349,6 +5349,75 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48948dfe9d76b07488dacd46a7955fa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Animation.Rigging::UnityEngine.Animations.Rigging.RigTransform
+--- !u!1001 &681538315
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1174557399403851596, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2827321935251233347, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6077987226358072364, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: m_Name
+      value: EnemyGun (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6351839981106544148, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: playerTransform
+      value: 
+      objectReference: {fileID: 544480782}
+    - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 6.969269
+      objectReference: {fileID: 0}
+    - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.0000002493971
+      objectReference: {fileID: 0}
+    - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -4.389141
+      objectReference: {fileID: 0}
+    - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
 --- !u!1 &687787169
 GameObject:
   m_ObjectHideFlags: 0
@@ -12962,6 +13031,10 @@ PrefabInstance:
       propertyPath: maxHealth
       value: 300
       objectReference: {fileID: 0}
+    - target: {fileID: 8789450234712980830, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 8917391034459329229, guid: ca38079c7d9dec94ebb3628e156cf165, type: 3}
       propertyPath: m_LocalPosition.x
       value: 6.9947796
@@ -17591,3 +17664,4 @@ SceneRoots:
   - {fileID: 12003963}
   - {fileID: 8499433356960705145}
   - {fileID: 6366485257705631863}
+  - {fileID: 681538315}
