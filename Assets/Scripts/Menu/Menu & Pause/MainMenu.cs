@@ -14,7 +14,7 @@ public class MainMenu : MonoBehaviour
 
     [Header("UI Tambahan")]
     // Tarik GameObject 'PlaySelectionMenu' ke slot ini di Inspector
-    public GameObject playSelectionMenu; 
+    public GameObject playSelectionMenu;
     public GameObject mainMenuPanel;
 
     [Header("Click Sound")]
@@ -23,26 +23,33 @@ public class MainMenu : MonoBehaviour
 
     private void Start()
     {
-        // Paksa menyala di awal agar tidak ter-hide otomatis
+
         if (mainMenuPanel != null)
         {
             mainMenuPanel.SetActive(true);
         }
-        
-        // Paksa mati di awal untuk pilihan tutorialnya
+
+
         if (playSelectionMenu != null)
         {
-            playSelectionMenu.SetActive(false); 
+            playSelectionMenu.SetActive(false);
         }
 
+
         LoadVolume();
+
+
+        if (musicSlider != null)
+        {
+            musicSlider.onValueChanged.AddListener(UpdateMusicVolume);
+        }
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            // Jika menu pilihan sedang terbuka, tekan Esc akan menutupnya
+
             if (playSelectionMenu != null && playSelectionMenu.activeSelf)
             {
                 ClosePlaySelection();
@@ -75,24 +82,43 @@ public class MainMenu : MonoBehaviour
             uiAudioSource.PlayOneShot(clickSound);
         }
     }
+    public void UpdateMusicVolume(float volume)
+    {
+        if (audioMixer != null)
+        {
+            audioMixer.SetFloat("MusicVolume", volume);
 
-    // MODIFIKASI: Sekarang fungsi Play hanya membuka UI pilihan
+            PlayerPrefs.SetFloat("MusicVolume", volume);
+        }
+    }
+
+    public void LoadVolume()
+    {
+        if (musicSlider != null && audioMixer != null)
+        {
+
+            float savedVolume = PlayerPrefs.GetFloat("MusicVolume", 0f);
+
+            musicSlider.value = savedVolume;
+            audioMixer.SetFloat("MusicVolume", savedVolume);
+        }
+    }
     public void Play()
     {
         PlayClickSound();
-      
+
         if (playSelectionMenu != null)
         {
             playSelectionMenu.SetActive(true);
         }
         if (mainMenuPanel != null)
         {
-            mainMenuPanel.SetActive(false); // <--- Mematikan menu utama
+            mainMenuPanel.SetActive(false);
         }
     }
-    
 
-    // Fungsi untuk menutup UI pilihan jika klik tombol 'Back'
+
+
     public void ClosePlaySelection()
     {
         PlayClickSound();
@@ -102,28 +128,27 @@ public class MainMenu : MonoBehaviour
         }
         if (mainMenuPanel != null)
         {
-            mainMenuPanel.SetActive(true); // <--- Menyalakan kembali menu utama
+            mainMenuPanel.SetActive(true);
         }
     }
 
-    // PILIHAN 1: Mulai dari Tutorial Scene
+
     public void StartTutorial()
     {
         PlayClickSound();
         MusicManager.Instance.StopLobbyPlaylist();
-        LevelManager.Instance.LoadScene("Tutorial", "CircleWipe"); 
+        LevelManager.Instance.LoadScene("Tutorial", "CircleWipe");
         MusicManager.Instance.PlayMusic("Game");
 
         Time.timeScale = 1f;
         currentState = MenuState.Playing;
     }
 
-    // PILIHAN 2: Langsung Main (Ganti "PlayScene" dengan nama scene gameplay utama Anda)
     public void StartDirectGame()
     {
         PlayClickSound();
         MusicManager.Instance.StopLobbyPlaylist();
-        LevelManager.Instance.LoadScene("PlayScene", "CircleWipe"); 
+        LevelManager.Instance.LoadScene("PlayScene", "CircleWipe");
         MusicManager.Instance.PlayMusic("Game");
 
         Time.timeScale = 1f;
@@ -164,24 +189,17 @@ public class MainMenu : MonoBehaviour
         Application.Quit();
     }
 
-    public void UpdateMusicVolume(float volume)
-    {
-        audioMixer.SetFloat("MusicVolume", volume);
-    }
 
     public void SaveVolume()
     {
         audioMixer.GetFloat("MusicVolume", out float musicVolume);
         PlayerPrefs.SetFloat("MusicVolume", musicVolume);
     }
-    public void LoadVolume()
-    {
-        musicSlider.value = PlayerPrefs.GetFloat("MusicVolume");
-    }
+
 
     public void ShowCursorSettings()
     {
         Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;                  
+        Cursor.visible = true;
     }
 }

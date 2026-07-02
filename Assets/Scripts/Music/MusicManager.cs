@@ -2,18 +2,37 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Audio;
 
 public class MusicManager : MonoBehaviour
 {
     public static MusicManager Instance;
-    [SerializeField]
-    private MusicLibrary musicLibrary;
-    [SerializeField]
-    private AudioSource musicSource;
-    [SerializeField]
-    private List<string> lobbyPlaylist = new List<string> { "Lobby Sound 1", "Lobby Sound 2" };
+    [SerializeField] private MusicLibrary musicLibrary;
+    
+    // HAPUS ATAU KOMENTAR: Kita tidak lagi memakai satu musicSource global ini
+    // [SerializeField] private AudioSource musicSource; 
+
+    [SerializeField] private List<string> lobbyPlaylist = new List<string> { "Lobby Sound 1", "Lobby Sound 2" };
     private Coroutine playlistCoroutine;
     private string currentTrackName = "";
+    
+    // Menyimpan referensi track yang sedang aktif berputar saat ini
+    private MusicTrack currentActiveTrack; 
+    [SerializeField] private AudioMixer audioMixer; // Tarik AudioMixer kamu ke slot ini via Inspector prefab/scene
+    
+    private void Start()
+    {
+        playlistCoroutine = StartCoroutine(PlayLobbyPlaylistAutomatically());
+        ApplySavedVolume();
+    }
+    private void ApplySavedVolume()
+    {
+        if (audioMixer != null)
+        {
+            float savedVolume = PlayerPrefs.GetFloat("MusicVolume", 0f);
+            audioMixer.SetFloat("MusicVolume", savedVolume);
+        }
+    }
 
     private void Awake()
     {
@@ -25,7 +44,6 @@ public class MusicManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
     }
@@ -40,58 +58,63 @@ public class MusicManager : MonoBehaviour
         if (scene.name == "MainMenu")
         {
             StopLobbyPlaylist();
-
             currentTrackName = "";
-
-            if (musicSource != null) musicSource.loop = false;
-
             playlistCoroutine = StartCoroutine(PlayLobbyPlaylistAutomatically());
         }
-        // TAMBAHKAN BLOK ELSE IF INI (Sesuaikan "GameScene" dengan nama scene permainanmu)
-        else if (scene.name == "GameScene")
+        else if (scene.name == "PlayScene")
         {
-            // Pastikan playlist lobby dimatikan total saat masuk atau reload game scene
             StopLobbyPlaylist();
-
-            // Mainkan kembali lagu in-game agar saat respawn tidak balik ke lagu lobby
             PlayMusic("Game");
         }
     }
-    private void Start()
-    {
-        playlistCoroutine = StartCoroutine(PlayLobbyPlaylistAutomatically());
-    }
+
     public void PlayMusic(string trackName, float fadeDuration = 0.5f)
     {
         if (trackName == currentTrackName) return;
         currentTrackName = trackName;
 
-        if (musicSource != null)
-        {
-            musicSource.loop = true;
-        }
+        // Ambil data track baru dari library
+        MusicTrack nextTrack = musicLibrary.GetTrackFromName(trackName);
 
-        StartCoroutine(AnimateMusicCrossfade(musicLibrary.GetClipFromName(trackName), fadeDuration));
+        if (nextTrack.clip != null && nextTrack.audioSource != null)
+        {
+            nextTrack.audioSource.loop = true;
+            StartCoroutine(AnimateMusicCrossfade(nextTrack, fadeDuration));
+        }
     }
 
-    IEnumerator AnimateMusicCrossfade(AudioClip nextTrack, float fadeDuration = 0.5f)
+    IEnumerator AnimateMusicCrossfade(MusicTrack nextTrack, float fadeDuration = 0.5f)
     {
         float percent = 0;
-        while (percent < 1)
+        
+        // 1. FADE OUT: Mengecilkan volume AudioSource yang sedang aktif saat ini (jika ada)
+        AudioSource oldSource = currentActiveTrack.audioSource;
+        if (oldSource != null && oldSource.isPlaying)
         {
-            percent += Time.deltaTime * 1 / fadeDuration;
-            musicSource.volume = Mathf.Lerp(1f, 0, percent);
-            yield return null;
+            float startVolume = oldSource.volume;
+            while (percent < 1)
+            {
+                percent += Time.deltaTime * 1 / fadeDuration;
+                oldSource.volume = Mathf.Lerp(startVolume, 0, percent);
+                yield return null;
+            }
+            oldSource.Stop();
         }
 
-        musicSource.clip = nextTrack;
-        musicSource.Play();
+        // Ganti referensi track aktif ke track yang baru
+       currentActiveTrack = nextTrack;
+        AudioSource newSource = currentActiveTrack.audioSource;
+
+        newSource.clip = nextTrack.clip;
+        newSource.volume = 0;
+        newSource.Play();
 
         percent = 0;
         while (percent < 1)
         {
             percent += Time.deltaTime * 1 / fadeDuration;
-            musicSource.volume = Mathf.Lerp(0, 1f, percent);
+       
+            newSource.volume = Mathf.Lerp(0, 1f, percent); 
             yield return null;
         }
     }
@@ -103,23 +126,24 @@ public class MusicManager : MonoBehaviour
         while (true)
         {
             string trackToPlay = lobbyPlaylist[currentIndex];
-            AudioClip nextClip = musicLibrary.GetClipFromName(trackToPlay);
+            MusicTrack nextTrack = musicLibrary.GetTrackFromName(trackToPlay);
 
-            if (nextClip != null)
+            if (nextTrack.clip != null && nextTrack.audioSource != null)
             {
                 currentTrackName = trackToPlay;
-                yield return StartCoroutine(AnimateMusicCrossfade(nextClip, 0.5f));
+                nextTrack.audioSource.loop = false; // Playlist otomatis biasanya tidak looping per lagu
+                yield return StartCoroutine(AnimateMusicCrossfade(nextTrack, 0.5f));
             }
 
             yield return new WaitForSeconds(0.2f);
 
-            while (musicSource.isPlaying)
+            // Tunggu sampai AudioSource dari track yang aktif selesai berputar
+            while (currentActiveTrack.audioSource != null && currentActiveTrack.audioSource.isPlaying)
             {
                 yield return null;
             }
 
             currentIndex++;
-
             if (currentIndex >= lobbyPlaylist.Count)
             {
                 currentIndex = 0;
@@ -132,6 +156,10 @@ public class MusicManager : MonoBehaviour
         if (playlistCoroutine != null)
         {
             StopCoroutine(playlistCoroutine);
+        }
+        if (currentActiveTrack.audioSource != null)
+        {
+            currentActiveTrack.audioSource.Stop();
         }
     }
 }

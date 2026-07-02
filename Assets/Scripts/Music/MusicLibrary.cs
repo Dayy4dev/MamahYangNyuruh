@@ -5,21 +5,23 @@ public struct MusicTrack
 {
     public string trackName;
     public AudioClip clip;
+    public AudioSource audioSource;
 }
  
 public class MusicLibrary : MonoBehaviour
 {
     public MusicTrack[] tracks;
- 
-    public AudioClip GetClipFromName(string trackName)
+
+    public MusicTrack GetTrackFromName(string trackName)
     {
         foreach (var track in tracks)
         {
             if (track.trackName == trackName)
             {
-                return track.clip;
+                return track;
             }
         }
-        return null;
+    
+        return default(MusicTrack);
     }
 }
