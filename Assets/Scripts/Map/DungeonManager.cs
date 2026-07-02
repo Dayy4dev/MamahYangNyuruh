@@ -427,51 +427,63 @@ public class DungeonManager : MonoBehaviour
         }
     }
 
-    public void RefreshRoomEnemyCounter(RoomType type, GameObject roomObject)
+   public void RefreshRoomEnemyCounter(RoomType type, GameObject roomObject)
+{
+    EnemySpawner spawner = roomObject.GetComponentInChildren<EnemySpawner>();
+
+    if (spawner != null)
     {
-        EnemySpawner spawner = roomObject.GetComponentInChildren<EnemySpawner>();
+        maxEnemiesInRoom = spawner.spawnCount;
+    }
+    else
+    {
+        maxEnemiesInRoom = 0;
+    }
 
-        if (spawner != null)
+    currentEnemiesInRoom = maxEnemiesInRoom;
+
+    Debug.Log($"[DungeonManager] Room {type} sukses disinkronkan. Total musuh: {maxEnemiesInRoom}");
+
+    if (maxEnemiesInRoom > 0)
+    {
+        if (roomUIBar != null)
         {
-            maxEnemiesInRoom = spawner.spawnCount;
-        }
-        else
-        {
-            maxEnemiesInRoom = 0;
-        }
-
-        currentEnemiesInRoom = maxEnemiesInRoom;
-
-        Debug.Log($"[DungeonManager] Room {type} sukses disinkronkan. Total musuh: {maxEnemiesInRoom}");
-
-        if (maxEnemiesInRoom > 0)
-        {
-            if (roomUIBar != null)
+            roomUIBar.ShowBar(true);
+            
+            // ──────────────────────────────────────────────────────────────
+            // PERBAIKAN LOGIKA TEKS UI:
+            // Jika saat ini adalah Boss Floor, paksa tulisan menjadi "Boss Room"
+            if (FloorManager.Instance != null && FloorManager.Instance.IsBossFloor)
             {
-                roomUIBar.ShowBar(true);
-                roomUIBar.UpdateRoomText(type.ToString());
-                roomUIBar.UpdateBarValue(currentEnemiesInRoom, maxEnemiesInRoom);
+                roomUIBar.UpdateRoomText("Boss Room");
             }
-
-            if (currentRoom != null && currentRoom.exitDoors != null)
+            else
             {
-                foreach (var door in currentRoom.exitDoors)
+                roomUIBar.UpdateRoomText(type.ToString());
+            }
+            // ──────────────────────────────────────────────────────────────
+
+            roomUIBar.UpdateBarValue(currentEnemiesInRoom, maxEnemiesInRoom);
+        }
+
+        if (currentRoom != null && currentRoom.exitDoors != null)
+        {
+            foreach (var door in currentRoom.exitDoors)
+            {
+                if (door != null)
                 {
-                    if (door != null)
-                    {
-                        door.LockDoor();
-                        Debug.Log($"[DungeonManager] Kunci pengaman dipaksa AKTIF pada: {door.name}");
-                    }
+                    door.LockDoor();
+                    Debug.Log($"[DungeonManager] Kunci pengaman dipaksa AKTIF pada: {door.name}");
                 }
             }
         }
-        else
-        {
-            if (roomUIBar != null) roomUIBar.ShowBar(false);
-            OpenExitDoorsOfRoom(type);
-        }
     }
-
+    else
+    {
+        if (roomUIBar != null) roomUIBar.ShowBar(false);
+        OpenExitDoorsOfRoom(type);
+    }
+}
     public void OnEnemyKilled()
     {
         currentEnemiesInRoom--;
